@@ -3,6 +3,7 @@ set -euo pipefail
 
 # Metabase image version
 version="v0.31.2"
+network="metabase-bridge"
 
 # Absolute base path
 base="$(cd "$(dirname $0)"; echo "$PWD")"
@@ -23,12 +24,22 @@ main() {
     sudo chown root:root "$data"
     sudo chmod u=rwx,g=rx,o= "$data"
 
+    # Create a user-defined bridge network for the container to use instead of
+    # the default bridge network.
+    if docker network inspect "$network" >/dev/null 2>&1; then
+        log "Using existing Docker network $network"
+    else
+        log "Creating Docker network $network"
+        docker network create "$network"
+    fi
+
     log "Creating container metabase ($version)"
     docker container create \
         --name metabase \
         --volume "$data/metabase.db":/metabase.db \
         --env MB_DB_FILE=/metabase.db \
         --env JAVA_TIMEZONE=US/Pacific \
+        --network "$network" \
         --publish 127.0.0.1:3000:3000 \
         metabase/metabase:"$version"
 }
