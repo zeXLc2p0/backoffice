@@ -1,0 +1,40 @@
+#!/bin/bash
+set -euo pipefail
+
+# Metabase image version
+version="v0.31.2"
+
+# Absolute base path
+base="$(cd "$(dirname $0)"; echo "$PWD")"
+data="$base/data"
+
+main() {
+    # Create container data dir if necessary
+    if [[ ! -d "$data" ]]; then
+        log "Making data directory $data"
+        mkdir "$data"
+    else
+        log "Using existing data directory $data"
+    fi
+
+    # Ensure only root can look into the container data dir.  It contains the
+    # internal H2 database with Metabase credentials and other admin settings.
+    log "Changing ownership and permissions of $data to root:root (rwxr-x---)"
+    sudo chown root:root "$data"
+    sudo chmod u=rwx,g=rx,o= "$data"
+
+    log "Creating container metabase ($version)"
+    docker container create \
+        --name metabase \
+        --volume "$data/metabase.db":/metabase.db \
+        --env MB_DB_FILE=/metabase.db \
+        --env JAVA_TIMEZONE=US/Pacific \
+        --publish 127.0.0.1:3000:3000 \
+        metabase/metabase:"$version"
+}
+
+log() {
+    echo "->" "$@" >&2
+}
+
+main "$@"
