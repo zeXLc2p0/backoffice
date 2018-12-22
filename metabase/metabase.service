@@ -1,0 +1,11 @@
+[Unit]
+Description=Metabase container
+After=docker.service
+
+[Service]
+Restart=always
+ExecStart=/usr/bin/docker start -a metabase
+ExecStop=/usr/bin/docker stop -t 2 metabase
+
+[Install]
+WantedBy=local.target
