@@ -1,0 +1,30 @@
+#!/bin/bash
+set -euo pipefail
+
+# Lab Labels image version
+version="build-1"
+network="lab-labels-bridge"
+
+main() {
+    # Create a user-defined bridge network for the container to use instead of
+    # the default bridge network.
+    if docker network inspect "$network" >/dev/null 2>&1; then
+        log "Using existing Docker network $network"
+    else
+        log "Creating Docker network $network"
+        docker network create "$network"
+    fi
+
+    log "Creating container lab-labels ($version)"
+    docker container create \
+        --name lab-labels \
+        --network "$network" \
+        --publish 127.0.0.1:3001:80 \
+        trsibley/lab-labels:"$version"
+}
+
+log() {
+    echo "->" "$@" >&2
+}
+
+main "$@"
