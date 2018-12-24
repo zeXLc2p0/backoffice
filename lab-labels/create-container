@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Lab Labels image version
-version="build-1"
+version="build-3"
 network="lab-labels-bridge"
 
 main() {
