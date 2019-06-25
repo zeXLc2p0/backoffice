@@ -5,25 +5,7 @@ set -euo pipefail
 version="v0.32.8"
 network="metabase-bridge"
 
-# Absolute base path
-base="$(cd "$(dirname $0)"; echo "$PWD")"
-data="$base/data"
-
 main() {
-    # Create container data dir if necessary
-    if [[ ! -d "$data" ]]; then
-        log "Making data directory $data"
-        mkdir "$data"
-    else
-        log "Using existing data directory $data"
-    fi
-
-    # Ensure only root can look into the container data dir.  It contains the
-    # internal H2 database with Metabase credentials and other admin settings.
-    log "Changing ownership and permissions of $data to root:root (rwxr-x---)"
-    sudo chown root:root "$data"
-    sudo chmod u=rwx,g=rx,o= "$data"
-
     # Create a user-defined bridge network for the container to use instead of
     # the default bridge network.
     if docker network inspect "$network" >/dev/null 2>&1; then
@@ -36,8 +18,12 @@ main() {
     log "Creating container metabase ($version)"
     docker container create \
         --name metabase \
-        --volume "$data/metabase.db":/metabase.db \
-        --env MB_DB_FILE=/metabase.db \
+        --env MB_DB_TYPE=postgres \
+        --env MB_DB_HOST=production.db.seattleflu.org \
+        --env MB_DB_PORT=5432 \
+        --env MB_DB_DBNAME=metabase \
+        --env MB_DB_USER=metabase \
+        --env MB_DB_PASS \
         --env JAVA_TIMEZONE=US/Pacific \
         --network "$network" \
         --publish 127.0.0.1:3000:3000 \
