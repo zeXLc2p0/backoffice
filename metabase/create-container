@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Metabase image version
-version="v0.32.8"
+version="v0.32.9"
 network="metabase-bridge"
 
 main() {
