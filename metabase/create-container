@@ -18,12 +18,7 @@ main() {
     log "Creating container metabase ($version)"
     docker container create \
         --name metabase \
-        --env MB_DB_TYPE=postgres \
-        --env MB_DB_HOST=production.db.seattleflu.org \
-        --env MB_DB_PORT=5432 \
-        --env MB_DB_DBNAME=metabase \
-        --env MB_DB_USER=metabase \
-        --env MB_DB_PASS \
+        --env MB_DB_CONNECTION_URI \
         --env JAVA_TIMEZONE=US/Pacific \
         --network "$network" \
         --publish 127.0.0.1:3000:3000 \
