@@ -20,6 +20,7 @@ main() {
         --name metabase \
         --env MB_DB_CONNECTION_URI \
         --env JAVA_TIMEZONE=US/Pacific \
+        --env JAVA_TOOL_OPTIONS=-Xmx2g \
         --network "$network" \
         --publish 127.0.0.1:3000:3000 \
         metabase/metabase:"$version"
