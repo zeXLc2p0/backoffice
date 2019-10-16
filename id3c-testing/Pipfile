@@ -6,8 +6,8 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-id3c = {editable = true,git = "https://github.com/seattleflu/id3c.git",ref = "extensibility"}
-seattleflu-id3c-customizations = {editable = true,git = "https://github.com/seattleflu/id3c-customizations.git",ref = "extensibility"}
+id3c = {editable = true,git = "https://github.com/seattleflu/id3c.git",ref = "master"}
+seattleflu-id3c-customizations = {editable = true,git = "https://github.com/seattleflu/id3c-customizations.git",ref = "master"}
 
 [requires]
 python_version = "3.6"
