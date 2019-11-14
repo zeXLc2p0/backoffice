@@ -1,0 +1,243 @@
+#!/bin/bash
+# usage: ./dev/refresh-database [workdir]
+#
+# Refreshing a target database using dumps from our production database.
+#
+# The default target database is "seattleflu" on the local PostgreSQL instance.
+# This matches the convention we use for local development.
+#
+# Other target databases may be specified using the standard PGHOST, PGUSER,
+# and PGDATABASE environment variables.  PGSERVICE may not be used as a
+# separate database name is required.
+#
+# The default working directory (workdir) for this program is a temporary
+# directory which is automatically deleted on exit.  The workdir is used to
+# store the data dumps needed for restore.  You can use a persistent, alternate
+# workdir by specifying it as the first command-line argument.  This allows
+# re-use of existing data dumps with repeated refreshes, saving dump time.
+#
+set -euo pipefail
+
+PRODUCTION_PGHOST=production.db.seattleflu.org
+PRODUCTION_PGDATABASE=production
+PRODUCTION_PGUSER=postgres
+
+# Default target database is our dev database
+: ${PGDATABASE:=seattleflu}
+
+main() {
+    local workdir=
+
+    for arg; do
+        case "$arg" in
+            -h|--help)
+                print-help
+                exit;;
+            *)
+                workdir="$1"
+                shift
+                break;;
+        esac
+    done
+
+    if [[ $# -gt 0 ]]; then
+        echo "Error: extra arguments provided; aborting out of an abundance of caution." >&2
+        echo
+        print-help
+        exit 1
+    fi
+
+    log "Refreshing target database from production"
+    log "Target is $(connection-info)"
+    log "Production is $(production connection-info)"
+
+    assert-target-is-not-production
+
+    cd-to-workdir "$workdir"
+    confirm-to-continue
+
+    if ! [[ -s production.pgdb ]]; then
+        log "Dumping production database"
+        production pg_dump --format custom > production.pgdb
+        assert-not-empty production.pgdb
+    else
+        log "Using existing production database dump"
+    fi
+
+    if [[ production.pgdb -nt production-roles-filtered.sql ]]; then
+        log "Dumping production roles"
+
+        # This doesn't use --clean --if-exists because during restore dropping
+        # the roles will remove membership from any login users on the target.
+        # As a result, the restore won't run without error when there are
+        # existing roles, but these errors are ignorable.
+        production pg_dumpall --roles-only --no-role-passwords > production-roles.sql
+
+        log "Filtering to non-login production roles which aren't internal to Pg or RDS"
+
+        production psql --quiet --no-align --tuples-only <<<"
+            select rolname
+              from pg_roles
+             where not rolcanlogin
+               and rolname !~ E'^(pg|rds)'
+             order by rolname
+            " > roles-to-restore
+
+        filter-roles \
+            roles-to-restore \
+            < production-roles.sql \
+            > production-roles-filtered.sql
+
+        assert-not-empty production-roles-filtered.sql
+    else
+        log "Using existing production roles dump"
+    fi
+
+    log "Dropping and re-creating target database"
+    dropdb --if-exists "$PGDATABASE"
+    createdb --encoding=UTF-8 "$PGDATABASE"
+
+    log "Restoring filtered roles"
+    psql < production-roles-filtered.sql |& suppress-ignorable-errors
+
+    log "Restoring database dump"
+    pg_restore --dbname "$PGDATABASE" production.pgdb |& suppress-ignorable-errors || true
+
+    log "Finished in $(elapsed-time)"
+}
+
+print-help() {
+    # Print the help comments at the top of this file ($0)
+    perl -MEnglish -ne '
+        s/^# ?// or exit;
+        print if $INPUT_LINE_NUMBER >= 2;
+    ' "$0"
+}
+
+log() {
+    echo "$(date "+%b %e %T"):" "$@"
+}
+
+connection-info() {
+    echo "host=${PGHOST:-} dbname=${PGDATABASE:-} user=${PGUSER:-}"
+}
+
+assert-target-is-not-production() {
+    if [[ $(connection-info) =~ production ]]; then
+        echo
+        echo "Target database contains the word production!" >&2
+        echo "Aborting out of an abundance of caution." >&2
+        exit 1
+    fi
+}
+
+assert-not-empty() {
+    [[ -s $1 ]]
+}
+
+cd-to-workdir() {
+    local workdir="$1"
+
+    if [[ -z $workdir ]]; then
+        workdir="$(mktemp -d -t refresh-database-XXXXXX)"
+        trap "rm -rf '$workdir'" EXIT
+        log "Workdir is $workdir (temporary, deleted on exit)"
+    else
+        log "Workdir is $workdir"
+    fi
+
+    cd "$workdir"
+}
+
+confirm-to-continue() {
+    echo
+    read -e -p 'Press Y to continue, or any other key to abort: ' -n 1
+
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo "Proceeding"
+        echo
+    else
+        echo "Aborting!" >&2
+        exit 1
+    fi
+}
+
+production() {
+    PGHOST="$PRODUCTION_PGHOST" \
+    PGDATABASE="$PRODUCTION_PGDATABASE" \
+    PGUSER="$PRODUCTION_PGUSER" \
+    "$@"
+}
+
+filter-roles() {
+    local rolelist="$1"
+
+    # This Perl program takes a list of newline-separated role names as the
+    # first argument.  It constructs regex patterns from those and then filters
+    # stdin using them.  The following statements are kept:
+    #
+    #   - SET statements
+    #   - CREATE/ALTER ROLE statements for the given roles
+    #   - GRANT statements granting permissions TO the given roles
+    #
+    # Some statements are also rewritten to avoid issues:
+    #
+    #   - The NOSUPERUSER and NOREPLICATION flags are removed from ALTER ROLE
+    #     statements to avoid spurious errors like "must be superuser to alter
+    #     superusers/replication users" on AWS RDS (where postgres isn't a real
+    #     superuser).  These are spurious because the removal of NOSUPERUSER and
+    #     NOREPLICATION are a no-op anyway, but Pg doesn't check.
+    #
+    #   - GRANTED BY clauses are rewritten to always be by postgres, avoiding
+    #     dependencies on the interactive login roles we aren't restoring.
+    #
+    perl -e '
+        my @roles = split "\n", shift;
+        my $roles = join "|", map { quotemeta } @roles;
+
+        my $create_or_alter_role = qr/
+            ^(?:CREATE|ALTER) \s+ ROLE \s+ ("?)(?:$roles)\1 [\s;]
+        /x;
+
+        my $grant_role = qr/
+            ^GRANT \s+ .+? \s+ TO \s+ ("?)(?:$roles)\1
+        /x;
+
+        while (<STDIN>) {
+            s/(NOSUPERUSER|NOREPLICATION)//g;
+            s/GRANTED BY .+?;/GRANTED BY postgres;/;
+            print if /^SET / or /$create_or_alter_role/ or /$grant_role/;
+        }
+    ' "$(<"$rolelist")"
+}
+
+suppress-ignorable-errors() {
+    # This Perl script:
+    #
+    #   1. Reads stdin (-p) in paragraph chunks (-000 is magic for
+    #      splitting input on \n\n+, see `perldoc perlrun`).
+    #
+    #   2. Modifies each chunk with a couple search-and-replace operations (-e).
+    #
+    #   3. Prints out the modified chunk to stdout (-p).
+    #
+    # Its purpose is to suppress harmless, expected errors from our restore
+    # process so that real, unexpected errors aren't lost in familiar noise.
+    perl -000pe '
+        s/^ERROR:  role (.+?) already exists/CREATE ROLE \1 (already exists, skipped)/mg;
+
+        s/(?-x:^pg_restore: .+? COMMENT EXTENSION (.+?)\s*)\n
+          (?-x:^pg_restore: .+? ERROR:  must be owner of extension .+?)\n
+          (?-x:^Command was: COMMENT ON EXTENSION .+?)\n+
+         /COMMENT EXTENSION \1 (failure due to RDS permissions ignored)\n/xmg;
+    '
+}
+
+elapsed-time() {
+    local delta=$SECONDS
+    local minutes=$(($delta / 60))  # integer division
+    local seconds=$(($delta % 60))
+    printf "%dm%ds\n" $minutes $seconds
+}
+
+main "$@"
