@@ -6,6 +6,7 @@ Services:
   * [ID3C testing environment](id3c-testing/README.md)
   * [Metabase](metabase/README.md)
   * [Lab Labels](lab-labels/README.md)
+  * [Crontabs](crontabs/README.md)
 
 Other supporting files:
 

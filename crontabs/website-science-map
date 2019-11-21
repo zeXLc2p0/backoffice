@@ -1,0 +1,9 @@
+SHELL=/bin/bash
+PATH=/usr/local/bin:/usr/bin:/bin
+
+LOG_LEVEL=warning
+PGSERVICEFILE=/opt/backoffice/pg_service.conf
+PGSERVICE=production-etl
+
+# Export the latest enrollment data to S3 for the website science map viz.
+28 * * * * ubuntu /opt/website-science-map/export-science-map-data-to-s3.sh
