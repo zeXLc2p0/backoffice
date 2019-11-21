@@ -8,7 +8,6 @@ psql --quiet --no-align --tuples-only --set ON_ERROR_STOP= <<<"
                 'type', 'Feature',
                 'geometry', st_asgeojson(tract.point)::jsonb,
                 'properties', jsonb_build_object(
-                    'id', strain,
                     'ageCategory', age_category,
                     'siteCategory', site_category
                 )
