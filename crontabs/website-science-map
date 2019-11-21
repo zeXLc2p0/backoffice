@@ -5,5 +5,5 @@ LOG_LEVEL=warning
 PGSERVICEFILE=/opt/backoffice/pg_service.conf
 PGSERVICE=production-etl
 
-# Export the latest enrollment data to S3 for the website science map viz.
-28 * * * * ubuntu /opt/website-science-map/export-science-map-data-to-s3.sh
+# Export the latest sample collection data to S3 for seattleflu.org/science
+28 * * * * ubuntu /opt/backoffice/export/science-map-geojson | aws s3 cp - s3://seattle-flu-study/samples.geojson
