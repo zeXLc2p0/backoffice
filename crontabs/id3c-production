@@ -30,7 +30,7 @@ ENVD=/opt/backoffice/id3c-production/env.d
 # Right now we're only manually receiving presence/absence results, but
 # eventually we'll get them at times we don't control.  The bottom of the hour
 # seems good for now.
-#30 * * * * ubuntu pipenv run id3c etl presence-absence --commit
+30 * * * * ubuntu pipenv run id3c etl presence-absence --commit
 
 # After presence/absence results are uploaded, check if any contain reportable 
 # conditions. 
