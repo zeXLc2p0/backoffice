@@ -4,9 +4,6 @@ PATH=/usr/local/bin:/usr/bin:/bin
 # Point Pipenv at the production environment
 PIPENV_PIPFILE=/opt/backoffice/id3c-production/Pipfile
 
-# Eventually all the variables below should probably be
-# in /opt/backoffice/id3c-production/.env or something
-# similar instead of inlined here.
 LOG_LEVEL=warning
 PGSERVICEFILE=/opt/backoffice/pg_service.conf
 PGSERVICE=production-etl
