@@ -8,9 +8,8 @@ LOG_LEVEL=warning
 PGSERVICEFILE=/opt/backoffice/pg_service.conf
 PGSERVICE=production-etl
 
-# For reportable conditions notifications
-SLACK_WEBHOOK_REPORTING_GENERAL=https://hooks.slack.com/services/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
-SLACK_WEBHOOK_REPORTING_CHILDRENS=https://hooks.slack.com/services/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
+# Base of our env.d directories
+ENVD=/opt/backoffice/id3c-production/env.d
 
 
 # Longitudinal childcare records are manually uploaded right now, so just check
@@ -35,7 +34,7 @@ SLACK_WEBHOOK_REPORTING_CHILDRENS=https://hooks.slack.com/services/TCAKABJR2/BLB
 
 # After presence/absence results are uploaded, check if any contain reportable 
 # conditions. 
-35 * * * * ubuntu pipenv run id3c reportable-conditions notify --commit 
+35 * * * * ubuntu envdir $ENVD/slack/ pipenv run id3c reportable-conditions notify --commit
 
 # Manifests are manually uploaded periodically right now, so just check once an
 # hour at quarter 'till.
