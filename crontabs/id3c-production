@@ -1,0 +1,49 @@
+SHELL=/bin/bash
+PATH=/usr/local/bin:/usr/bin:/bin
+
+# Point Pipenv at the production environment
+PIPENV_PIPFILE=/opt/backoffice/id3c-production/Pipfile
+
+LOG_LEVEL=warning
+PGSERVICEFILE=/opt/backoffice/pg_service.conf
+PGSERVICE=production-etl
+
+# Base of our env.d directories
+ENVD=/opt/backoffice/id3c-production/env.d
+
+
+# Longitudinal childcare records are manually uploaded right now, so just check
+# once an hour at five past.
+5 * * * * ubuntu pipenv run id3c etl longitudinal --commit
+
+# Genomes are uploaded irregularly.  Once an hour should be good for now.
+10 * * * * ubuntu pipenv run id3c etl consensus-genome --commit
+
+# Audere sends us data at quarter past.  It rarely takes more than a minute,
+# but ensure we process everything they might send by waiting until 20 after.
+20 * * * * ubuntu pipenv run id3c etl enrollments --commit
+
+# Kit records are created/updated from enrollment records from Audere. To ensure 
+# that this doesn't run at the same time as the enrollments etl, run at 25 after.
+25 * * * * ubuntu pipenv run id3c etl kit enrollments --commit
+
+# Right now we're only manually receiving presence/absence results, but
+# eventually we'll get them at times we don't control.  The bottom of the hour
+# seems good for now.
+#30 * * * * ubuntu pipenv run id3c etl presence-absence --commit
+
+# After presence/absence results are uploaded, check if any contain reportable 
+# conditions. 
+35 * * * * ubuntu envdir $ENVD/slack/ pipenv run id3c reportable-conditions notify --commit
+
+# Manifests are manually uploaded periodically right now, so just check once an
+# hour at quarter 'till.
+45 * * * * ubuntu pipenv run id3c etl manifest --commit
+
+# Kit records are created/updated from manifest records. To ensure that this
+# doesn't run at the same time as manifest etl, run ten 'till.
+50 * * * * ubuntu pipenv run id3c etl kit manifest --commit
+
+# Clinical encounter records are manually uploaded right now, so just check
+# once an hour at five 'till.
+55 * * * * ubuntu pipenv run id3c etl clinical --commit
