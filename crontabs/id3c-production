@@ -36,6 +36,9 @@ ENVD=/opt/backoffice/id3c-production/env.d
 # conditions.
 35 * * * * ubuntu envdir $ENVD/slack/ pipenv run id3c reportable-conditions notify --commit
 
+# Upload new manifest data
+40 * * * * ubuntu envdir $ENVD/hutch/ /opt/specimen-manifest/update-unattended
+
 # Manifests are manually uploaded periodically right now, so just check once an
 # hour at quarter 'till.
 45 * * * * ubuntu pipenv run id3c etl manifest --commit
