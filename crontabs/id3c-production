@@ -23,7 +23,7 @@ ENVD=/opt/backoffice/id3c-production/env.d
 # but ensure we process everything they might send by waiting until 20 after.
 20 * * * * ubuntu pipenv run id3c etl enrollments --commit
 
-# Kit records are created/updated from enrollment records from Audere. To ensure 
+# Kit records are created/updated from enrollment records from Audere. To ensure
 # that this doesn't run at the same time as the enrollments etl, run at 25 after.
 25 * * * * ubuntu pipenv run id3c etl kit enrollments --commit
 
@@ -32,8 +32,8 @@ ENVD=/opt/backoffice/id3c-production/env.d
 # seems good for now.
 30 * * * * ubuntu pipenv run id3c etl presence-absence --commit
 
-# After presence/absence results are uploaded, check if any contain reportable 
-# conditions. 
+# After presence/absence results are uploaded, check if any contain reportable
+# conditions.
 35 * * * * ubuntu envdir $ENVD/slack/ pipenv run id3c reportable-conditions notify --commit
 
 # Manifests are manually uploaded periodically right now, so just check once an
