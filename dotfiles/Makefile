@@ -2,7 +2,8 @@ SHELL := /bin/bash -euo pipefail
 HOME ?= /home/ubuntu
 
 dotfiles := \
-	gitconfig
+	gitconfig \
+	pg_service.conf
 
 install: $(dotfiles:%=$(HOME)/.%)
 

@@ -12,3 +12,8 @@ from within this directory or running:
     make -C dotfiles
 
 from within the top-level of this repo.
+
+## Files of note
+
+  * `pg_service.conf` is the PostgreSQL service definition file used by some of
+    our automated processes.

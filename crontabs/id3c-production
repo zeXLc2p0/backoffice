@@ -5,7 +5,6 @@ PATH=/usr/local/bin:/usr/bin:/bin
 PIPENV_PIPFILE=/opt/backoffice/id3c-production/Pipfile
 
 LOG_LEVEL=warning
-PGSERVICEFILE=/opt/backoffice/pg_service.conf
 PGSERVICE=production-etl
 
 # Base of our env.d directories

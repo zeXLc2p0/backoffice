@@ -2,7 +2,6 @@ SHELL=/bin/bash
 PATH=/usr/local/bin:/usr/bin:/bin
 
 LOG_LEVEL=warning
-PGSERVICEFILE=/opt/backoffice/pg_service.conf
 PGSERVICE=production-etl
 
 # Export the latest sample collection data to S3 for seattleflu.org/science
