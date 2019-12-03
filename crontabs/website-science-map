@@ -4,5 +4,9 @@ PATH=/usr/local/bin:/usr/bin:/bin
 LOG_LEVEL=warning
 PGSERVICE=production-etl
 
+# Base of our env.d directories
+ENVD=/opt/backoffice/id3c-production/env.d
+
+
 # Export the latest sample collection data to S3 for seattleflu.org/science
-28 * * * * ubuntu /opt/backoffice/export/science-map-geojson | aws s3 cp - s3://seattle-flu-study/samples.geojson
+28 * * * * ubuntu /opt/backoffice/export/science-map-geojson | envdir $ENVD/aws/ aws s3 cp - s3://seattle-flu-study/samples.geojson
