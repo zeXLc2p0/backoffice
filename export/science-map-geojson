@@ -18,7 +18,7 @@ psql --quiet --no-align --tuples-only --set ON_ERROR_STOP= <<<"
     from shipping.metadata_for_augur_build_v2
     join warehouse.tract on (tract.identifier = residence_census_tract)
 
-    where date >= '2019-09-01'
+    where date >= '2019-10-01'
       and age_category in ('child', 'adult')
       and site_category in ('clinical', 'community')
 "
