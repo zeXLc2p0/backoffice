@@ -11,9 +11,19 @@ The `metabase.service` file should be symlinked into `/etc/systemd/system/` and
 enabled using `systemctl enable metabase`.  Management of the Metabase
 container is then performed using `systemctl {start,stop,restart} metabase`.
 
+## Upgrade
 To upgrade Metabase, change the image version in `create-container`, stop the
 Metabase service, remove the existing `metabase` container with `docker
 container rm`, run the `create-container` script, and restart the Metabase
 service.  You may want to make a backup of the Metabase database first so that
 you can restore and rollback to the previous Metabase version if the upgrade
 corrupts the configuration.
+
+## Restart
+To restart Metabase, run `sudo systemctl restart metabase`.
+
+## See service status
+To see service status info, run `sudo systemctl status metabase`.
+
+## View logs
+Run `sudo journalctl -fu metabase` to view Metabase logs.
