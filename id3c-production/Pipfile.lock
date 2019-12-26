@@ -80,6 +80,13 @@
             ],
             "version": "==4.0.9"
         },
+        "fhir.resources": {
+            "hashes": [
+                "sha256:4eabb6d8497e7b8f57ffff0fe68f38eebf85cad0fc9f534d6a9dc69af86ace56",
+                "sha256:93bf0c5748f7b14edbca15edfafe8a6a24e0b3de19bdaff2f0a65ea2f319d15c"
+            ],
+            "version": "==5.0.1"
+        },
         "fiona": {
             "hashes": [
                 "sha256:0742177422d20f72e69e499886f96e1cbf5ce0c9752f8320a05eddcb0f1c576a",
@@ -113,7 +120,7 @@
         "id3c": {
             "editable": true,
             "git": "https://github.com/seattleflu/id3c.git",
-            "ref": "ff21370f6d4f69a8c20dba172adbe0ad614e76c6"
+            "ref": "6b5b3101fc5fd726d64cbf3374140b4390a6744e"
         },
         "idna": {
             "hashes": [
@@ -121,6 +128,13 @@
                 "sha256:ea8b7f6188e6fa117537c3df7da9fc686d485087abf6ac197f9c46432f7e4a3c"
             ],
             "version": "==2.8"
+        },
+        "isodate": {
+            "hashes": [
+                "sha256:2e364a3d5759479cdb2d37cce6b9376ea504db2ff90252a2e5b7cc89cc9ff2d8",
+                "sha256:aa4d33c06640f5352aca96e4b81afd8ab3b47337cc12089822d6f322ac772c81"
+            ],
+            "version": "==0.6.0"
         },
         "itsdangerous": {
             "hashes": [
