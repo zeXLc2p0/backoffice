@@ -5,7 +5,7 @@ A suitably-configured Docker container named `metabase` is created by the
 to bake into the environment connection details for Metabase's own internal
 application database (not our ID3C databases).  This should take the form of:
 
-    MB_DB_CONNECTION_URI="postgres://hostname/metabase?ssl=true&sslmode=require&user=metabase&password=$(grep :metabase: ~/.pgpass | cut -d: -f5)"
+    MB_DB_CONNECTION_URI="postgres://production.db.seattleflu.org/metabase?ssl=true&sslmode=require&user=metabase&password=$(grep :metabase: ~/.pgpass | cut -d: -f5)"
 
 The `metabase.service` file should be symlinked into `/etc/systemd/system/` and
 enabled using `systemctl enable metabase`.  Management of the Metabase
