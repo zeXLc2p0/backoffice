@@ -19,6 +19,45 @@ service.  You may want to make a backup of the Metabase database first so that
 you can restore and rollback to the previous Metabase version if the upgrade
 corrupts the configuration.
 
+### Testing
+
+It's nice to test upgrades locally, particularly if there are significant
+changes.  Briefly sketched out, here's one way to do so:
+
+ 1. Dump a copy of Metabase's internal database:
+
+        pg_dump -Fc -h production.db.seattleflu.org -U postgres metabase > metabase.pgdb
+
+ 2. Create a local `metabase` PostgreSQL user with a password of your choosing:
+
+        createuser -P metabase
+
+ 3. Restore the database dump to create a local `metabase` database:
+
+        pg_restore --create --clean -d template1 metabase.pgdb
+
+ 4. Create the new Metabase container using the instructions in the
+    [upgrade](#upgrade) section above, but don't (re-)start the new container
+    yet.  When running `create-container`, you'll need to set the
+    `MB_DB_CONNECTION_URI` environment variable to point to localhost and
+    include the password you set in step #2.
+
+ 5. Forward connections from inside the Metabase container to your local
+    PostgreSQL instance running outside the container:
+
+        socat TCP4-LISTEN:5432,bind=172.20.0.1,reuseaddr,fork TCP4:localhost:5432
+
+    Replace the `bind` IP address with the gateway IP output by `docker network
+    inspect metabase-bridge`.
+
+ 6. Start the Metabase container:
+
+        docker container start -a metabase
+
+ 7. Look at Metabase on <http://localhost:3000>.
+
+
+
 ## Restart
 To restart Metabase, run `sudo systemctl restart metabase`.
 
