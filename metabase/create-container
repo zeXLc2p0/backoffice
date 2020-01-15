@@ -19,6 +19,8 @@ main() {
     docker container create \
         --name metabase \
         --env MB_DB_CONNECTION_URI \
+        --env MB_PASSWORD_COMPLEXITY=strong \
+        --env MB_PASSWORD_LENGTH=10 \
         --env JAVA_TIMEZONE=US/Pacific \
         --env JAVA_TOOL_OPTIONS=-Xmx2g \
         --network "$network" \
