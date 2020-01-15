@@ -6,6 +6,11 @@ version="v0.34.1"
 network="metabase-bridge"
 
 main() {
+    if [[ -z "${MB_DB_CONNECTION_URI:-}" ]]; then
+        echo "The MB_DB_CONNECTION_URI environment variable must be provided." >&2
+        exit 1
+    fi
+
     # Create a user-defined bridge network for the container to use instead of
     # the default bridge network.
     if docker network inspect "$network" >/dev/null 2>&1; then
