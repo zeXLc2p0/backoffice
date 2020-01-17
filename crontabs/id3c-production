@@ -47,3 +47,18 @@ ENVD=/opt/backoffice/id3c-production/env.d
 # Clinical encounter records are manually uploaded right now, so just check
 # once an hour at five 'till.
 55 * * * * ubuntu pipenv run id3c etl clinical --commit
+
+# XXX TODO: Explicitly configure the location the geocoding cache when that is
+# supported by our code.  Currently it ends up as cache.pickle in the working
+# directory, which is /home/ubuntu in this case.  Possibly use separate cache
+# files for each REDCap project.
+#
+# XXX TODO: Remove locking of the cache file (to prevent corruption/race
+# conditions) once locking is done by ID3C directly.
+#
+# Transform REDCap DETs to FHIR documents every 10 minutes, interleaving kiosk
+# and swab-n-send on the 5s (since they share a cache file).  Ingest FHIR
+# documents every 5 minutes, scheduled 3 minutes after each DET run.
+0-50/10 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-kiosk pipenv run id3c etl redcap-det kiosk --commit
+5-55/10 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-swab-n-send pipenv run id3c etl redcap-det swab-n-send --commit
+3-58/5  * * * * ubuntu pipenv run id3c etl fhir --commit
