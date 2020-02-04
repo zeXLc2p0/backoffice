@@ -1,0 +1,4 @@
+# Out of an abundance of caution, ignore data files that may have erroneously
+# remained in this directory.
+*.csv
+*.ndjson
