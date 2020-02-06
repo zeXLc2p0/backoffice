@@ -1,0 +1,28 @@
+#!/bin/bash
+set -euo pipefail
+psql --quiet --no-align --tuples-only --set ON_ERROR_STOP= <<<"
+    with candidate_connections as (
+        select
+            pid,
+            client_addr,
+            usename,
+            application_name,
+            current_timestamp - state_change as idle_duration
+        from
+            pg_stat_activity_nonsuperuser
+        where
+                pid != pg_backend_pid()
+            and state in ('idle', 'idle in transaction', 'idle in transaction (aborted)', 'disabled')
+        order by
+            client_addr,
+            application_name,
+            state_change desc
+    )
+
+    select *, pg_terminate_backend(pid)
+    from candidate_connections
+    where idle_duration > interval '30 min'
+    and usename not in ('rdsadmin', 'metabase')
+    and usename not in (select rolname from pg_roles where rolsuper = 'f')
+    and pg_terminate_backend(pid) = 't'
+"
