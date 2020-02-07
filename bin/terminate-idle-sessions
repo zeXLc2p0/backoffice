@@ -17,12 +17,15 @@ psql --quiet --no-align --tuples-only --set ON_ERROR_STOP= <<<"
             client_addr,
             application_name,
             state_change desc
+    ),
+
+    idle_sessions as (
+        select *, pg_terminate_backend(pid) as terminated
+        from candidate_connections
+        where idle_duration > interval '30 min'
+        and usename not in ('rdsadmin', 'metabase')
+        and usename not in (select rolname from pg_roles where rolsuper)
     )
 
-    select *, pg_terminate_backend(pid)
-    from candidate_connections
-    where idle_duration > interval '30 min'
-    and usename not in ('rdsadmin', 'metabase')
-    and usename not in (select rolname from pg_roles where rolsuper)
-    and pg_terminate_backend(pid) = 'f'
+    select * from idle_sessions where not terminated
 "
