@@ -1,12 +1,15 @@
 #!/bin/bash
-# usage: ./export/sch-retrospective-data-pulls
+# usage: ./bin/sch-retrospective-data-pulls
 #
 # Parses and uploads SCH retrospective data from AWS to ID3C.
 #
 
 set -euo pipefail
 
-: ${ID3C:="$(dirname "0")"/../id3c-production}
+# Change to the top-level of the backoffice checkout
+cd "$(dirname "$0")/.."
+
+: ${ID3C:=id3c-production}
 : ${id3c:=pipenv run id3c}
 
 export PIPENV_PIPFILE="$ID3C/Pipfile"
@@ -36,38 +39,37 @@ main() {
         exit 1
     fi
 
-    cd "$(dirname "$0")"
-    workdir="$(pwd)"
-
     datadir="$(mktemp -d -t sch-retrospective-data-pulls-XXXXXX)"
-    cd $datadir
 
     # Always leave and delete this temporary directory regardless of exit code
-    trap "cd '$workdir' && rm -rf '$datadir'" EXIT
+    trap "rm -rf '$datadir'" EXIT
 
     echo "Downloading the most recent Year2 SCH data from AWS S3"
     # Do not include SFS Year2 Main Data files prior to 2020. After the last
     # SCH data upload of 2019, the column naming scheme changed. The CLI command
     # was then changed, now causing earlier data pulls to fail on parsing.
-    aws s3 cp --recursive s3://fh-pi-bedford-t/seattleflu/sch/ . --exclude "*" \
+    aws s3 cp --recursive \
+        s3://fh-pi-bedford-t/seattleflu/sch/ \
+        "$datadir" \
+        --exclude "*" \
         --include "SFS_Year2_Main_Data_2020*.csv" \
         --include "SFS_Year2_Main_Data_2020*.ndjson"
     echo
 
-    for retrospective_data_file in *.csv
+    for retrospective_csv_file in "$datadir"/*.csv
     do
-        filename=$(basename "$retrospective_data_file" .csv)
-        echo "Checking for parsed retrospective data matching «$filename»"
-        if [[ -e "$filename".ndjson ]]; then
+        retrospective_ndjson_file="${retrospective_csv_file%.csv}.ndjson"
+
+        echo "Checking for parsed retrospective data «$retrospective_ndjson_file»"
+        if [[ -e "$retrospective_ndjson_file" ]]; then
             echo "Parsed data found. Continuing"
             echo
             continue
         fi
 
         echo "No parsed data found. Parsing now"
-        cd $workdir
         echo
-        if ! $id3c clinical parse-sch "$datadir/$filename".csv > "$datadir/$filename".ndjson; then
+        if ! $id3c clinical parse-sch "$retrospective_csv_file" > "$retrospective_ndjson_file"; then
             echo "Something went wrong when parsing the retrospective data"
             exit 1
         fi
@@ -75,11 +77,11 @@ main() {
 
         if [[ $UPLOAD -eq 1 ]]; then
             echo "Uploading the parsed records to ID3C"
-            $id3c clinical upload "$datadir/$filename".ndjson
+            $id3c clinical upload "$retrospective_ndjson_file"
             echo
 
             echo "Uploading the parsed records to S3"
-            aws s3 cp "$datadir/$filename".ndjson s3://fh-pi-bedford-t/seattleflu/sch/
+            aws s3 cp "$retrospective_ndjson_file" s3://fh-pi-bedford-t/seattleflu/sch/
             echo
 
             echo "Finished uploading new SCH retrospective data"
