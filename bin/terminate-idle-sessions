@@ -23,6 +23,6 @@ psql --quiet --no-align --tuples-only --set ON_ERROR_STOP= <<<"
     from candidate_connections
     where idle_duration > interval '30 min'
     and usename not in ('rdsadmin', 'metabase')
-    and usename not in (select rolname from pg_roles where rolsuper = 'f')
-    and pg_terminate_backend(pid) = 't'
+    and usename not in (select rolname from pg_roles where rolsuper)
+    and pg_terminate_backend(pid) = 'f'
 "
