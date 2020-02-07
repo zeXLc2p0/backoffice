@@ -1,0 +1,103 @@
+#!/bin/bash
+# usage: ./bin/sch-retrospective-data-pulls
+#
+# Parses and uploads SCH retrospective data from AWS to ID3C.
+#
+
+set -euo pipefail
+
+# Change to the top-level of the backoffice checkout
+cd "$(dirname "$0")/.."
+
+: ${ID3C:=id3c-production}
+: ${id3c:=pipenv run id3c}
+
+export PIPENV_PIPFILE="$ID3C/Pipfile"
+
+main() {
+    local UPLOAD=0
+
+    for arg; do
+        case "$arg" in
+            -h|--help)
+                print-help
+                exit
+                ;;
+            --upload)
+                UPLOAD=1
+                shift
+                break
+                ;;
+            *)
+        esac
+    done
+
+    if [[ $# -gt 0 ]]; then
+        echo "Error: extra arguments provided; aborting out of an abundance of caution." >&2
+        echo
+        print-help
+        exit 1
+    fi
+
+    datadir="$(mktemp -d -t sch-retrospective-data-pulls-XXXXXX)"
+
+    # Always leave and delete this temporary directory regardless of exit code
+    trap "rm -rf '$datadir'" EXIT
+
+    echo "Downloading the most recent Year2 SCH data from AWS S3"
+    # Do not include SFS Year2 Main Data files prior to 2020. After the last
+    # SCH data upload of 2019, the column naming scheme changed. The CLI command
+    # was then changed, now causing earlier data pulls to fail on parsing.
+    aws s3 cp --recursive \
+        s3://fh-pi-bedford-t/seattleflu/sch/ \
+        "$datadir" \
+        --exclude "*" \
+        --include "SFS_Year2_Main_Data_2020*.csv" \
+        --include "SFS_Year2_Main_Data_2020*.ndjson"
+    echo
+
+    for retrospective_csv_file in "$datadir"/*.csv
+    do
+        retrospective_ndjson_file="${retrospective_csv_file%.csv}.ndjson"
+
+        echo "Checking for parsed retrospective data «$retrospective_ndjson_file»"
+        if [[ -e "$retrospective_ndjson_file" ]]; then
+            echo "Parsed data found. Continuing"
+            echo
+            continue
+        fi
+
+        echo "No parsed data found. Parsing now"
+        echo
+        if ! $id3c clinical parse-sch "$retrospective_csv_file" > "$retrospective_ndjson_file"; then
+            echo "Something went wrong when parsing the retrospective data"
+            exit 1
+        fi
+        echo "Finished parsing new SCH retrospective data"
+
+        if [[ $UPLOAD -eq 1 ]]; then
+            echo "Uploading the parsed records to ID3C"
+            $id3c clinical upload "$retrospective_ndjson_file"
+            echo
+
+            echo "Uploading the parsed records to S3"
+            aws s3 cp "$retrospective_ndjson_file" s3://fh-pi-bedford-t/seattleflu/sch/
+            echo
+
+            echo "Finished uploading new SCH retrospective data"
+        fi
+
+    done
+
+
+}
+
+print-help() {
+    # Print the help comments at the top of this file ($0)
+    perl -MEnglish -ne '
+        s/^# ?// or exit;
+        print if $INPUT_LINE_NUMBER >= 2;
+    ' "$0"
+}
+
+main "$@"
