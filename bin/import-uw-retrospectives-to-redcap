@@ -1,0 +1,110 @@
+#!/bin/bash
+set -euo pipefail
+
+# Absolute path to our containing repo
+base="$(cd "$(dirname "$0")/.."; pwd)"
+
+: ${CONFIG:="$base/etc/uw-retrospectives-manifest.yaml"}
+
+main() {
+    # Parse arguments.
+    local import=cat
+    local debug=0
+
+    for arg; do
+        case "$arg" in
+            --import)
+                import=import-to-redcap
+                shift;;
+            --debug)
+                debug=1
+                shift;;
+        esac
+    done
+
+    # Check this early before we do any work rather than failing at the end.
+    if [[ $import == import-to-redcap ]]; then
+        : "${REDCAP_API_URL:?The environment variable REDCAP_API_URL is required.}"
+        : "${REDCAP_API_TOKEN:?The environment variable REDCAP_API_TOKEN is required.}"
+    fi
+
+    if [[ $debug == 1 ]]; then
+        set -x
+    fi
+
+    local previous_records="${1:-s3://fh-pi-bedford-t/seattleflu/uw-retrospectives-manifest.ndjson}"
+    local latest_records="$(mktemp -t "$(basename "$previous_records" .ndjson)"-XXXXXX.ndjson)"
+    local new_records="${latest_records%.ndjson}-new.ndjson"
+
+    if [[ $debug == 0 ]]; then
+        trap "rm -f '$latest_records' '$new_records'" EXIT
+    fi
+
+    parse-manifest > "$latest_records"
+    diff-manifests "$previous_records" "$latest_records" > "$new_records"
+
+    if [[ ! -s $new_records ]]; then
+        echo "No new records" >&2
+        exit
+    fi
+
+    if [[ $import == import-to-redcap ]]; then
+        import-to-redcap < <(<"$new_records" as-redcap-records)
+        cp-records "$latest_records" "$previous_records"
+    else
+        <"$new_records" as-redcap-records
+    fi
+}
+
+parse-manifest() {
+    id3c manifest parse-using-config "$CONFIG" \
+        | jq --compact-output 'select(.sample_origin | test("^(uwmc|hmc|nwh)_retro$"; "i"))'
+}
+
+diff-manifests() {
+    id3c manifest diff "$1" "$2"
+}
+
+as-redcap-records() {
+    jq --compact-output --slurp '
+        def nullif(x): if . == x then null else . end;
+
+        map({
+            barcode,
+            collection_date,
+            mrn,
+            accession_no: (.accession_no | nullif("na") // ""),
+            participant_information_complete: 2
+        })
+    '
+}
+
+import-to-redcap() {
+    echo "Importing to REDCap..." >&2
+    curl -fsS "$REDCAP_API_URL" \
+        -d token="$REDCAP_API_TOKEN" \
+        -d format=json \
+        -d content=record \
+        -d type=flat \
+        -d overwriteBehavior=overwrite \
+        -d dateFormat=MDY \
+        -d returnFormat=json \
+        -d returnContent=ids \
+        --data-urlencode data@/dev/stdin \
+        >&2
+    echo >&2
+}
+
+cp-records() {
+    local new="$1"
+    local old="$2"
+
+    case "$old" in
+        s3://*)
+            aws s3 cp "$new" "$old" >&2;;
+        *)
+            cp -pv "$new" "$old" >&2;;
+    esac
+}
+
+main "$@"
