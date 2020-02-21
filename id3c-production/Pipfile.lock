@@ -380,7 +380,7 @@
         "seattleflu-id3c-customizations": {
             "editable": true,
             "git": "https://github.com/seattleflu/id3c-customizations.git",
-            "ref": "99f4b51b03bd48e12745fd8d72fba61b7d5371e9"
+            "ref": "52e7490ef7e1e124d6aa15a9fff48812d49b8629"
         },
         "six": {
             "hashes": [
