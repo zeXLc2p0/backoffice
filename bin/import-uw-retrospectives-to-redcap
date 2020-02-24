@@ -1,0 +1,161 @@
+#!/bin/bash
+# usage: import-uw-retrospectives-to-redcap [--debug] [--import] [manifest.ndjson]
+#        import-uw-retrospectives-to-redcap --help
+#
+# Parses the latest manifest files, identifies new UW retrospective samples,
+# and imports them into the clinical data pulls REDCap project.
+#
+# High-level data flow for UW retrospectives looks like:
+#
+# The manifests are parsed according to the the YAML configuration in $CONFIG,
+# which defaults to etc/uw-retrospectives-manifest.yaml.
+#
+# New samples are identified by diffing against the previous parse, which by
+# default is stored at:
+#
+#    s3://fh-pi-bedford-t/seattleflu/uw-retrospectives-manifest.ndjson
+#
+# You can optionally test with a different previous parse file (including the
+# final replacement step) by providing a local path or another s3:// URL as a
+# program argument.
+#
+# If no new samples are found, the program stops here.
+#
+# Otherwise, the new samples are reformatted into records appropriate for the
+# redcap.iths.org project #19915 and, by default, printed to stdout.
+#
+# If the --import flag is given, the new records are instead imported into
+# REDCap via its web API, and the previous manifest parse is replaced by the
+# new parse, for diffing against the next time this program runs.
+#
+# The --debug option enables even noiser output to stderr than usual, which may
+# be helpful for debugging.
+#
+set -euo pipefail
+
+# Absolute path to our containing repo
+base="$(cd "$(dirname "$0")/.."; pwd)"
+
+: ${CONFIG:="$base/etc/uw-retrospectives-manifest.yaml"}
+
+main() {
+    # Parse arguments.
+    local import=cat
+    local debug=0
+
+    for arg; do
+        case "$arg" in
+            --import)
+                import=import-to-redcap
+                shift;;
+            --debug)
+                debug=1
+                shift;;
+            --help)
+                print-help
+                exit 0;;
+        esac
+    done
+
+    # Check this early before we do any work rather than failing at the end.
+    if [[ $import == import-to-redcap ]]; then
+        : "${REDCAP_API_URL:?The environment variable REDCAP_API_URL is required.}"
+        : "${REDCAP_API_TOKEN:?The environment variable REDCAP_API_TOKEN is required.}"
+    fi
+
+    if [[ $debug == 1 ]]; then
+        set -x
+    fi
+
+    local previous_records="${1:-s3://fh-pi-bedford-t/seattleflu/uw-retrospectives-manifest.ndjson}"
+    local latest_records="$(mktemp -t "$(basename "$previous_records" .ndjson)"-XXXXXX.ndjson)"
+    local new_records="${latest_records%.ndjson}-new.ndjson"
+
+    if [[ $debug == 0 ]]; then
+        trap "rm -f '$latest_records' '$new_records'" EXIT
+    fi
+
+    parse-manifest > "$latest_records"
+    diff-manifests "$previous_records" "$latest_records" > "$new_records"
+
+    if [[ ! -s $new_records ]]; then
+        echo "No new records" >&2
+        exit
+    fi
+
+    if [[ $import == import-to-redcap ]]; then
+        import-to-redcap < <(<"$new_records" as-redcap-records)
+        cp-records "$latest_records" "$previous_records"
+    else
+        <"$new_records" as-redcap-records
+    fi
+}
+
+parse-manifest() {
+    id3c manifest parse-using-config "$CONFIG" \
+        | jq --compact-output 'select(.sample_origin | test("^(uwmc|hmc|nwh)_retro$"; "i"))'
+}
+
+diff-manifests() {
+    id3c manifest diff "$1" "$2"
+}
+
+as-redcap-records() {
+    jq --compact-output --slurp '
+        def nullif(x): if . == x then null else . end;
+
+        map({
+            barcode,
+            collection_date,
+            mrn,
+            accession_no: (.accession_no | nullif("na") // ""),
+            participant_information_complete: 2
+        })
+    '
+}
+
+import-to-redcap() {
+    echo "Importing to REDCap..." >&2
+    curl -fsS "$REDCAP_API_URL" \
+        -d token="$REDCAP_API_TOKEN" \
+        -d format=json \
+        -d content=record \
+        -d type=flat \
+        -d overwriteBehavior=overwrite \
+        -d dateFormat=MDY \
+        -d returnFormat=json \
+        -d returnContent=ids \
+        --data-urlencode data@/dev/stdin \
+        >&2
+    echo >&2
+}
+
+cp-records() {
+    local new="$1"
+    local old="$2"
+
+    case "$old" in
+        s3://*)
+            aws s3 cp "$new" "$old" >&2;;
+        *)
+            cp -pv "$new" "$old" >&2;;
+    esac
+}
+
+print-help() {
+    # Print the help comments at the top of this file ($0)
+    local line
+    while read -r line; do
+        if [[ $line =~ ^#! ]]; then
+            continue
+        elif [[ $line =~ ^# ]]; then
+            line="${line/##/}"
+            line="${line/# /}"
+            echo "$line"
+        else
+            break
+        fi
+    done < "$0"
+}
+
+main "$@"
