@@ -64,10 +64,13 @@ ENVD=/opt/backoffice/id3c-production/env.d
 # conditions) once locking is done by ID3C directly.
 #
 # Transform REDCap DETs to FHIR documents every 10 minutes, interleaving kiosk
-# and swab-n-send on the 5s (since they share a cache file).  Ingest FHIR
-# documents every 5 minutes, scheduled 3 minutes after each DET run.
+# and swab-n-send on the 5s (since they share a cache file). Only process the
+# old swab-n-send project at 5 past and process from new project the rest of time.
+# We can eventually delete the old project once it has been completely stopped.
+# Ingest FHIR documents every 5 minutes, scheduled 3 minutes after each DET run.
 0-50/10 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-kiosk pipenv run id3c etl redcap-det kiosk --commit
-5-55/10 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-swab-n-send pipenv run id3c etl redcap-det swab-n-send --commit
+5 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-swab-n-send pipenv run id3c etl redcap-det swab-n-send --commit
+15-55/10 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-swab-and-home-flu pipenv run id3c etl redcap-det swab-and-home-flu --commit
 3-58/5  * * * * ubuntu pipenv run id3c etl fhir --commit
 
 # Run the idle database session disconnector routine every minute
