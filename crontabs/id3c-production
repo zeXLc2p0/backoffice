@@ -38,7 +38,7 @@ ENVD=/opt/backoffice/id3c-production/env.d
 40 * * * * ubuntu chronic envdir $ENVD/hutch/ /opt/specimen-manifests/update-unattended --push-and-upload
 
 # Upload new UW retrospectives to REDCap once a day at midnight
-0 0 * * * ubuntu chronic envdir $ENVD/hutch/ envdir $ENVD/redcap-uw-retrospectives/ /opt/backoffice/bin/import-uw-retrospectives-to-redcap --import
+0 0 * * * ubuntu pipenv run chronic envdir $ENVD/hutch/ envdir $ENVD/redcap-uw-retrospectives/ /opt/backoffice/bin/import-uw-retrospectives-to-redcap --import
 
 # Manifests are manually uploaded periodically right now, so just check once an
 # hour at quarter 'till.
