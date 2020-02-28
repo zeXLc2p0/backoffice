@@ -144,6 +144,11 @@ cd-to-workdir() {
         log "Workdir is $workdir (temporary, deleted on exit)"
     else
         log "Workdir is $workdir"
+
+        if [[ ! -e $workdir ]]; then
+            mkdir -p "$workdir"
+            log "Workdir doesn't exist, creating"
+        fi
     fi
 
     cd "$workdir"
