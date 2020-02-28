@@ -40,6 +40,9 @@ ENVD=/opt/backoffice/id3c-production/env.d
 # Upload new UW retrospectives to REDCap once a day at midnight
 0 0 * * * ubuntu pipenv run chronic envdir $ENVD/hutch/ envdir $ENVD/redcap-uw-retrospectives/ /opt/backoffice/bin/import-uw-retrospectives-to-redcap --import
 
+# Create and upload REDCap DETs for UW retrospectives once a day at 4 A.M.
+0 4 * * * ubuntu pipenv run chronic envdir $ENVD/redcap-uw-retrospectives/ /opt/backoffice/bin/generate-and-upload-uw-retro-redcap-dets
+
 # Manifests are manually uploaded periodically right now, so just check once an
 # hour at quarter 'till.
 45 * * * * ubuntu pipenv run id3c etl manifest --commit
