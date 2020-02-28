@@ -49,6 +49,7 @@ main() {
     # Do not include SFS Year2 Main Data files prior to 2020. After the last
     # SCH data upload of 2019, the column naming scheme changed. The CLI command
     # was then changed, now causing earlier data pulls to fail on parsing.
+    glob_pattern="SFS_Year2_Main_Data_2020*"
 
     # Since the 2020-02-10 dataset, Amanda has only sent us Excel workbooks,
     # but preserve support for CSV too.
@@ -56,10 +57,10 @@ main() {
         s3://fh-pi-bedford-t/seattleflu/sch/ \
         "$datadir" \
         --exclude "*" \
-        --include "SFS_Year2_Main_Data_2020*.csv" \
-        --include "SFS_Year2_Main_Data_2020*.xls" \
-        --include "SFS_Year2_Main_Data_2020*.xlsx" \
-        --include "SFS_Year2_Main_Data_2020*.ndjson"
+        --include "$glob_pattern.csv" \
+        --include "$glob_pattern.xls" \
+        --include "$glob_pattern.xlsx" \
+        --include "$glob_pattern.ndjson"
     echo
 
     for retrospective_spreadsheet_file in "$datadir"/*.@(csv|xls|xlsx)
