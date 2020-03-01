@@ -56,4 +56,4 @@ formatters:
     datefmt: "%Y-%m-%d %H:%M:%S"
 
   syslog:
-    format: "id3c-production[%(process)s] %(name)s %(levelname)s: %(message)s"
+    format: "id3c-restricted[%(process)s] %(name)s %(levelname)s: %(message)s"
