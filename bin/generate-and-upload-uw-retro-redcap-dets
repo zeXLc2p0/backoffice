@@ -1,0 +1,54 @@
+#!/bin/bash
+# usage: ./bin/generate-and-upload-uw-retro-redcap-dets
+#
+# Generates UW retrospective REDCap DETs from project 19915
+# for records that have been created and/or modified since
+# 25 hours ago and uploads them to ID3C.
+#
+
+set -euo pipefail
+
+# Absolute path to our containing repo
+base="$(cd "$(dirname "$0")/.."; pwd)"
+
+main() {
+    for arg; do
+        case "$arg" in
+            -h|--help)
+                print-help
+                exit 0;;
+        esac
+    done
+
+    # Check this early before we do any work rather than failing at the end.
+    : "${REDCAP_API_URL:?The environment variable REDCAP_API_URL is required.}"
+    : "${REDCAP_API_TOKEN:?The environment variable REDCAP_API_TOKEN is required.}"
+
+    upload-to-id3c <(generate-redcap-dets)
+}
+
+generate-redcap-dets() {
+    id3c redcap-det generate --project-id 19915 --since-date "`date +"%F %T" -d "25 hours ago"`" --include-incomplete
+}
+
+upload-to-id3c() {
+    id3c redcap-det upload "$1"
+}
+
+print-help() {
+    # Print the help comments at the top of this file ($0)
+    local line
+    while read -r line; do
+        if [[ $line =~ ^#! ]]; then
+            continue
+        elif [[ $line =~ ^# ]]; then
+            line="${line/##/}"
+            line="${line/# /}"
+            echo "$line"
+        else
+            break
+        fi
+    done < "$0"
+}
+
+main "$@"
