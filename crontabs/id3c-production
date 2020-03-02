@@ -52,7 +52,7 @@ ENVD=/opt/backoffice/id3c-production/env.d
 50 * * * * ubuntu pipenv run id3c etl kit manifest --commit
 
 # Parse and upload the latest SCH retrospective data from S3 to ID3C
-51 * * * * ubuntu chronic envdir $ENVD/hutch envdir $ENVD/deidentification /opt/backoffice/bin/upload-sch-retrospective-data-pulls
+51 * * * * ubuntu chronic envdir $ENVD/hutch envdir $ENVD/deidentification /opt/backoffice/bin/upload-sch-retrospective-data-pulls --upload
 
 # Clinical encounter records are manually uploaded right now, so just check
 # once an hour at five 'till.
