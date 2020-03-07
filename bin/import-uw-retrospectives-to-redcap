@@ -102,13 +102,13 @@ diff-manifests() {
 
 as-redcap-records() {
     jq --compact-output --slurp '
-        def nullif(x): if . == x then null else . end;
+        def blankif(x): if . == x then "" else . end;
 
         map({
             barcode,
             collection_date,
             mrn,
-            accession_no: (.accession_no | nullif("na") // ""),
+            accession_no: (.accession_no | blankif("na")),
             participant_information_complete: 2
         })
     '
