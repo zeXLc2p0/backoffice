@@ -106,7 +106,7 @@ as-redcap-records() {
 
         map({
             barcode,
-            collection_date,
+            collection_date: (.collection_date | blankif("na")),
             mrn,
             accession_no: (.accession_no | blankif("na")),
             participant_information_complete: 2
