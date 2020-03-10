@@ -89,10 +89,10 @@
         },
         "deepdiff": {
             "hashes": [
-                "sha256:b3fa588d1eac7fa318ec1fb4f2004568e04cb120a1989feda8e5e7164bcbf07a",
-                "sha256:ed7342d3ed3c0c2058a3fb05b477c943c9959ef62223dca9baa3375718a25d87"
+                "sha256:eee68cc6853b47ded2d91524f74b681e09d66f68ffb3388ff15c5cdbc265bedb",
+                "sha256:f0022be05c44c5c85c7e95c4fda89a1f28ddb3408f889f51ff8b9841951b9f9d"
             ],
-            "version": "==4.2.0"
+            "version": "==4.3.0"
         },
         "docutils": {
             "hashes": [
@@ -149,7 +149,7 @@
         "id3c": {
             "editable": true,
             "git": "https://github.com/seattleflu/id3c.git",
-            "ref": "ea6a46dd8f869a7bb5ffe6292a0e35be0446a231"
+            "ref": "28e3b617b3e6a30653b4f61c2db3b48a2124f807"
         },
         "idna": {
             "hashes": [
