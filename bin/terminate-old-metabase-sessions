@@ -1,0 +1,25 @@
+#!/bin/bash
+set -euo pipefail
+psql --quiet --no-align --tuples-only --set ON_ERROR_STOP= <<<"
+    with active_metabase_connections as (
+        select
+            pid,
+            current_timestamp - state_change as active_duration
+        from
+            pg_stat_activity_nonsuperuser
+        where
+            pid != pg_backend_pid()
+            and usename = 'metabase'
+            and state = 'active'
+        order by
+            active_duration desc
+    ),
+
+    old_sessions as (
+        select *, pg_terminate_backend(pid) as terminated
+        from active_metabase_connections
+        where active_duration > interval '10 min'
+    )
+
+    select * from idle_sessions where not terminated
+"
