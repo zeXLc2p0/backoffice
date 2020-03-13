@@ -26,7 +26,7 @@ PRODUCTION_PGUSER=postgres
 : ${PGDATABASE:=seattleflu}
 
 main() {
-    local workdir=
+    local workdir= pv=
 
     for arg; do
         case "$arg" in
@@ -47,6 +47,12 @@ main() {
         exit 1
     fi
 
+    if hash pv 2>/dev/null; then
+        pv="pv --timer --rate --average-rate --bytes"
+    else
+        pv=cat
+    fi
+
     log "Refreshing target database from production"
     log "Target is $(connection-info)"
     log "Production is $(production connection-info)"
@@ -58,7 +64,7 @@ main() {
 
     if ! [[ -s production.pgdb ]]; then
         log "Dumping production database"
-        production pg_dump --format custom > production.pgdb
+        production pg_dump --format custom | $pv > production.pgdb
         assert-not-empty production.pgdb
     else
         log "Using existing production database dump"
