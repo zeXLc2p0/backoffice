@@ -30,10 +30,6 @@ ENVD=/opt/backoffice/id3c-production/env.d
 # The bottom of the hour seems good for now.
 30 * * * * ubuntu pipenv run id3c etl presence-absence --commit
 
-# After presence/absence results are uploaded, check if any contain reportable
-# conditions.
-35 * * * * ubuntu envdir $ENVD/slack/ pipenv run id3c reportable-conditions notify --commit
-
 # Upload new manifest data
 40 * * * * ubuntu chronic envdir $ENVD/hutch/ /opt/specimen-manifests/update-unattended --push-and-upload
 
