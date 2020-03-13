@@ -83,3 +83,5 @@ ENVD=/opt/backoffice/id3c-production/env.d
 
 # Run the idle database session disconnector routine every minute
 * * * * * ubuntu /opt/backoffice/bin/terminate-idle-sessions
+# Run the old metabase session disconnector routine every minute
+* * * * * ubuntu /opt/backoffice/bin/terminate-old-metabase-sessions
