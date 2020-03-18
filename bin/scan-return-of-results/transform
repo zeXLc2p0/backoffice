@@ -1,0 +1,67 @@
+#!/usr/bin/env python3
+"""
+Join the REDCap csv data with an ID3C csv.
+Parses the joined data to make it suitable for UW Lab Med's return of results
+portal.
+"""
+import sys
+import argparse
+import pandas as pd
+from pathlib import Path
+
+
+def parse_redcap(redcap_file) -> pd.DataFrame:
+    """
+    Reads in data from a given *redcap_file*. Returns a pandas.DataFrame
+    prepared in the specifications of UW Lab Med's return of results portal.
+    """
+    redcap_data = pd.read_csv(redcap_file)
+    redcap_data = redcap_data.rename(columns={'return_utm_barcode': 'qrcode', 'birthday': 'birth_date'})
+
+    participant_name = lambda row: f"{row['participant_first_name']} {row['participant_last_name']}"
+    redcap_data['pat_name'] = redcap_data.apply(participant_name, axis='columns')
+    redcap_data = redcap_data.drop(columns=['participant_first_name', 'participant_last_name'])
+
+    return redcap_data
+
+def edit_status_code(scan_data: pd.DataFrame) -> pd.DataFrame:
+    """
+    Sets the *scan_data* status to `never-tested` in the unlikely event that a
+    REDCap record's barcode is not found in ID3C.
+
+    Sets the *scan_data* status to `pending` if a test result is `positive` but
+    the participant has not yet been contacted (`contacted` != 'yes').
+
+    Returns the modified *scan_data*.
+    """
+    scan_data.loc[scan_data['status_code'].isnull(), 'status_code'] = 'never-tested'
+
+    is_positive = scan_data['status_code'] == 'positive'
+    participant_contacted = scan_data['contacted'] == 'yes'
+
+    scan_data.loc[(is_positive) & ~(participant_contacted), 'status_code'] = 'pending'
+
+    return scan_data
+
+
+if __name__ == '__main__':
+    base = Path(__file__).resolve().parent.parent
+
+    parser = argparse.ArgumentParser(
+        description="Join a REDCAP export csv file with a SCAN return of results ID3C export csv file."
+    )
+    parser.add_argument("redcap_data", help="REDCap records export csv")
+    parser.add_argument("id3c_data", help="SCAN return of results from ID3C export csv", nargs="?", default=sys.stdin)
+    parser.add_argument("output", help="A destination for the output csv", nargs="?",
+        default="s3://dokku-stack-phi/covid19/scan-study-inbound/scan_return_results.csv")
+
+    args = parser.parse_args()
+
+    redcap_data = parse_redcap(args.redcap_data)
+    id3c_data = pd.read_csv(args.id3c_data)
+
+    # We can't return results without participant info so keep all from redcap_data
+    joined_data = redcap_data.merge(id3c_data, how='left', on='qrcode')
+    joined_data = edit_status_code(joined_data)
+
+    joined_data.to_csv(args.output, index=False)
