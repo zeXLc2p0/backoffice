@@ -27,8 +27,8 @@ ENVD=/opt/backoffice/id3c-production/env.d
 # that this doesn't run at the same time as the enrollments etl, run at 25 after.
 25 * * * * ubuntu pipenv run id3c etl kit enrollments --commit
 
-# The bottom of the hour seems good for now.
-30 * * * * ubuntu pipenv run id3c etl presence-absence --commit
+# Test results are pushed at arbitrary times now, so check for new ones every 15m.
+*/15 * * * * ubuntu pipenv run id3c etl presence-absence --commit
 
 # Upload new manifest data
 40 * * * * ubuntu chronic envdir $ENVD/hutch/ /opt/specimen-manifests/update-unattended --push-and-upload
