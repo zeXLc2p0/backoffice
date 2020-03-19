@@ -16,3 +16,5 @@ Other supporting files:
 
   * `web/` contains the simple static index page hosted at
     <https://backoffice.seattleflu.org>.
+
+  * `bin/` contains the scripts for the commands run by our cron jobs
