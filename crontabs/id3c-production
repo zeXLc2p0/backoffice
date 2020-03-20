@@ -64,7 +64,6 @@ ENVD=/opt/backoffice/id3c-production/env.d
 #
 # Ingest SFS projects every hour, interleaving the projects so each get
 # ingested once every 6 hours. Keeping these in case any data corrections are made.
-# Ingest FHIR documents every 5 minutes, scheduled 3 minutes after each DET run.
 # The uw-retro REDCap project is still active, but it only needs to be run
 # once a day after the DET generation at 4 A.M.
 0 0-18/6 * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-uw-retrospectives pipenv run id3c etl redcap-det uw-retrospectives --commit
@@ -72,6 +71,11 @@ ENVD=/opt/backoffice/id3c-production/env.d
 0 2-20/6 * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-kiosk pipenv run id3c etl redcap-det kiosk --commit
 0 3-21/6 * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-swab-and-home-flu pipenv run id3c etl redcap-det swab-and-home-flu --commit
 0 4-22/6 * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-asymptomatic-swab-n-send pipenv run id3c etl redcap-det asymptomatic-swab-n-send --commit
+# Ingest SCAN REDCap projects every 5 minutes
+# Frequency per project will change as we add more languages
+5-55/5 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-en pipenv run id3c etl redcap-det scan-en --commit
+
+# Ingest FHIR documents every 5 minutes, scheduled 3 minutes after each DET run.
 3-58/5  * * * * ubuntu pipenv run id3c etl fhir --commit
 
 # Run the idle database session disconnector routine every minute
