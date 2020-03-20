@@ -1,0 +1,12 @@
+SHELL=/bin/bash
+PATH=/usr/local/bin:/usr/bin:/bin
+
+LOG_LEVEL=warning
+PGSERVICE=production-etl
+
+# Base of our env.d directories
+ENVD=/opt/backoffice/id3c-production/env.d
+
+
+# Export the latest, parsed SCAN return of results data to S3 for UW Lab Med's results portal
+35 * * * * ubuntu /opt/backoffice/bin/scan-return-of-results/workflow-scan-lab-med
