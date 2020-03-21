@@ -22,6 +22,8 @@ def parse_redcap(redcap_file) -> pd.DataFrame:
     redcap_data['pat_name'] = redcap_data.apply(participant_name, axis='columns')
     redcap_data = redcap_data.drop(columns=['participant_first_name', 'participant_last_name'])
 
+    redcap_data['qrcode'] = redcap_data['qrcode'].str.lower().str.strip()
+
     return redcap_data
 
 def edit_status_code(scan_data: pd.DataFrame) -> pd.DataFrame:
@@ -58,7 +60,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     redcap_data = parse_redcap(args.redcap_data)
+
     id3c_data = pd.read_csv(args.id3c_data)
+    id3c_data['qrcode'] = id3c_data['qrcode'].str.lower().str.strip()
 
     # We can't return results without participant info so keep all from redcap_data
     joined_data = redcap_data.merge(id3c_data, how='left', on='qrcode')
