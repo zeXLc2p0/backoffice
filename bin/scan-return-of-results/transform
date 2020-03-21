@@ -15,7 +15,7 @@ def parse_redcap(redcap_file) -> pd.DataFrame:
     Reads in data from a given *redcap_file*. Returns a pandas.DataFrame
     prepared in the specifications of UW Lab Med's return of results portal.
     """
-    redcap_data = pd.read_csv(redcap_file)
+    redcap_data = pd.read_csv(redcap_file, dtype = 'string')
     redcap_data = redcap_data.rename(columns={'return_utm_barcode': 'qrcode', 'birthday': 'birth_date'})
 
     participant_name = lambda row: f"{row['participant_first_name']} {row['participant_last_name']}"
@@ -61,7 +61,7 @@ if __name__ == '__main__':
 
     redcap_data = parse_redcap(args.redcap_data)
 
-    id3c_data = pd.read_csv(args.id3c_data)
+    id3c_data = pd.read_csv(args.id3c_data, dtype = 'string')
     id3c_data['qrcode'] = id3c_data['qrcode'].str.lower().str.strip()
 
     # We can't return results without participant info so keep all from redcap_data
