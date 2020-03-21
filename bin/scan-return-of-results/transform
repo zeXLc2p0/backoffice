@@ -50,8 +50,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description="Join a REDCAP export csv file with a SCAN return of results ID3C export csv file."
     )
-    parser.add_argument("redcap_data", help="REDCap records export csv")
-    parser.add_argument("id3c_data", help="SCAN return of results from ID3C export csv", nargs="?", default=sys.stdin)
+    parser.add_argument("redcap_data", help="CSV export of SCAN records from REDCap")
+    parser.add_argument("id3c_data", help="CSV export of SCAN return of results from ID3C")
     parser.add_argument("output", help="A destination for the output csv", nargs="?",
         default="s3://dokku-stack-phi/covid19/scan-study-inbound/scan_return_results.csv")
 

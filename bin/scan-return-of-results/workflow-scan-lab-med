@@ -26,25 +26,18 @@ main() {
     # Change to the ./bin/scan-return-of-results directory in the backoffice checkout
     cd "$(dirname "$0")"
 
-    local datadir="$(mktemp -d -t scan-return-of-results-XXXXXX)"
     local redcap_project_tokens=("$REDCAP_API_TOKEN_EN" "$REDCAP_API_TOKEN_ES")
-
-    # Always leave and delete this temporary directory regardless of exit code
-    trap "rm -rf '$datadir'" EXIT
-
-    export-redcap-data
-
-    ./transform "$datadir/redcap-export.csv" < <(./export-id3c-scan-return-results)
+    ./transform <(export-redcap-data) <(./export-id3c-scan-return-results)
 }
 
-# Exports data using all given REDCap project API tokens, appending to one csv
+# Exports data using all given REDCap project API tokens, output as one csv.
 export-redcap-data() {
     local redcap_fields="participant_first_name,participant_last_name,birthday,return_utm_barcode,contacted"
     # Create csv file with headers only
-    echo $redcap_fields > "$datadir/redcap-export.csv"
+    echo $redcap_fields
 
     for token in "$redcap_project_tokens"; do
-        ./export-redcap-scan "$redcap_fields" "$token" >> "$datadir/redcap-export.csv"
+        ./export-redcap-scan "$redcap_fields" "$token"
     done;
 }
 
