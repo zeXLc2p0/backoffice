@@ -81,7 +81,7 @@ main() {
 
         log "Filtering to non-login production roles which aren't internal to Pg or RDS"
 
-        production psql --quiet --no-align --tuples-only <<<"
+        production psql --quiet --no-psqlrc --no-align --tuples-only <<<"
             select rolname
               from pg_roles
              where not rolcanlogin
@@ -104,7 +104,7 @@ main() {
     createdb --encoding=UTF-8 "$PGDATABASE"
 
     log "Restoring filtered roles"
-    psql < production-roles-filtered.sql |& suppress-ignorable-errors
+    psql --no-psqlrc < production-roles-filtered.sql |& suppress-ignorable-errors
 
     log "Restoring database dump"
     pg_restore --dbname "$PGDATABASE" production.pgdb |& suppress-ignorable-errors || true
