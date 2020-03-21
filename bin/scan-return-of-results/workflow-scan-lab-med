@@ -36,7 +36,7 @@ export-redcap-data() {
     # Create csv file with headers only
     echo $redcap_fields
 
-    for token in "$redcap_project_tokens"; do
+    for token in "${redcap_project_tokens[@]}"; do
         ./export-redcap-scan "$redcap_fields" "$token"
     done;
 }
