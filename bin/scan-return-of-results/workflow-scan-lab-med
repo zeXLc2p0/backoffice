@@ -5,8 +5,7 @@
 # Joins REDCap SCAN data and the SCAN return of results view in ID3C. Parses
 # these data into a format appropriate for UW Lab Med's results portal.
 #
-# Resulting transformed csv is by default stored at:
-#    s3://dokku-stack-phi/covid19/scan-study-inbound/scan_return_results.csv
+# Resulting transformed csv is output to stdout.
 #
 set -euo pipefail
 

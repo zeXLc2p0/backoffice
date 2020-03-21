@@ -55,7 +55,7 @@ if __name__ == '__main__':
     parser.add_argument("redcap_data", help="CSV export of SCAN records from REDCap")
     parser.add_argument("id3c_data", help="CSV export of SCAN return of results from ID3C")
     parser.add_argument("output", help="A destination for the output csv", nargs="?",
-        default="s3://dokku-stack-phi/covid19/scan-study-inbound/scan_return_results.csv")
+        default=sys.stdout)
 
     args = parser.parse_args()
 
