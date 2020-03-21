@@ -7,7 +7,6 @@ portal.
 import sys
 import argparse
 import pandas as pd
-from pathlib import Path
 
 
 def parse_redcap(redcap_file) -> pd.DataFrame:
@@ -49,8 +48,6 @@ def edit_status_code(scan_data: pd.DataFrame) -> pd.DataFrame:
 
 
 if __name__ == '__main__':
-    base = Path(__file__).resolve().parent.parent
-
     parser = argparse.ArgumentParser(
         description="Join a REDCAP export csv file with a SCAN return of results ID3C export csv file."
     )
