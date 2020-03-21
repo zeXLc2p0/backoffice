@@ -37,6 +37,8 @@ def edit_status_code(scan_data: pd.DataFrame) -> pd.DataFrame:
     Returns the modified *scan_data*.
     """
     scan_data.loc[scan_data['status_code'].isnull(), 'status_code'] = 'never-tested'
+    # Assume a null value for `contacted` means not contacted
+    scan_data.loc[scan_data['contacted'].isnull(), 'contacted'] = 'no'
 
     is_positive = scan_data['status_code'] == 'positive'
     participant_contacted = scan_data['contacted'] == 'yes'
