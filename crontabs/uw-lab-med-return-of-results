@@ -9,4 +9,4 @@ ENVD=/opt/backoffice/id3c-production/env.d
 
 
 # Export the latest, parsed SCAN return of results data to S3 for UW Lab Med's results portal
-35 * * * * ubuntu /opt/backoffice/bin/scan-return-of-results/workflow-scan-lab-med | envdir $ENVD/securelink/ aws s3 cp - s3://dokku-stack-phi/covid19/scan-study-inbound/scan_return_results.csv
+35 * * * * ubuntu envdir $ENVD/redcap-scan/ /opt/backoffice/bin/scan-return-of-results/workflow-scan-lab-med | envdir $ENVD/securelink/ aws s3 cp - s3://dokku-stack-phi/covid19/scan-study-inbound/scan_return_results.csv
