@@ -25,17 +25,17 @@
         },
         "boto3": {
             "hashes": [
-                "sha256:5dd06fdc820da2d2efedb365345bc822755ba6e018ce46a2920ecda60ba48d22",
-                "sha256:9549cb07e0f2bd93be90fbf7e544de8e441e448decda8d72defceb1bd8b51686"
+                "sha256:934057d57331d1f9c969f186533e87f460e97d2127ca2fde0505a234ec9ad286",
+                "sha256:c998a5a8c6ec6ebb4f3fc6884faa0250e511dbc27fee555e422fe6023e0e73ac"
             ],
-            "version": "==1.12.24"
+            "version": "==1.12.26"
         },
         "botocore": {
             "hashes": [
-                "sha256:85f1c3f402925a1b896ff198b01cb55e34e7bd28f7ce5ff3450bcfe69376bddd",
-                "sha256:d27c2b800be3eb20dac1a539ddee268acdeb07f2abd3f326e2d88b528017e7ad"
+                "sha256:285bd8f8f2258628eb32994505570896c76bdd8f3c7828d2e7749739f9ba07a9",
+                "sha256:9a697a5e1fca536d68b13f99545a49f446db622c0c525f0d29609bb875ac0b7a"
             ],
-            "version": "==1.15.24"
+            "version": "==1.15.26"
         },
         "cachetools": {
             "hashes": [
@@ -141,14 +141,15 @@
         },
         "fsspec": {
             "hashes": [
-                "sha256:7a6d48af15b2416c5007706039e6d46d083c89229e7cdf6474b5ef5e7e687b00"
+                "sha256:7a6d48af15b2416c5007706039e6d46d083c89229e7cdf6474b5ef5e7e687b00",
+                "sha256:89b502e4bdf51bb3cb1698d1427ec07923fa9ee05e532672e0075e642e78134d"
             ],
             "version": "==0.6.3"
         },
         "id3c": {
             "editable": true,
             "git": "https://github.com/seattleflu/id3c.git",
-            "ref": "f98eced0d0c462c5f387a0672fc73d8732703e88"
+            "ref": "5955209b5511f094a0f17c754e2f2eb7364432b9"
         },
         "idna": {
             "hashes": [
@@ -381,7 +382,7 @@
         "seattleflu-id3c-customizations": {
             "editable": true,
             "git": "https://github.com/seattleflu/id3c-customizations.git",
-            "ref": "3fdacf6c0ba62174f470edfd7537d98b5b91fb4c"
+            "ref": "b4d8d054cacd431005ac58b3a9adbdb16c2a8c8d"
         },
         "six": {
             "hashes": [
