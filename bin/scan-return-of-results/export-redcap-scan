@@ -11,7 +11,7 @@ set -euo pipefail
 fields="participant_first_name,participant_last_name,birthday,return_utm_barcode,contacted"
 filters="[participant_first_name] != '' and [participant_last_name] != '' and [birthday] != '' and [return_utm_barcode] != ''"
 
-curl -H "Content-Type: application/x-www-form-urlencoded" \
+curl -fsSL -H "Content-Type: application/x-www-form-urlencoded" \
       -H "Accept: application/json" \
       -X POST \
       -d @<(echo "token=$REDCAP_API_TOKEN") \
