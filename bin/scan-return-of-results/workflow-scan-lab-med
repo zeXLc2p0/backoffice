@@ -26,19 +26,14 @@ main() {
     # Change to the ./bin/scan-return-of-results directory in the backoffice checkout
     cd "$(dirname "$0")"
 
-    local redcap_project_tokens=("$REDCAP_API_TOKEN_EN" "$REDCAP_API_TOKEN_ES")
     ./transform <(export-redcap-data) <(./export-id3c-scan-return-results)
 }
 
 # Exports data using all given REDCap project API tokens, output as one csv.
+# The first export keeps the header, all subsequent ones skip it.
 export-redcap-data() {
-    local redcap_fields="participant_first_name,participant_last_name,birthday,return_utm_barcode,contacted"
-    # Create csv file with headers only
-    echo $redcap_fields
-
-    for token in "${redcap_project_tokens[@]}"; do
-        REDCAP_API_TOKEN="$token" ./export-redcap-scan "$redcap_fields"
-    done;
+    REDCAP_API_TOKEN="$REDCAP_API_TOKEN_EN" ./export-redcap-scan
+    REDCAP_API_TOKEN="$REDCAP_API_TOKEN_ES" ./export-redcap-scan | tail -n +2
 }
 
 print-help() {

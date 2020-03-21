@@ -1,23 +1,17 @@
 #!/bin/bash
 # usage: export-redcap-scan
 #
-# Exports REDCap the given *fields* from all projects matching the given
-# *api_token*.
-#
-# Does not export field names (csv header).
+# Exports participant information from the SCAN REDCap projects as CSV.
 #
 set -euo pipefail
 
 : "${REDCAP_API_URL:?The REDCAP_API_URL environment variable is required.}"
 : "${REDCAP_API_TOKEN:?The REDCAP_API_TOKEN environment variable is required.}"
 
-fields="${1:?A comma-separated string of requested fields from REDCap is required as the first argument.}"
-
+fields="participant_first_name,participant_last_name,birthday,return_utm_barcode,contacted"
 filters="[participant_first_name] != '' and [participant_last_name] != '' and [birthday] != '' and [return_utm_barcode] != ''"
 
-# Retrieve specified REDCap data, removing csv header
-awk '{if (NR!=1) {print}}' < \
-<(curl -H "Content-Type: application/x-www-form-urlencoded" \
+curl -H "Content-Type: application/x-www-form-urlencoded" \
       -H "Accept: application/json" \
       -X POST \
       -d @<(echo "token=$REDCAP_API_TOKEN") \
@@ -28,4 +22,4 @@ awk '{if (NR!=1) {print}}' < \
       -d filterLogic="$filters" \
       -d exportDataAccessGroups=false \
       -d returnFormat=json \
-      "$REDCAP_API_URL")
+      "$REDCAP_API_URL"
