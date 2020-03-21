@@ -37,7 +37,7 @@ export-redcap-data() {
     echo $redcap_fields
 
     for token in "${redcap_project_tokens[@]}"; do
-        ./export-redcap-scan "$redcap_fields" "$token"
+        REDCAP_API_TOKEN="$token" ./export-redcap-scan "$redcap_fields"
     done;
 }
 
