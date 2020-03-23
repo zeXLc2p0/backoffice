@@ -15,12 +15,31 @@ def parse_redcap(redcap_file) -> pd.DataFrame:
     prepared in the specifications of UW Lab Med's return of results portal.
     """
     redcap_data = pd.read_csv(redcap_file, dtype = 'string')
-    redcap_data = redcap_data.rename(columns={'return_utm_barcode': 'qrcode', 'birthday': 'birth_date'})
+    redcap_data = redcap_data.rename(columns={'birthday': 'birth_date'})
 
     participant_name = lambda row: f"{row['participant_first_name']} {row['participant_last_name']}"
     redcap_data['pat_name'] = redcap_data.apply(participant_name, axis='columns')
 
-    redcap_data['qrcode'] = redcap_data['qrcode'].str.lower().str.strip()
+    # These invariants protect our data processing assumptions.  We may want to
+    # relax them in the future if data entry is more error-prone than expected.
+    # For example, if the two participant-entered barcodes don't match, we
+    # could nullify and ignore both of them instead of blowing up with an
+    # error.
+    assert all((redcap_data['pre_scan_barcode'] == redcap_data['return_utm_barcode']).dropna())
+    assert all((redcap_data['utm_tube_barcode_2'] == redcap_data['reenter_barcode']).dropna())
+
+    # Define a barcode field preference from most reliable to least reliable.
+    # It's important to allow all fields to be used because they are entered at
+    # different times in the participation process, and we'd like to return
+    # "not yet received" results to participants who have completed initial
+    # steps.
+    redcap_data['qrcode'] = (
+        redcap_data['return_utm_barcode']                   # Scanned during unboxing late in the process
+        .combine_first(redcap_data['pre_scan_barcode'])     # Scanned before shipping early in the process
+        .combine_first(redcap_data['utm_tube_barcode_2'])   # Entered manually by the participant, while self-swabbing
+        .str.lower()
+        .str.strip()
+    )
 
     return redcap_data[['qrcode', 'pat_name', 'birth_date', 'contacted']]
 

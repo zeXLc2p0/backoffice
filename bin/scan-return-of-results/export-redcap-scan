@@ -8,8 +8,8 @@ set -euo pipefail
 : "${REDCAP_API_URL:?The REDCAP_API_URL environment variable is required.}"
 : "${REDCAP_API_TOKEN:?The REDCAP_API_TOKEN environment variable is required.}"
 
-fields="participant_first_name,participant_last_name,birthday,return_utm_barcode,contacted"
-filters="[participant_first_name] != '' and [participant_last_name] != '' and [birthday] != '' and [return_utm_barcode] != ''"
+fields="participant_first_name,participant_last_name,birthday,pre_scan_barcode,utm_tube_barcode_2,reenter_barcode,return_utm_barcode,contacted"
+filters="[participant_first_name] != '' and [participant_last_name] != '' and [birthday] != ''"
 
 curl -fsSL -H "Content-Type: application/x-www-form-urlencoded" \
       -H "Accept: application/json" \
