@@ -1,0 +1,15 @@
+SHELL=/bin/bash
+PATH=/usr/local/bin:/usr/bin:/bin
+
+# Point Pipenv at the production environment
+PIPENV_PIPFILE=/opt/backoffice/id3c-production/Pipfile
+
+LOG_LEVEL=warning
+PGSERVICE=production-etl
+
+# Base of our env.d directories
+ENVD=/opt/backoffice/id3c-production/env.d
+
+
+# Export the latest, parsed SCAN return of results data to S3 for UW Lab Med's results portal
+35 * * * * ubuntu pipenv run envdir $ENVD/redcap-scan/ /opt/backoffice/bin/scan-return-of-results/workflow-scan-lab-med | envdir $ENVD/securelink/ aws s3 cp - s3://dokku-stack-phi/covid19/scan-study-inbound/scan_return_results.csv

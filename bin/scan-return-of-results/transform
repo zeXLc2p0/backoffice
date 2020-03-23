@@ -1,0 +1,84 @@
+#!/usr/bin/env python3
+"""
+Join the REDCap csv data with an ID3C csv.
+Parses the joined data to make it suitable for UW Lab Med's return of results
+portal.
+"""
+import sys
+import argparse
+import pandas as pd
+
+
+def parse_redcap(redcap_file) -> pd.DataFrame:
+    """
+    Reads in data from a given *redcap_file*. Returns a pandas.DataFrame
+    prepared in the specifications of UW Lab Med's return of results portal.
+    """
+    redcap_data = pd.read_csv(redcap_file, dtype = 'string')
+    redcap_data = redcap_data.rename(columns={'birthday': 'birth_date'})
+
+    participant_name = lambda row: f"{row['participant_first_name'].strip()} {row['participant_last_name'].strip()}"
+    redcap_data['pat_name'] = redcap_data.apply(participant_name, axis='columns')
+
+    # These invariants protect our data processing assumptions.  We may want to
+    # relax them in the future if data entry is more error-prone than expected.
+    # For example, if the two participant-entered barcodes don't match, we
+    # could nullify and ignore both of them instead of blowing up with an
+    # error.
+    assert all((redcap_data['pre_scan_barcode'] == redcap_data['return_utm_barcode']).dropna())
+    assert all((redcap_data['utm_tube_barcode_2'] == redcap_data['reenter_barcode']).dropna())
+
+    # Define a barcode field preference from most reliable to least reliable.
+    # It's important to allow all fields to be used because they are entered at
+    # different times in the participation process, and we'd like to return
+    # "not yet received" results to participants who have completed initial
+    # steps.
+    redcap_data['qrcode'] = (
+        redcap_data['return_utm_barcode']                   # Scanned during unboxing late in the process
+        .combine_first(redcap_data['pre_scan_barcode'])     # Scanned before shipping early in the process
+        .combine_first(redcap_data['utm_tube_barcode_2'])   # Entered manually by the participant, while self-swabbing
+        .str.lower()
+        .str.strip()
+    )
+
+    return redcap_data[['qrcode', 'pat_name', 'birth_date', 'contacted']]
+
+def edit_status_code(scan_data: pd.DataFrame) -> pd.DataFrame:
+    """
+    Sets the *scan_data* status to `pending` if a test result is `positive` but
+    the participant has not yet been contacted (`contacted` != 'yes').
+
+    Returns the modified *scan_data*.
+    """
+    # Assume a null value for `contacted` means not contacted
+    scan_data.loc[scan_data['contacted'].isnull(), 'contacted'] = 'no'
+
+    is_positive = scan_data['status_code'] == 'positive'
+    participant_contacted = scan_data['contacted'] == 'yes'
+
+    scan_data.loc[(is_positive) & ~(participant_contacted), 'status_code'] = 'pending'
+
+    return scan_data
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        description="Join a REDCAP export csv file with a SCAN return of results ID3C export csv file."
+    )
+    parser.add_argument("redcap_data", help="CSV export of SCAN records from REDCap")
+    parser.add_argument("id3c_data", help="CSV export of SCAN return of results from ID3C")
+    parser.add_argument("output", help="A destination for the output csv", nargs="?",
+        default=sys.stdout)
+
+    args = parser.parse_args()
+
+    redcap_data = parse_redcap(args.redcap_data)
+
+    id3c_data = pd.read_csv(args.id3c_data, dtype = 'string')
+    id3c_data['qrcode'] = id3c_data['qrcode'].str.lower().str.strip()
+
+    # We can't return results without participant info so keep all from redcap_data
+    joined_data = redcap_data.merge(id3c_data, how='inner', on='qrcode')
+    joined_data = edit_status_code(joined_data)
+
+    joined_data[['qrcode', 'pat_name', 'birth_date', 'collect_ts', 'status_code']].to_csv(args.output, index=False)
