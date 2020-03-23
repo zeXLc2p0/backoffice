@@ -19,11 +19,10 @@ def parse_redcap(redcap_file) -> pd.DataFrame:
 
     participant_name = lambda row: f"{row['participant_first_name']} {row['participant_last_name']}"
     redcap_data['pat_name'] = redcap_data.apply(participant_name, axis='columns')
-    redcap_data = redcap_data.drop(columns=['participant_first_name', 'participant_last_name'])
 
     redcap_data['qrcode'] = redcap_data['qrcode'].str.lower().str.strip()
 
-    return redcap_data
+    return redcap_data[['qrcode', 'pat_name', 'birth_date', 'contacted']]
 
 def edit_status_code(scan_data: pd.DataFrame) -> pd.DataFrame:
     """
