@@ -17,7 +17,7 @@ def parse_redcap(redcap_file) -> pd.DataFrame:
     redcap_data = pd.read_csv(redcap_file, dtype = 'string')
     redcap_data = redcap_data.rename(columns={'birthday': 'birth_date'})
 
-    participant_name = lambda row: f"{row['participant_first_name']} {row['participant_last_name']}"
+    participant_name = lambda row: f"{row['participant_first_name'].strip()} {row['participant_last_name'].strip()}"
     redcap_data['pat_name'] = redcap_data.apply(participant_name, axis='columns')
 
     # These invariants protect our data processing assumptions.  We may want to
