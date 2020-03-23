@@ -27,15 +27,11 @@ def parse_redcap(redcap_file) -> pd.DataFrame:
 
 def edit_status_code(scan_data: pd.DataFrame) -> pd.DataFrame:
     """
-    Sets the *scan_data* status to `never-tested` in the unlikely event that a
-    REDCap record's barcode is not found in ID3C.
-
     Sets the *scan_data* status to `pending` if a test result is `positive` but
     the participant has not yet been contacted (`contacted` != 'yes').
 
     Returns the modified *scan_data*.
     """
-    scan_data.loc[scan_data['status_code'].isnull(), 'status_code'] = 'never-tested'
     # Assume a null value for `contacted` means not contacted
     scan_data.loc[scan_data['contacted'].isnull(), 'contacted'] = 'no'
 
@@ -64,7 +60,7 @@ if __name__ == '__main__':
     id3c_data['qrcode'] = id3c_data['qrcode'].str.lower().str.strip()
 
     # We can't return results without participant info so keep all from redcap_data
-    joined_data = redcap_data.merge(id3c_data, how='left', on='qrcode')
+    joined_data = redcap_data.merge(id3c_data, how='inner', on='qrcode')
     joined_data = edit_status_code(joined_data)
 
     joined_data.to_csv(args.output, index=False)
