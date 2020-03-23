@@ -81,4 +81,4 @@ if __name__ == '__main__':
     joined_data = redcap_data.merge(id3c_data, how='inner', on='qrcode')
     joined_data = edit_status_code(joined_data)
 
-    joined_data.to_csv(args.output, index=False)
+    joined_data[['qrcode', 'pat_name', 'birth_date', 'collect_ts', 'status_code']].to_csv(args.output, index=False)
