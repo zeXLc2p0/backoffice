@@ -11,7 +11,6 @@ set -euo pipefail
 
 : "${REDCAP_API_URL:?The REDCAP_API_URL environment variable is required.}"
 : "${REDCAP_API_TOKEN_EN:?The REDCAP_API_TOKEN_EN environment variable is required.}"
-: "${REDCAP_API_TOKEN_ES:?The REDCAP_API_TOKEN_ES environment variable is required.}"
 
 main() {
     for arg; do
@@ -32,7 +31,6 @@ main() {
 # The first export keeps the header, all subsequent ones skip it.
 export-redcap-data() {
     REDCAP_API_TOKEN="$REDCAP_API_TOKEN_EN" ./export-redcap-scan
-    REDCAP_API_TOKEN="$REDCAP_API_TOKEN_ES" ./export-redcap-scan | tail -n +2
 }
 
 print-help() {
