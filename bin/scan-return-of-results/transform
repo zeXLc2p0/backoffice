@@ -20,6 +20,9 @@ def parse_redcap(redcap_file) -> pd.DataFrame:
     participant_name = lambda row: f"{row['participant_first_name'].strip()} {row['participant_last_name'].strip()}"
     redcap_data['pat_name'] = redcap_data.apply(participant_name, axis='columns')
 
+    for col in ['return_utm_barcode', 'pre_scan_barcode', 'utm_tube_barcode_2', 'reenter_barcode']:
+        redcap_data[col] = normalize_barcode(redcap_data[col])
+
     # These invariants protect our data processing assumptions.  We may want to
     # relax them in the future if data entry is more error-prone than expected.
     # For example, if the two participant-entered barcodes don't match, we
@@ -37,11 +40,14 @@ def parse_redcap(redcap_file) -> pd.DataFrame:
         redcap_data['return_utm_barcode']                   # Scanned during unboxing late in the process
         .combine_first(redcap_data['pre_scan_barcode'])     # Scanned before shipping early in the process
         .combine_first(redcap_data['utm_tube_barcode_2'])   # Entered manually by the participant, while self-swabbing
-        .str.lower()
-        .str.strip()
     )
 
     return redcap_data[['qrcode', 'pat_name', 'birth_date', 'contacted']]
+
+
+def normalize_barcode(barcode):
+    return barcode.str.lower().str.strip()
+
 
 def edit_status_code(scan_data: pd.DataFrame) -> pd.DataFrame:
     """
@@ -75,7 +81,7 @@ if __name__ == '__main__':
     redcap_data = parse_redcap(args.redcap_data)
 
     id3c_data = pd.read_csv(args.id3c_data, dtype = 'string')
-    id3c_data['qrcode'] = id3c_data['qrcode'].str.lower().str.strip()
+    id3c_data['qrcode'] = normalize_barcode(id3c_data['qrcode'])
 
     # We can't return results without participant info so keep all from redcap_data
     joined_data = redcap_data.merge(id3c_data, how='inner', on='qrcode')
