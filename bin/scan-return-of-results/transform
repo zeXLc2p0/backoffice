@@ -47,7 +47,7 @@ def parse_redcap(redcap_file) -> pd.DataFrame:
 
 
 def normalize_barcode(barcode):
-    return barcode.str.lower().str.strip()
+    return barcode.str.upper().str.strip()
 
 
 def edit_status_code(scan_data: pd.DataFrame) -> pd.DataFrame:
