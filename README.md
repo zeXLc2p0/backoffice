@@ -3,7 +3,6 @@
 Services:
 
   * [ID3C production environment](id3c-production/README.md)
-  * [ID3C restricted environment](id3c-restricted/README.md)
   * [ID3C testing environment](id3c-testing/README.md)
   * [Metabase](metabase/README.md)
   * [Lab Labels](lab-labels/README.md)
