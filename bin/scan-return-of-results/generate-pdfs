@@ -1,0 +1,19 @@
+#!/bin/bash
+set -euo pipefail
+
+: "${S3_PREFIX:=s3://dokku-stack-phi/covid19/scan-study-inbound}"
+
+params="${1:-$S3_PREFIX/scan_return_results.csv}"
+output="${2:-$S3_PREFIX/{qrcode\}-{birth_date\}-en.pdf}"
+
+docker run \
+    --rm \
+    --interactive \
+    --env=AWS_ACCESS_KEY_ID \
+    --env=AWS_SECRET_ACCESS_KEY \
+    seattleflu/lab-result-reports:build-4 \
+        fill-template \
+            --template scan/report-en.tex \
+            --params "$params" \
+            --output "$output" \
+            --filter 'status_code not in ["not-received", "pending"]'
