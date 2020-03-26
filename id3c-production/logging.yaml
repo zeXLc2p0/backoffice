@@ -39,7 +39,7 @@ filters:
     name: id3c.cli.command.etl.presence_absence
     levelname: WARNING
     msg:
-      pattern: Skipping results for sample without a known identifier «.+?_(Plasmid|PBS|Xeno|Water|NWGC_CONTROL)»
+      pattern: Skipping results for sample without a known identifier «(.+?_(Plasmid|PBS|Xeno|Water|NWGC_CONTROL|HAP1)|Water_Control|PTC_.+?)»
 
   unknown sample warnings for controls from id3c.db.find_identifier:
     (): id3c.logging.filters.suppress_records_matching
@@ -47,7 +47,7 @@ filters:
     funcName: find_identifier
     levelname: WARNING
     msg:
-      pattern: No identifier found for barcode «.+?_(Plasmid|PBS|Xeno|Water|NWGC_CONTROL)»
+      pattern: No identifier found for barcode «(.+?_(Plasmid|PBS|Xeno|Water|NWGC_CONTROL|HAP1)|Water_Control|PTC_.+?)»
 
 handlers:
   console:
