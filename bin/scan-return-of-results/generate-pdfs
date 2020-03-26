@@ -1,10 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
-: "${S3_PREFIX:=s3://dokku-stack-phi/covid19/scan-study-inbound}"
-
-params="${1:-$S3_PREFIX/scan_return_results.csv}"
-output="${2:-$S3_PREFIX/{qrcode\}-{birth_date\}-en.pdf}"
+params="${1:-s3://dokku-stack-phi/covid19/scan-study-inbound/scan_return_results.csv}"
+output="${2:-s3://dokku-stack-phi/covid19/results-scan-study/{qrcode\}-{birth_date\}-en.pdf}"
 
 docker run \
     --rm \
