@@ -14,4 +14,5 @@ docker run \
             --template scan/report-en.tex \
             --params "$params" \
             --output "$output" \
-            --filter 'status_code not in ["not-received", "pending"]'
+            --filter 'status_code not in ["not-received", "pending"]' \
+            --workers 1
