@@ -9,10 +9,9 @@ docker run \
     --interactive \
     --env=AWS_ACCESS_KEY_ID \
     --env=AWS_SECRET_ACCESS_KEY \
-    seattleflu/lab-result-reports:build-4 \
+    seattleflu/lab-result-reports:build-6 \
         fill-template \
             --template scan/report-en.tex \
             --params "$params" \
             --output "$output" \
-            --filter 'status_code not in ["not-received", "pending"]' \
-            --workers 1
+            --filter 'status_code not in ["not-received", "pending"]'
