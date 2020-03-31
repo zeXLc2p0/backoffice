@@ -64,8 +64,9 @@ def normalize_barcode(barcode):
 
 def edit_status_code(scan_data: pd.DataFrame) -> pd.DataFrame:
     """
-    Sets the *scan_data* status to `pending` if a test result is `positive` but
-    the participant has not yet been contacted (`contacted` != 'yes').
+    Sets the *scan_data* status to `pending` if a test result is `positive` or
+    `inconclusive` but the participant has not yet been contacted
+    (`contacted` != 'yes').
 
     Returns the modified *scan_data*.
     """
@@ -73,9 +74,11 @@ def edit_status_code(scan_data: pd.DataFrame) -> pd.DataFrame:
     scan_data.loc[scan_data['contacted'].isnull(), 'contacted'] = 'no'
 
     is_positive = scan_data['status_code'] == 'positive'
+    is_inconclusive = scan_data['status_code'] == 'inconclusive'
+
     participant_contacted = scan_data['contacted'] == 'yes'
 
-    scan_data.loc[(is_positive) & ~(participant_contacted), 'status_code'] = 'pending'
+    scan_data.loc[(is_positive | is_inconclusive) & ~(participant_contacted), 'status_code'] = 'pending'
 
     return scan_data
 
