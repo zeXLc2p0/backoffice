@@ -360,15 +360,15 @@
         },
         "s3fs": {
             "hashes": [
-                "sha256:3955eaeadcc3f6535a748e6cabcf03014133a792847796314e8bc6823a9ff58d",
-                "sha256:3972e7edf5f02960a043928e155cc15616c6dee3b5a3083ad331c621d96ff673"
+                "sha256:2ca5de8dc18ad7ad350c0bd01aef0406aa5d0fff78a561f0f710f9d9858abdd0",
+                "sha256:91c1dfb45e5217bd441a7a560946fe865ced6225ff7eb0fb459fe6e601a95ed3"
             ],
-            "version": "==0.4.1"
+            "version": "==0.4.2"
         },
         "seattleflu-id3c-customizations": {
             "editable": true,
             "git": "https://github.com/seattleflu/id3c-customizations.git",
-            "ref": "df5f88bbed243112d1e5414a17b6ce82f3d21b7c"
+            "ref": "f6a06a1b5c0ea637adb48490dc25e059da988526"
         },
         "six": {
             "hashes": [
