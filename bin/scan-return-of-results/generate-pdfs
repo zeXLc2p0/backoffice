@@ -9,7 +9,7 @@ docker run \
     --interactive \
     --env=AWS_ACCESS_KEY_ID \
     --env=AWS_SECRET_ACCESS_KEY \
-    seattleflu/lab-result-reports:build-6 \
+    seattleflu/lab-result-reports:build-7 \
         fill-template \
             --template scan/report-en.tex \
             --params "$params" \
