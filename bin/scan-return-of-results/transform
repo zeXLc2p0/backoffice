@@ -39,6 +39,7 @@ def parse_redcap(redcap_file) -> pd.DataFrame:
     redcap_data.loc[redcap_data['record_id'] == '1003', 'pre_scan_barcode'] = pd.NA
     redcap_data.loc[redcap_data['record_id'] == '1004', 'pre_scan_barcode'] = pd.NA
     redcap_data.loc[redcap_data['record_id'] == '1098', 'pre_scan_barcode'] = pd.NA
+    redcap_data.loc[redcap_data['record_id'] == '1539', 'pre_scan_barcode'] = pd.NA
     redcap_data.loc[redcap_data['record_id'] == '1897', 'pre_scan_barcode'] = pd.NA
 
     assert all(redcap_data['birth_date'].str.match(r"^\d{4}-\d{2}-\d{2}$").dropna())
