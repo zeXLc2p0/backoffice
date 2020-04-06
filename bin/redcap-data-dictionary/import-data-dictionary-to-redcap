@@ -165,17 +165,17 @@ if __name__ == '__main__':
     )
 
     parser.add_argument("--field-names",
-        metavar="<field_names.xlsx>",
-        help="An Excel file containing all REDCap project field names "
+        metavar="<field_names.csv>",
+        help="An CSV file containing all REDCap project field names "
              "that need the HTML attributes. "
-             "Assumes the Excel file only contains one column of all field names.")
+             "Assumes the CSV file only contains one column of all field names.")
 
     parser.add_argument("--html-attributes",
         nargs="+",
         metavar="<attribute>:<value>",
         help="HTML <attribute> and <value> to add to span tag around: "
            "`section_header`, `field_label`, `select_choices_or_calculations` "
-           "and `field_note` for the provided <field-names.xlsx>")
+           "and `field_note` for the provided <field-names.csv>")
 
     parser.add_argument("--export-output",
         metavar="<data-dictionary.json>",
@@ -193,7 +193,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    field_names = pd.read_excel(args.field_names, header=None) \
+    field_names = pd.read_csv(args.field_names, header=None) \
                     .applymap(lambda x: x.strip().lower()) \
                     .iloc[:,0].tolist()
 
