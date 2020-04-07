@@ -20,46 +20,25 @@ def parse_redcap(redcap_file) -> pd.DataFrame:
     participant_name = lambda row: f"{row['participant_first_name'].strip()} {row['participant_last_name'].strip()}"
     redcap_data['pat_name'] = redcap_data.apply(participant_name, axis='columns')
 
-    for col in ['return_utm_barcode', 'pre_scan_barcode', 'utm_tube_barcode_2', 'reenter_barcode']:
-        redcap_data[col] = normalize_barcode(redcap_data[col])
-
-    # These invariants protect our data processing assumptions.  We may want to
-    # relax them in the future if data entry is more error-prone than expected.
-    # For example, if the two participant-entered barcodes don't match, we
-    # could nullify and ignore both of them instead of blowing up with an
-    # error.
-    #
-    # Known errors are masked, for now at least.
-    redcap_data.loc[redcap_data['record_id'] == '210', 'pre_scan_barcode'] = pd.NA
-    redcap_data.loc[redcap_data['record_id'] == '408', 'pre_scan_barcode'] = pd.NA
-    redcap_data.loc[redcap_data['record_id'] == '499', 'pre_scan_barcode'] = pd.NA
-    redcap_data.loc[redcap_data['record_id'] == '833', 'reenter_barcode'] = pd.NA
-    redcap_data.loc[redcap_data['record_id'] == '860', 'reenter_barcode'] = pd.NA
-    redcap_data.loc[redcap_data['record_id'] == '934', 'pre_scan_barcode'] = pd.NA
-    redcap_data.loc[redcap_data['record_id'] == '1003', 'pre_scan_barcode'] = pd.NA
-    redcap_data.loc[redcap_data['record_id'] == '1004', 'pre_scan_barcode'] = pd.NA
-    redcap_data.loc[redcap_data['record_id'] == '1098', 'pre_scan_barcode'] = pd.NA
-    redcap_data.loc[redcap_data['record_id'] == '1539', 'pre_scan_barcode'] = pd.NA
-    redcap_data.loc[redcap_data['record_id'] == '1897', 'pre_scan_barcode'] = pd.NA
-    redcap_data.loc[redcap_data['record_id'] == '1975', 'reenter_barcode'] = pd.NA
-    redcap_data.loc[redcap_data['record_id'] == '2020', 'utm_tube_barcode_2'] = pd.NA
-    redcap_data.loc[redcap_data['record_id'] == '2020', 'reenter_barcode'] = pd.NA
-    redcap_data.loc[redcap_data['record_id'] == '2315', 'pre_scan_barcode'] = pd.NA
-
+    # This invariant protects our filename assumptions.
     assert all(redcap_data['birth_date'].str.match(r"^\d{4}-\d{2}-\d{2}$").dropna())
-    assert all((redcap_data['pre_scan_barcode'] == redcap_data['return_utm_barcode']).dropna())
-    assert all((redcap_data['utm_tube_barcode_2'] == redcap_data['reenter_barcode']).dropna())
 
-    # Define a barcode field preference from most reliable to least reliable.
-    # It's important to allow all fields to be used because they are entered at
-    # different times in the participation process, and we'd like to return
-    # "not yet received" results to participants who have completed initial
-    # steps.
-    redcap_data['qrcode'] = (
-        redcap_data['return_utm_barcode']                   # Scanned during unboxing late in the process
-        .combine_first(redcap_data['pre_scan_barcode'])     # Scanned before shipping early in the process
-        .combine_first(redcap_data['utm_tube_barcode_2'])   # Entered manually by the participant, while self-swabbing
-    )
+    # Only use the barcode scanned during unboxing, which is input only after
+    # confirming identity.
+    barcodes = normalize_barcode(redcap_data['return_utm_barcode'])
+
+    # There should be absolutely no duplicates, but REDCap can't enforce this,
+    # so warn and drop any that we find.
+    dups = barcodes.loc[barcodes.duplicated(keep = False)].dropna()
+
+    if not dups.empty:
+        barcodes.drop(dups.index, inplace = True)
+
+        dups_count = len(dups)
+        dups_unique = list(dups.unique())
+        print(f"Dropped {dups_count:,} REDCap records with duplicated barcodes: {dups_unique}", file = sys.stderr)
+
+    redcap_data['qrcode'] = barcodes
 
     return redcap_data[['qrcode', 'pat_name', 'birth_date', 'contacted']]
 
