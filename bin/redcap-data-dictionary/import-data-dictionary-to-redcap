@@ -59,7 +59,6 @@ def add_html_attr(data_dictionary: List[Dict[str,str]],
         if field['field_name'] not in field_names:
             continue
         else:
-
             for key in single_value_keys:
                 field[key] = add_tag_to_value(open_span_tag, field[key], close_span_tag)
 
