@@ -205,4 +205,4 @@ if __name__ == '__main__':
                                         args.new_output)
 
     if args.import_to_redcap:
-        import_data_dictionary(data_dictionary)
+        import_data_dictionary(new_data_dictionary)
