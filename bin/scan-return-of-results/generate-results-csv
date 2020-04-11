@@ -1,6 +1,6 @@
 #!/bin/bash
-# usage: workflow-scan-lab-med
-#        workflow-scan-lab-med --help
+# usage: generate-results-csv
+#        generate-results-csv --help
 #
 # Joins REDCap SCAN data and the SCAN return of results view in ID3C. Parses
 # these data into a format appropriate for UW Lab Med's results portal.
