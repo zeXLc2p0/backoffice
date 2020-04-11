@@ -1,0 +1,8 @@
+#!/bin/bash
+set -euo pipefail
+
+bin="$(dirname "$0")"
+results="${1:-s3://dokku-stack-phi/covid19/scan-study-inbound/scan_return_results.csv}"
+
+"$bin"/generate-results-csv | aws s3 cp - "$results"
+"$bin"/generate-pdfs "$results"
