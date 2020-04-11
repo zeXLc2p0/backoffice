@@ -13,30 +13,11 @@ use for projects in Development status.'
     * REDCAP_API_TOKEN
 
 """
-import os
 import argparse
-import requests
 import json
 import pandas as pd
-from typing import Dict, List, Any
-
-
-def export_data_dictionary(output: str) -> List[Dict[str, str]]:
-    """
-    Export data dictionary from REDCap project indicated by the environment
-    variables REDCAP_API_URL and REDCAP_API_TOKEN.
-
-    Data dictionary will print to stdout by default or to *output* if provided.
-    """
-    data_dictionary = post_to_redcap('metadata')
-
-    if output:
-        with open(output, 'w') as outfile:
-            json.dump(data_dictionary, outfile, indent=4)
-    else:
-        print(json.dumps(data_dictionary))
-
-    return data_dictionary
+from typing import Dict, List
+from post_to_redcap import post_to_redcap
 
 
 def add_html_attr(data_dictionary: List[Dict[str,str]],
@@ -130,31 +111,6 @@ def import_data_dictionary(data_dictionary: List[Dict[str,str]]):
     post_to_redcap('metadata', parameters)
 
 
-def post_to_redcap(content: str, parameters: Dict[str,str] = {}) -> Any:
-    """
-    POST request to the REDCap API to export or import REDCap *content*.
-    Requires environment variables REDCAP_API_URL and REDCAP_API_TOKEN.
-    """
-    api_url = os.environ['REDCAP_API_URL']
-    api_token = os.environ['REDCAP_API_TOKEN']
-
-    headers = {
-        'Content-type': 'application/x-www-form-urlencoded',
-        'Accept': 'application/json'
-    }
-
-    data = {
-        **parameters,
-        'content': content,
-        'token': api_token,
-        'format': 'json',
-    }
-
-    response = requests.post(api_url, data=data, headers=headers)
-    response.raise_for_status()
-
-    return response.json()
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -175,12 +131,11 @@ if __name__ == '__main__':
            "`section_header`, `field_label`, `select_choices_or_calculations` "
            "and `field_note` for the provided <field-names.csv>")
 
-    parser.add_argument("--export-output",
-        metavar="<data-dictionary.json>",
-        help="A destination for the exported data dictionary. "
-             "Prints to stdout by default.")
+    parser.add_argument("--exported-data-dictionary",
+        metavar="<exported-data-dictionary.json>",
+        help="An exported data dictionary from REDCap to transform.")
 
-    parser.add_argument("--new-output",
+    parser.add_argument("--output",
         metavar="<new-data-dictionary.json>",
         help="A destination for the new data dictionary containing the HTML tags. "
              "Prints to stdout by default.")
@@ -195,12 +150,14 @@ if __name__ == '__main__':
                     .applymap(lambda x: x.strip().lower()) \
                     .iloc[:,0].tolist()
 
-    data_dictionary = export_data_dictionary(args.export_output)
+    with open(args.exported_data_dictionary) as f:
+        file = f.read()
+        data_dictionary = json.loads(file)
 
     new_data_dictionary = add_html_attr(data_dictionary,
                                         field_names,
                                         args.html_attributes,
-                                        args.new_output)
+                                        args.output)
 
     if args.import_to_redcap:
         import_data_dictionary(new_data_dictionary)
