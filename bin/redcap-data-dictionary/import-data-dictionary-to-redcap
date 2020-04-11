@@ -14,7 +14,6 @@ use for projects in Development status.'
 
 """
 import os
-import sys
 import argparse
 import requests
 import json
