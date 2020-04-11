@@ -2,8 +2,10 @@
 import os
 import json
 import requests
+import logging
 from typing import Any, Dict
 
+logging.basicConfig(level=logging.INFO)
 
 def post_to_redcap(content: str, parameters: Dict[str,str] = {}) -> Any:
     """
@@ -23,9 +25,11 @@ def post_to_redcap(content: str, parameters: Dict[str,str] = {}) -> Any:
         'content': content,
         'token': api_token,
         'format': 'json',
+        'returnFormat': 'json',
     }
 
     response = requests.post(api_url, data=data, headers=headers)
+    logging.info(json.dumps(response.json()))
     response.raise_for_status()
 
     return response.json()
