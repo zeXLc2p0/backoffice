@@ -9,7 +9,7 @@ docker run \
     --interactive \
     --env=AWS_ACCESS_KEY_ID \
     --env=AWS_SECRET_ACCESS_KEY \
-    --env=LOG_LEVEL=warning \
+    --env=LOG_LEVEL \
     seattleflu/lab-result-reports:build-8 \
         fill-template \
             --template scan/report-en.tex \
