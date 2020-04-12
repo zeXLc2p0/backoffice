@@ -17,7 +17,11 @@ import argparse
 import json
 import pandas as pd
 from typing import Dict, List
+from pathlib import Path
 from post_to_redcap import post_to_redcap
+
+
+base = Path(__file__).resolve().parent
 
 
 def add_html_attr(data_dictionary: List[Dict[str,str]],
@@ -120,18 +124,21 @@ if __name__ == '__main__':
 
     parser.add_argument("--field-names",
         metavar="<field_names.csv>",
+        default=base / 'field_names_for_html_tags.csv',
         help="An CSV file containing all REDCap project field names "
              "that need the HTML attributes. "
              "Assumes the CSV file only contains one column of all field names.")
 
     parser.add_argument("--html-attributes",
         nargs="+",
+        required=True,
         metavar="<attribute>:<value>",
         help="HTML <attribute> and <value> to add to span tag around: "
            "`section_header`, `field_label`, `select_choices_or_calculations` "
            "and `field_note` for the provided <field-names.csv>")
 
     parser.add_argument("--exported-data-dictionary",
+        required=True,
         metavar="<exported-data-dictionary.json>",
         help="An exported data dictionary from REDCap to transform.")
 
