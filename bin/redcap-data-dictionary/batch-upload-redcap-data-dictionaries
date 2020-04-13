@@ -1,0 +1,23 @@
+#!/bin/bash
+# usage: batch-upload-redcap-data-dictionaries
+#
+set -euo pipefail
+
+: "${REDCAP_API_URL:?The REDCAP_API_URL environment variable is required.}"
+: "${REDCAP_API_TOKEN_TEST:?The REDCAP_API_TOKEN_TEST environment variable is required.}"
+
+# Change to the ./bin/redcap-data-dictionary directory in the backoffice checkout
+cd "$(dirname "$0")"
+
+# Uploads new data dictionaries using all given REDCap project API tokens.
+upload-language-data-dictionary() {
+    # Test example with Urdu language, right-to-left text direction
+    REDCAP_API_TOKEN="$REDCAP_API_TOKEN_TEST" \
+        ./upload-data-dictionary \
+            --html-attribute lang:ur dir:rtl \
+            --import-to-redcap \
+            --exported-data-dictionary <(REDCAP_API_TOKEN="$REDCAP_API_TOKEN_EN" ./download-data-dictionary) \
+            --output "./data-dictionary-test.json"
+}
+
+upload-language-data-dictionary
