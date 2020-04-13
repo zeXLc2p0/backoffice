@@ -5,7 +5,8 @@ import requests
 import logging
 from typing import Any, Dict
 
-logging.basicConfig(level=logging.INFO)
+LOG_LEVEL = os.environ.get('LOG_LEVEL')
+logging.basicConfig(level=logging.DEBUG if LOG_LEVEL == 'debug' else logging.INFO)
 
 def post_to_redcap(content: str, parameters: Dict[str,str] = {}) -> Any:
     """
@@ -29,7 +30,7 @@ def post_to_redcap(content: str, parameters: Dict[str,str] = {}) -> Any:
     }
 
     response = requests.post(api_url, data=data, headers=headers)
-    logging.info(json.dumps(response.json()))
+    logging.debug(json.dumps(response.json()))
     response.raise_for_status()
 
     return response.json()
