@@ -51,7 +51,7 @@ def add_html_attr(data_dictionary: List[Dict[str,str]],
 
     if output:
         with open(output, 'w') as outfile:
-            json.dump(data_dictionary, outfile, indent=4)
+            json.dump(data_dictionary, outfile)
     else:
         print(json.dumps(data_dictionary))
 
