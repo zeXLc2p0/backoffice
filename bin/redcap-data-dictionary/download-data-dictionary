@@ -1,0 +1,48 @@
+#!/usr/bin/env python3
+"""
+Export data dictionary from a REDCap project.
+
+\b
+    This requires two environment variables:
+    * REDCAP_API_URL
+    * REDCAP_API_TOKEN
+
+"""
+import json
+import argparse
+from typing import List, Dict
+from post_to_redcap import post_to_redcap
+
+
+def export_data_dictionary(output: str) -> List[Dict[str, str]]:
+    """
+    Export data dictionary from REDCap project indicated by the environment
+    variables REDCAP_API_URL and REDCAP_API_TOKEN.
+
+    Data dictionary will print to stdout by default or to *output* if provided.
+    """
+    data_dictionary = post_to_redcap('metadata')
+
+    if output:
+        with open(output, 'w') as outfile:
+            json.dump(data_dictionary, outfile)
+    else:
+        print(json.dumps(data_dictionary))
+
+    return data_dictionary
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        description= __doc__,
+        formatter_class=argparse.RawTextHelpFormatter
+    )
+
+    parser.add_argument("--output",
+        metavar="<data-dictionary.json>",
+        help="A destination for the exported data dictionary. "
+             "Prints to stdout by default.")
+
+    args = parser.parse_args()
+
+    export_data_dictionary(args.output)

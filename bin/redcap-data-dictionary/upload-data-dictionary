@@ -1,0 +1,170 @@
+#!/usr/bin/env python3
+"""
+Export data dictionary from a REDCap project, inject HTML tags into field
+values, and import new data dictionary into REDCap project.
+
+Warning from REDCap API Documentation:
+'Because of this method's destructive nature, it is only available for
+use for projects in Development status.'
+
+\b
+    This requires two environment variables:
+    * REDCAP_API_URL
+    * REDCAP_API_TOKEN
+
+"""
+import argparse
+import json
+import pandas as pd
+from typing import Dict, List
+from pathlib import Path
+from post_to_redcap import post_to_redcap
+
+
+base = Path(__file__).resolve().parent
+
+
+def add_html_attr(data_dictionary: List[Dict[str,str]],
+                  field_names: List[str],
+                  html_attributes: List[str],
+                  output: str) -> List[Dict[str,str]]:
+    """
+    Add provided *html_attributes* to span tag around all values of
+    `section_header`,`field_label`, `select_choices_or_calculations`,
+    `field_note` for fields listed in *field_names*.
+
+    The new data dictionary is output to stdout or provided *output*.
+    """
+    open_span_tag = create_span_tag(html_attributes)
+    close_span_tag = "</span>"
+
+    single_value_keys = ['section_header', 'field_label', 'field_note']
+    for field in data_dictionary:
+        if field['field_name'] not in field_names:
+            continue
+        else:
+            for key in single_value_keys:
+                field[key] = add_tag_to_value(open_span_tag, field[key], close_span_tag)
+
+            field['select_choices_or_calculations'] = add_tags_to_choice_values(
+                open_span_tag, field['select_choices_or_calculations'], close_span_tag)
+
+    if output:
+        with open(output, 'w') as outfile:
+            json.dump(data_dictionary, outfile)
+    else:
+        print(json.dumps(data_dictionary))
+
+    return data_dictionary
+
+
+def create_span_tag(html_attributes: tuple) -> str:
+    """
+    Create span tag containing the attribute=value pairs in the provided
+    *html_attributes*
+    """
+    attribute_string = ""
+    for attr, value in [arg.split(":", 1) for arg in html_attributes]:
+        attribute_string += f' {attr}=\"{value}\"'
+
+    return f"<span{attribute_string}>"
+
+
+def add_tag_to_value(open_tag: str, value: str, close_tag: str) -> str:
+    """
+    Add *open_tag* and *close_tag* around a given *value* if it doesn't
+    already have a span tag around it.
+    """
+    if not value or value.strip().startswith("<span"):
+        return value
+
+    return f"{open_tag}{value}{close_tag}"
+
+
+def add_tags_to_choice_values(open_tag: str, choice_values: str, close_tag: str) -> str:
+    """
+    Add *open_tag* and *close_tag* around values listed within a single string
+    of *choice_values* returned by the REDCap API in the
+    `select_choices_or_calculations` field
+
+    Expects *choice_values* to have this structure:
+    'choice1, choice1_display | choice2, choice2_display | choice3, choice3_display'
+    """
+    if not choice_values:
+        return choice_values
+
+    new_choices = ""
+    choices = choice_values.split('|')
+
+    for code, answer in [choice.split(",", 1) for choice in choices]:
+        tagged_answer = add_tag_to_value(open_tag, answer, close_tag)
+        new_choices += f"{code}, {tagged_answer} |"
+
+    return new_choices.rstrip("|")
+
+
+def import_data_dictionary(data_dictionary: List[Dict[str,str]]):
+    """
+    Import data dictionary to REDCap project indicated by the environment
+    variables REDCAP_API_URL and REDCAP_API_TOKEN.
+    """
+    parameters = {
+        'data': json.dumps(data_dictionary)
+    }
+
+    post_to_redcap('metadata', parameters)
+
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        description= __doc__,
+        formatter_class=argparse.RawTextHelpFormatter
+    )
+
+    parser.add_argument("--field-names",
+        metavar="<field_names.csv>",
+        default=base / 'field_names_for_html_tags.csv',
+        help="An CSV file containing all REDCap project field names "
+             "that need the HTML attributes. "
+             "Assumes the CSV file only contains one column of all field names.")
+
+    parser.add_argument("--html-attributes",
+        nargs="+",
+        required=True,
+        metavar="<attribute>:<value>",
+        help="HTML <attribute> and <value> to add to span tag around: "
+           "`section_header`, `field_label`, `select_choices_or_calculations` "
+           "and `field_note` for the provided <field-names.csv>")
+
+    parser.add_argument("--exported-data-dictionary",
+        required=True,
+        metavar="<exported-data-dictionary.json>",
+        help="An exported data dictionary from REDCap to transform.")
+
+    parser.add_argument("--output",
+        metavar="<new-data-dictionary.json>",
+        help="A destination for the new data dictionary containing the HTML tags. "
+             "Prints to stdout by default.")
+
+    parser.add_argument("--import-to-redcap",
+        action="store_true",
+        help="Import new data dictionary to REDCap project.")
+
+    args = parser.parse_args()
+
+    field_names = pd.read_csv(args.field_names, header=None) \
+                    .applymap(lambda x: x.strip().lower()) \
+                    .iloc[:,0].tolist()
+
+    with open(args.exported_data_dictionary) as f:
+        file = f.read()
+        data_dictionary = json.loads(file)
+
+    new_data_dictionary = add_html_attr(data_dictionary,
+                                        field_names,
+                                        args.html_attributes,
+                                        args.output)
+
+    if args.import_to_redcap:
+        import_data_dictionary(new_data_dictionary)
