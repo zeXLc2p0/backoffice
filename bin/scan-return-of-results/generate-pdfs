@@ -2,10 +2,10 @@
 set -euo pipefail
 
 params="${1:-s3://dokku-stack-phi/covid19/scan-study-inbound/scan_return_results.csv}"
+output="${2:-s3://dokku-stack-phi/covid19/results-scan-study/{qrcode\}-{birth_date\}}"
 
 for lang in "en" "es" "vi" "zh-Hans"; do
     echo "Generating PDFs for language code «$lang»"
-    output="${2:-s3://dokku-stack-phi/covid19/results-scan-study/{qrcode\}-{birth_date\}-$lang.pdf}"
 
     docker run \
         --rm \
@@ -17,6 +17,6 @@ for lang in "en" "es" "vi" "zh-Hans"; do
             fill-template \
                 --template "scan/report-$lang.tex" \
                 --params "$params" \
-                --output "$output" \
+                --output "$output-$lang.pdf" \
                 --filter 'status_code not in ["not-received", "pending"]'
 done;
