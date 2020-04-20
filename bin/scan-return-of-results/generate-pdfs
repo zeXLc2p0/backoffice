@@ -5,7 +5,7 @@ params="${1:-s3://dokku-stack-phi/covid19/scan-study-inbound/scan_return_results
 output="${2:-s3://dokku-stack-phi/covid19/results-scan-study/{qrcode\}-{birth_date\}}"
 
 for lang in "en" "es" "vi" "zh-Hans"; do
-    echo "Generating PDFs for language code «$lang»"
+    echo "Generating PDFs for language code «${lang}»"
 
     docker run \
         --rm \
