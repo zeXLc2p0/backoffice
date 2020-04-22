@@ -13,7 +13,7 @@ for lang in "en" "es" "vi" "zh-Hans"; do
         --env=AWS_ACCESS_KEY_ID \
         --env=AWS_SECRET_ACCESS_KEY \
         --env=LOG_LEVEL \
-        seattleflu/lab-result-reports:build-9 \
+        seattleflu/lab-result-reports:build-10 \
             fill-template \
                 --template "scan/report-$lang.tex" \
                 --params "$params" \
