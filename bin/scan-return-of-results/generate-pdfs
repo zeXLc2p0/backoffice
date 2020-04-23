@@ -8,7 +8,7 @@ for lang in "en" "es" "vi" "zh-Hans"; do
     echo "Generating PDFs for language code «${lang}»"
 
     docker run \
-        --rm \
+        --rm --volume $PWD:/cwd:ro \
         --interactive \
         --env=AWS_ACCESS_KEY_ID \
         --env=AWS_SECRET_ACCESS_KEY \
@@ -16,7 +16,7 @@ for lang in "en" "es" "vi" "zh-Hans"; do
         seattleflu/lab-result-reports:build-10 \
             fill-template \
                 --template "scan/report-$lang.tex" \
-                --params "$params" \
+                --params "/cwd/$params" \
                 --output "$output-$lang.pdf" \
                 --filter 'status_code not in ["not-received", "pending"]'
 done;
