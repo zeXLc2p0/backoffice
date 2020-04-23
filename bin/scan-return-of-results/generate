@@ -24,6 +24,16 @@ results="${1:-s3://dokku-stack-phi/covid19/scan-study-inbound/scan_return_result
 latest_results="${2:-}"
 
 main() {
+    for arg; do
+        case "$arg" in
+            -h|--help)
+                print-help
+                exit
+                ;;
+            *)
+        esac
+    done
+
     datadir="$(mktemp -d -t -p "$base" scan-return-results-XXXXXX)"
 
     # Always leave and delete this temporary directory regardless of exit code
@@ -60,5 +70,12 @@ main() {
     fi
 }
 
+print-help() {
+    # Print the help comments at the top of this file ($0)
+    perl -MEnglish -ne '
+        s/^# ?// or exit;
+        print if $INPUT_LINE_NUMBER >= 2;
+    ' "$0"
+}
 
 main "$@"
