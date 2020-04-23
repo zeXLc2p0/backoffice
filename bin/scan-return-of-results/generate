@@ -58,7 +58,10 @@ main() {
     # Construct a CSV containing the first row (column names) of the results file
     # and new or changed rows from the previous version
     head -n 1 "$datadir/latest_results.csv" > "$datadir/diff.csv"
-    grep -vf "$datadir/previous_results.csv" "$datadir/latest_results.csv" >> "$datadir/diff.csv"
+    comm -13 \
+        <(tail -n +2 "$datadir/previous_results.csv" | sort) \
+        <(tail -n +2 "$datadir/latest_results.csv" | sort) \
+        >> "$datadir/diff.csv"
 
 
     "$bin"/generate-pdfs "$datadir/diff.csv"
