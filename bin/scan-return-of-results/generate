@@ -1,8 +1,58 @@
 #!/bin/bash
+# usage: ./bin/generate [results] [latest_results]
+#
+# Updates the Securelink S3 results CSV and generates PDFs for new or changed
+# results.
+#
+# *results* and *latest_results* are local or S3 filenames of CSVs exported by
+# the `./generate-results-csv` script.
+#
+# If *results* is not provided, defaults to reading from the remote results CSV
+# at the Securelink S3 bucket.
+#
+# If *latest_results* is not provided, generates these data on the fly using
+# live data from ID3C and REDCap.
+#
 set -euo pipefail
 
 bin="$(dirname "$0")"
-results="${1:-s3://dokku-stack-phi/covid19/scan-study-inbound/scan_return_results.csv}"
 
-"$bin"/generate-results-csv | aws s3 cp - "$results"
-"$bin"/generate-pdfs "$results"
+# Relative path to our containing repo, accessible by our Docker container
+base="$(dirname "$0")/../.."
+
+results="${1:-s3://dokku-stack-phi/covid19/scan-study-inbound/scan_return_results.csv}"
+latest_results="${2:-}"
+datadir="$(mktemp -d -t -p "$base" scan-return-results-XXXXXX)"
+
+# Always leave and delete this temporary directory regardless of exit code
+trap "rm -rf '$datadir'" EXIT
+
+# Copy the existing results file into the temp directory accessible by Docker
+if [[ "$results" == "s3://"* ]]; then
+    echo "Copying S3 results for comparison"
+    aws s3 cp "$results" "$datadir/previous_results.csv"
+else
+    echo "Copying local results for comparison"
+    cp "$results" "$datadir/previous_results.csv"
+fi
+
+# If latest results not provided, generate them now
+if [[ -z "$latest_results" ]]; then
+    "$bin"/generate-results-csv > "$datadir/latest_results.csv"
+else
+    cp "$latest_results" "$datadir/latest_results.csv"
+fi
+
+# Construct a CSV containing the first row (column names) of the results file
+# and new or changed rows from the previous version
+head -n 1 "$datadir/previous_results.csv" > "$datadir/diff.csv"
+grep -vf "$datadir/previous_results.csv" "$datadir/latest_results.csv" >> "$datadir/diff.csv"
+
+
+"$bin"/generate-pdfs "$datadir/diff.csv"
+
+
+# Upload latest results to S3
+if [[ "$results" == "s3://"* ]]; then
+    aws s3 cp "$datadir/latest_results.csv" "$results"
+fi
