@@ -1,16 +1,16 @@
 #!/bin/bash
-# usage: ./bin/generate [results] [latest_results]
+# usage: ./bin/generate [<results>] [<latest_results>]
 #
 # Updates the Securelink S3 results CSV and generates PDFs for new or changed
 # results.
 #
-# *results* and *latest_results* are local or S3 filenames of CSVs exported by
+# <results> and <latest_results> are local or S3 filenames of CSVs exported by
 # the `./generate-results-csv` script.
 #
-# If *results* is not provided, defaults to reading from the remote results CSV
+# If <results> is not provided, defaults to reading from the remote results CSV
 # at the Securelink S3 bucket.
 #
-# If *latest_results* is not provided, generates these data on the fly using
+# If <latest_results> is not provided, generates these data on the fly using
 # live data from ID3C and REDCap.
 #
 set -euo pipefail
