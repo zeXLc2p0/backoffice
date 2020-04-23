@@ -22,37 +22,43 @@ base="$(dirname "$0")/../.."
 
 results="${1:-s3://dokku-stack-phi/covid19/scan-study-inbound/scan_return_results.csv}"
 latest_results="${2:-}"
-datadir="$(mktemp -d -t -p "$base" scan-return-results-XXXXXX)"
 
-# Always leave and delete this temporary directory regardless of exit code
-trap "rm -rf '$datadir'" EXIT
+main() {
+    datadir="$(mktemp -d -t -p "$base" scan-return-results-XXXXXX)"
 
-# Copy the existing results file into the temp directory accessible by Docker
-if [[ "$results" == "s3://"* ]]; then
-    echo "Copying S3 results for comparison"
-    aws s3 cp "$results" "$datadir/previous_results.csv"
-else
-    echo "Copying local results for comparison"
-    cp "$results" "$datadir/previous_results.csv"
-fi
+    # Always leave and delete this temporary directory regardless of exit code
+    trap "rm -rf '$datadir'" EXIT
 
-# If latest results not provided, generate them now
-if [[ -z "$latest_results" ]]; then
-    "$bin"/generate-results-csv > "$datadir/latest_results.csv"
-else
-    cp "$latest_results" "$datadir/latest_results.csv"
-fi
+    # Copy the existing results file into the temp directory accessible by Docker
+    if [[ "$results" == "s3://"* ]]; then
+        echo "Copying S3 results for comparison"
+        aws s3 cp "$results" "$datadir/previous_results.csv"
+    else
+        echo "Copying local results for comparison"
+        cp "$results" "$datadir/previous_results.csv"
+    fi
 
-# Construct a CSV containing the first row (column names) of the results file
-# and new or changed rows from the previous version
-head -n 1 "$datadir/previous_results.csv" > "$datadir/diff.csv"
-grep -vf "$datadir/previous_results.csv" "$datadir/latest_results.csv" >> "$datadir/diff.csv"
+    # If latest results not provided, generate them now
+    if [[ -z "$latest_results" ]]; then
+        "$bin"/generate-results-csv > "$datadir/latest_results.csv"
+    else
+        cp "$latest_results" "$datadir/latest_results.csv"
+    fi
+
+    # Construct a CSV containing the first row (column names) of the results file
+    # and new or changed rows from the previous version
+    head -n 1 "$datadir/previous_results.csv" > "$datadir/diff.csv"
+    grep -vf "$datadir/previous_results.csv" "$datadir/latest_results.csv" >> "$datadir/diff.csv"
 
 
-"$bin"/generate-pdfs "$datadir/diff.csv"
+    "$bin"/generate-pdfs "$datadir/diff.csv"
 
 
-# Upload latest results to S3
-if [[ "$results" == "s3://"* ]]; then
-    aws s3 cp "$datadir/latest_results.csv" "$results"
-fi
+    # Upload latest results to S3
+    if [[ "$results" == "s3://"* ]]; then
+        aws s3 cp "$datadir/latest_results.csv" "$results"
+    fi
+}
+
+
+main "$@"
