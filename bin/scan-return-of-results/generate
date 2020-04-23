@@ -57,7 +57,7 @@ main() {
 
     # Construct a CSV containing the first row (column names) of the results file
     # and new or changed rows from the previous version
-    head -n 1 "$datadir/previous_results.csv" > "$datadir/diff.csv"
+    head -n 1 "$datadir/latest_results.csv" > "$datadir/diff.csv"
     grep -vf "$datadir/previous_results.csv" "$datadir/latest_results.csv" >> "$datadir/diff.csv"
 
 
