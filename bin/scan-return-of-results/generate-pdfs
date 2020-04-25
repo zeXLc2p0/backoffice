@@ -6,7 +6,7 @@ main() {
     local output="${2:-s3://dokku-stack-phi/covid19/results-scan-study/{qrcode\}-{birth_date\}}"
 
     for lang in "en" "es" "vi" "zh-Hans"; do
-        echo "Generating PDFs for language code «${lang}»"
+        debug "Generating PDFs for language code «${lang}»"
 
         docker run \
             --rm --volume $PWD:/cwd:ro \
@@ -21,6 +21,12 @@ main() {
                     --output "$output-$lang.pdf" \
                     --filter 'status_code not in ["not-received", "pending"]'
     done;
+}
+
+debug() {
+    if [[ "${LOG_LEVEL:-debug}" == debug ]]; then
+        echo "$@" >&2
+    fi
 }
 
 main "$@"
