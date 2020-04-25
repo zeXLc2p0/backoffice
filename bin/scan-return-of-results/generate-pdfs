@@ -1,22 +1,26 @@
 #!/bin/bash
 set -euo pipefail
 
-params="${1:-s3://dokku-stack-phi/covid19/scan-study-inbound/scan_return_results.csv}"
-output="${2:-s3://dokku-stack-phi/covid19/results-scan-study/{qrcode\}-{birth_date\}}"
+main() {
+    local params="${1:-s3://dokku-stack-phi/covid19/scan-study-inbound/scan_return_results.csv}"
+    local output="${2:-s3://dokku-stack-phi/covid19/results-scan-study/{qrcode\}-{birth_date\}}"
 
-for lang in "en" "es" "vi" "zh-Hans"; do
-    echo "Generating PDFs for language code «${lang}»"
+    for lang in "en" "es" "vi" "zh-Hans"; do
+        echo "Generating PDFs for language code «${lang}»"
 
-    docker run \
-        --rm --volume $PWD:/cwd:ro \
-        --interactive \
-        --env=AWS_ACCESS_KEY_ID \
-        --env=AWS_SECRET_ACCESS_KEY \
-        --env=LOG_LEVEL \
-        seattleflu/lab-result-reports:build-10 \
-            fill-template \
-                --template "scan/report-$lang.tex" \
-                --params "/cwd/$params" \
-                --output "$output-$lang.pdf" \
-                --filter 'status_code not in ["not-received", "pending"]'
-done;
+        docker run \
+            --rm --volume $PWD:/cwd:ro \
+            --interactive \
+            --env=AWS_ACCESS_KEY_ID \
+            --env=AWS_SECRET_ACCESS_KEY \
+            --env=LOG_LEVEL \
+            seattleflu/lab-result-reports:build-10 \
+                fill-template \
+                    --template "scan/report-$lang.tex" \
+                    --params "/cwd/$params" \
+                    --output "$output-$lang.pdf" \
+                    --filter 'status_code not in ["not-received", "pending"]'
+    done;
+}
+
+main "$@"
