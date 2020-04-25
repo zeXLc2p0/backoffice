@@ -17,7 +17,7 @@ main() {
             seattleflu/lab-result-reports:build-10 \
                 fill-template \
                     --template "scan/report-$lang.tex" \
-                    --params "/cwd/$params" \
+                    --params "$params" \
                     --output "$output-$lang.pdf" \
                     --filter 'status_code not in ["not-received", "pending"]'
     done;
