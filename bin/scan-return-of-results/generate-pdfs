@@ -1,22 +1,64 @@
 #!/bin/bash
 set -euo pipefail
 
-params="${1:-s3://dokku-stack-phi/covid19/scan-study-inbound/scan_return_results.csv}"
-output="${2:-s3://dokku-stack-phi/covid19/results-scan-study/{qrcode\}-{birth_date\}}"
+main() {
+    local params="${1:-s3://dokku-stack-phi/covid19/scan-study-inbound/scan_return_results.csv}"
+    local output="${2:-s3://dokku-stack-phi/covid19/results-scan-study/{qrcode\}-{birth_date\}}"
+    local -a mounts
 
-for lang in "en" "es" "vi" "zh-Hans"; do
-    echo "Generating PDFs for language code «${lang}»"
+    debug "params = $params"
+    debug "output = $output"
+    debug
 
-    docker run \
-        --rm \
-        --interactive \
-        --env=AWS_ACCESS_KEY_ID \
-        --env=AWS_SECRET_ACCESS_KEY \
-        --env=LOG_LEVEL \
-        seattleflu/lab-result-reports:build-10 \
-            fill-template \
-                --template "scan/report-$lang.tex" \
-                --params "$params" \
-                --output "$output-$lang.pdf" \
-                --filter 'status_code not in ["not-received", "pending"]'
-done;
+    if [[ "$params" != *://* ]]; then
+        host_path="$(realpath "$params")"
+        container_path="/input/$(basename "$params")"
+        mounts+=("--mount=type=bind,src=$host_path,dst=$container_path,ro=true")
+        params="$container_path"
+    fi
+
+    if [[ "$output" != *://* ]]; then
+        host_dirname="$(realpath "$(dirname "$output")")"
+        mounts+=("--mount=type=bind,src=$host_dirname,dst=/output,ro=false")
+        output="/output/$(basename "$output")"
+    fi
+
+    if [[ ${#mounts[@]} -ne 0 ]]; then
+        debug "Mounts"
+        for mount in "${mounts[@]}"; do
+            debug "  $mount"
+        done
+        debug
+
+        debug "params = $params"
+        debug "output = $output"
+        debug
+    fi
+
+    for lang in "en" "es" "vi" "zh-Hans"; do
+        debug "Generating PDFs for language code «${lang}»"
+
+        docker run \
+            --rm \
+            --interactive \
+            --env=AWS_ACCESS_KEY_ID \
+            --env=AWS_SECRET_ACCESS_KEY \
+            --env=LOG_LEVEL \
+            --user "$(id -u):$(id -g)" \
+            "${mounts[@]}" \
+            seattleflu/lab-result-reports:build-10 \
+                fill-template \
+                    --template "scan/report-$lang.tex" \
+                    --params "$params" \
+                    --output "$output-$lang.pdf" \
+                    --filter 'status_code not in ["not-received", "pending"]'
+    done;
+}
+
+debug() {
+    if [[ "${LOG_LEVEL:-debug}" == debug ]]; then
+        echo "$@" >&2
+    fi
+}
+
+main "$@"
