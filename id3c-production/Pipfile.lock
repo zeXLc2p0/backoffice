@@ -25,10 +25,10 @@
         },
         "botocore": {
             "hashes": [
-                "sha256:6c6e9db7a6e420431794faee111923e4627b4920d4d9d8b16e1a578a389b2283",
-                "sha256:cceeb6d2a1bbbd062ab54552ded5065a12b14e845aa35613fc91fd68312020c0"
+                "sha256:ef4fa3055421cb95a7bf559e715f8c5f656aca30fafef070eca21b13ca3f0f81",
+                "sha256:f3569216d2f0067a34608e26ae1d0035b84fa29ad68d6c5fd26124a4cc86e8c9"
             ],
-            "version": "==1.15.47"
+            "version": "==1.15.48"
         },
         "cachetools": {
             "hashes": [
@@ -53,10 +53,10 @@
         },
         "click": {
             "hashes": [
-                "sha256:8a18b4ea89d8820c5d0c7da8a64b2c324b4dabb695804dbfea19b9be9d88c0cc",
-                "sha256:e345d143d80bf5ee7534056164e5e112ea5e22716bbb1ce727941f4c8b471b9a"
+                "sha256:d2b5255c7c6349bc1bd1e59e08cd12acbbd63ce649f2588755783aa94dfb6b1a",
+                "sha256:dacca89f4bfadd5de3d7489b7c8a566eee0d3676333fbb50030263894c38c0dc"
             ],
-            "version": "==7.1.1"
+            "version": "==7.1.2"
         },
         "click-plugins": {
             "hashes": [
@@ -304,10 +304,10 @@
         },
         "pytz": {
             "hashes": [
-                "sha256:1c557d7d0e871de1f5ccd5833f60fb2550652da6be2693c1e02300743d21500d",
-                "sha256:b02c06db6cf09c12dd25137e563b31700d3b80fcc4ad23abb7a315f2789819be"
+                "sha256:a494d53b6d39c3c6e44c3bec237336e14305e4f29bbf800b599253057fbb79ed",
+                "sha256:c35965d010ce31b23eeb663ed3cc8c906275d6be1a34393a1d73a41febf4a048"
             ],
-            "version": "==2019.3"
+            "version": "==2020.1"
         },
         "pyyaml": {
             "hashes": [
@@ -368,7 +368,7 @@
         "seattleflu-id3c-customizations": {
             "editable": true,
             "git": "https://github.com/seattleflu/id3c-customizations.git",
-            "ref": "c4f5e83783e0fa3f88793e92765efb8013e336c9"
+            "ref": "6d7f2103b69051fddaef7d77d007c8c21228b8e3"
         },
         "six": {
             "hashes": [
