@@ -75,12 +75,16 @@ ENVD=/opt/backoffice/id3c-production/env.d
 0 2-20/6 * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-kiosk pipenv run id3c etl redcap-det kiosk --commit
 0 3-21/6 * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-swab-and-home-flu pipenv run id3c etl redcap-det swab-and-home-flu --commit
 0 4-22/6 * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-asymptomatic-swab-n-send pipenv run id3c etl redcap-det asymptomatic-swab-n-send --commit
-# Ingest SCAN REDCap projects every 5 minutes
-# Frequency per project will change as we add more languages
-5-55/5 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-en pipenv run id3c etl redcap-det scan-en --commit
 
-# Ingest FHIR documents every 5 minutes, scheduled 3 minutes after each DET run.
-3-58/5  * * * * ubuntu pipenv run id3c etl fhir --commit
+# Ingest each SCAN REDCap project every 30 min, 2 min apart (with the first
+# starting 5 min after the SFS ingests above).
+5,35 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-en pipenv run id3c etl redcap-det scan-en --commit
+7,37 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-es pipenv run id3c etl redcap-det scan-es --commit
+9,39 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-vi pipenv run id3c etl redcap-det scan-vi --commit
+11,41 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-zh-Hans pipenv run id3c etl redcap-det scan-zh-Hans --commit
+
+# Ingest FHIR documents every 5 minutes.
+*/5  * * * * ubuntu pipenv run id3c etl fhir --commit
 
 # Run the idle database session disconnector routine every minute
 * * * * * ubuntu /opt/backoffice/bin/terminate-idle-sessions
