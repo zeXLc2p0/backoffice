@@ -10,7 +10,6 @@
 set -euo pipefail
 
 : "${REDCAP_API_URL:?The REDCAP_API_URL environment variable is required.}"
-: "${REDCAP_API_TOKEN_EN:?The REDCAP_API_TOKEN_EN environment variable is required.}"
 
 main() {
     for arg; do
