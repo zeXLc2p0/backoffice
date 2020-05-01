@@ -63,6 +63,8 @@ main() {
         <(tail -n +2 "$datadir/latest_results.csv" | sort) \
         >> "$datadir/diff.csv"
 
+    debug "$(wc -l "$datadir/diff.csv") new or changed rows"
+
 
     "$bin"/generate-pdfs "$datadir/diff.csv"
 
