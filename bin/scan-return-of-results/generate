@@ -71,7 +71,7 @@ main() {
 
     # Upload latest results to S3
     if [[ "$results" == "s3://"* ]]; then
-        aws s3 cp "$datadir/latest_results.csv" "$results"
+        aws s3 cp --quiet "$datadir/latest_results.csv" "$results"
     fi
 }
 
