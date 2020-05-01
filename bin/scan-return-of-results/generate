@@ -41,10 +41,10 @@ main() {
 
     # Copy the existing results file into the temp directory accessible by Docker
     if [[ "$results" == "s3://"* ]]; then
-        echo "Copying S3 results for comparison"
-        aws s3 cp "$results" "$datadir/previous_results.csv"
+        debug "Copying S3 results for comparison"
+        aws s3 cp --quiet "$results" "$datadir/previous_results.csv"
     else
-        echo "Copying local results for comparison"
+        debug "Copying local results for comparison"
         cp "$results" "$datadir/previous_results.csv"
     fi
 
@@ -79,6 +79,12 @@ print-help() {
         s/^# ?// or exit;
         print if $INPUT_LINE_NUMBER >= 2;
     ' "$0"
+}
+
+debug() {
+    if [[ "${LOG_LEVEL:-debug}" == debug ]]; then
+        echo "$@" >&2
+    fi
 }
 
 main "$@"
