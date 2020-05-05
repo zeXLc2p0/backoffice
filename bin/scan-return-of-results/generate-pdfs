@@ -5,6 +5,7 @@ main() {
     local params="${1:-s3://dokku-stack-phi/covid19/scan-study-inbound/scan_return_results.csv}"
     local output="${2:-s3://dokku-stack-phi/covid19/results-scan-study/{qrcode\}-{birth_date\}}"
     local -a mounts
+    mounts=()
 
     debug "params = $params"
     debug "output = $output"
