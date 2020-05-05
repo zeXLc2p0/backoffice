@@ -1,5 +1,5 @@
 #!/bin/bash
-# usage: generate-amazon-addresses [<s3 output url>]
+# usage: generate-amazon-addresses [<s3 output url>] [<aws profile name>]
 #
 # Exports the Amazon Care Outgoing Report from SCAN REDCap project and uploads
 # to Amazon S3 bucket.
@@ -20,8 +20,9 @@ main() {
     done
 
     local addresses="${1:-s3://698378617677-prod-or-uwscan-intake/intake/sample.csv}"
+    local profile="${2:-amazon-care-fulfillment}"
 
-    export-redcap-data | aws s3 cp - "$addresses" --acl bucket-owner-full-control --quiet
+    export-redcap-data | aws s3 cp - "$addresses" --acl bucket-owner-full-control --profile "$profile" --quiet
 }
 
 # Exports reports using all given REDCap project API tokens, output as one csv.
