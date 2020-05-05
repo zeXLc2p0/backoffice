@@ -35,7 +35,7 @@ main() {
         debug
     fi
 
-    for lang in "en" "es" "vi" "zh-Hans"; do
+    for lang in "en" "es" "vi" "zh-Hans" "zh-Hant"; do
         debug "Generating PDFs for language code «${lang}»"
 
         docker run \
@@ -46,7 +46,7 @@ main() {
             --env=LOG_LEVEL \
             --user "$(id -u):$(id -g)" \
             "${mounts[@]}" \
-            seattleflu/lab-result-reports:build-10 \
+            seattleflu/lab-result-reports:build-14 \
                 fill-template \
                     --template "scan/report-$lang.tex" \
                     --params "$params" \
