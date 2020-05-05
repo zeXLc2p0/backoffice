@@ -47,7 +47,7 @@ main() {
             --env=LOG_LEVEL \
             --user "$(id -u):$(id -g)" \
             "${mounts[@]}" \
-            seattleflu/lab-result-reports:build-14 \
+            seattleflu/lab-result-reports:build-15 \
                 fill-template \
                     --template "scan/report-$lang.tex" \
                     --params "$params" \
