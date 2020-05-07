@@ -83,6 +83,9 @@ ENVD=/opt/backoffice/id3c-production/env.d
 9,39 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-vi pipenv run id3c etl redcap-det scan-vi --commit
 11,41 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-zh-Hans pipenv run id3c etl redcap-det scan-zh-Hans --commit
 13,43 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-zh-Hant pipenv run id3c etl redcap-det scan-zh-Hant --commit
+15,45 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-so pipenv run id3c etl redcap-det scan-so --commit
+17,47 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-ko pipenv run id3c etl redcap-det scan-ko --commit
+19,49 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-ru pipenv run id3c etl redcap-det scan-ru --commit
 
 # Ingest FHIR documents every 5 minutes.
 */5  * * * * ubuntu pipenv run id3c etl fhir --commit
