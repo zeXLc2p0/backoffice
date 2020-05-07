@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-: "${SCAN_LANGS:=en es vi zh-Hans zh-Hant}"
+: "${SCAN_LANGS:=en es vi zh-Hans zh-Hant so ko ru}"
 
 main() {
     local params="${1:-s3://dokku-stack-phi/covid19/scan-study-inbound/scan_return_results.csv}"
@@ -50,7 +50,7 @@ main() {
             --env=LOG_LEVEL \
             --user "$(id -u):$(id -g)" \
             "${mounts[@]}" \
-            seattleflu/lab-result-reports:build-16 \
+            seattleflu/lab-result-reports:build-17 \
                 fill-template \
                     --template "scan/report-$lang.tex" \
                     --params "$params" \
