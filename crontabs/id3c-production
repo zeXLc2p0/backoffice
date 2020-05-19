@@ -94,3 +94,6 @@ ENVD=/opt/backoffice/id3c-production/env.d
 * * * * * ubuntu /opt/backoffice/bin/terminate-idle-sessions
 # Run the old metabase session disconnector routine every minute
 * * * * * ubuntu /opt/backoffice/bin/terminate-old-metabase-sessions
+# Run the refresh materialized view routine every 5 minutes include latest
+# ingested FHIR documents in the view
+*/5 * * * * ubuntu pipenv run id3c refresh-materialized-view shipping fhir_questionnaire_responses_v1 --commit
