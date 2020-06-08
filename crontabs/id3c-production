@@ -67,25 +67,24 @@ ENVD=/opt/backoffice/id3c-production/env.d
 # conditions) once locking is done by ID3C directly.
 #
 # Ingest SFS projects every hour, interleaving the projects so each get
-# ingested once every 6 hours. Keeping these in case any data corrections are made.
+# ingested once every 8 hours. Keeping these in case any data corrections are made.
 # The uw-retro REDCap project is still active, but it only needs to be run
 # once a day after the DET generation at 4 A.M.
-0 0-18/6 * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-uw-retrospectives pipenv run id3c etl redcap-det uw-retrospectives --commit
-0 1-19/6 * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-swab-n-send pipenv run id3c etl redcap-det swab-n-send --commit
-0 2-20/6 * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-kiosk pipenv run id3c etl redcap-det kiosk --commit
-0 3-21/6 * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-swab-and-home-flu pipenv run id3c etl redcap-det swab-and-home-flu --commit
-0 4-22/6 * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-asymptomatic-swab-n-send pipenv run id3c etl redcap-det asymptomatic-swab-n-send --commit
+0 0-16/8 * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-uw-retrospectives pipenv run id3c etl redcap-det uw-retrospectives --commit
+0 1-17/8 * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-swab-n-send pipenv run id3c etl redcap-det swab-n-send --commit
+0 2-18/8 * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-kiosk pipenv run id3c etl redcap-det kiosk --commit
+0 3-19/8 * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-swab-and-home-flu pipenv run id3c etl redcap-det swab-and-home-flu --commit
+0 4-20/8 * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-asymptomatic-swab-n-send pipenv run id3c etl redcap-det asymptomatic-swab-n-send --commit
 
-# Ingest each SCAN REDCap project every 30 min, 2 min apart (with the first
-# starting 5 min after the SFS ingests above).
-5,35 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-en pipenv run id3c etl redcap-det scan-en --commit
-7,37 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-es pipenv run id3c etl redcap-det scan-es --commit
-9,39 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-vi pipenv run id3c etl redcap-det scan-vi --commit
-11,41 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-zh-Hans pipenv run id3c etl redcap-det scan-zh-Hans --commit
-13,43 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-zh-Hant pipenv run id3c etl redcap-det scan-zh-Hant --commit
-15,45 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-so pipenv run id3c etl redcap-det scan-so --commit
-17,47 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-ko pipenv run id3c etl redcap-det scan-ko --commit
-19,49 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-ru pipenv run id3c etl redcap-det scan-ru --commit
+# Ingest each SCAN Surveillance REDCap project every hour, interleaving the
+# projects so each gets ingested once every 8 hours.
+# These projects are no longer active since we've transitioned to the
+# SCAN Research Study. Keeping these in case any data corrects are made.
+# Deleted jobs for Surveillance REDCap projects that did not have any records
+# as of 08 June, 2020.
+0 5-21/8 * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-en pipenv run id3c etl redcap-det scan-en --commit
+0 6-22/8 * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-es pipenv run id3c etl redcap-det scan-es --commit
+0 7-23/8 * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-zh-Hant pipenv run id3c etl redcap-det scan-zh-Hant --commit
 
 # Ingest FHIR documents every 5 minutes.
 */5  * * * * ubuntu pipenv run id3c etl fhir --commit
