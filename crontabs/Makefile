@@ -4,7 +4,8 @@ crontabs := \
 	id3c-production \
 	website-science-map \
 	scan-return-of-results \
-	scan-amazon-addresses
+	scan-amazon-addresses \
+	scan-switchboard
 
 install: $(crontabs:%=/etc/cron.d/backoffice-%)
 
