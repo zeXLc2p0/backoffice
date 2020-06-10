@@ -9,4 +9,4 @@ ENVD=/opt/backoffice/id3c-production/env.d
 
 
 # Refresh the SCAN Switchboard SQLite database every minute
-* * * * * ubuntu chronic envdir $ENVD/redcap-scan/ make -BC /opt/scan-switchboard
+* * * * * ubuntu chronic envdir $ENVD/redcap-scan/ pipenv run make -BC /opt/scan-switchboard
