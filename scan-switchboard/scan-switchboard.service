@@ -1,0 +1,14 @@
+[Unit]
+Description=SCAN Switchboard
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/scan-switchboard
+User=nobody
+Environment="PIPENV_VENV_IN_PROJECT=1"
+ExecStart=/usr/local/bin/pipenv run ./bin/serve
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=default.target
