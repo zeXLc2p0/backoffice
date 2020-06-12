@@ -11,5 +11,5 @@ PGSERVICE=production-etl
 ENVD=/opt/backoffice/id3c-production/env.d
 
 
-# Generate data file and PDFs for returning SCAN results via UW Lab Med's SecureLink portal
+# Generate data file and PDFs for returning SCAN IRB results via UW Lab Med's SecureLink portal
 35 */2 * * * ubuntu flock --no-fork --nonblock /var/lock/scan-return-of-results pipenv run envdir $ENVD/redcap-scan/ envdir $ENVD/securelink/ /opt/backoffice/bin/scan-return-of-results/generate

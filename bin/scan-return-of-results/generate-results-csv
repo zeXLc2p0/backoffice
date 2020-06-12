@@ -2,7 +2,7 @@
 # usage: generate-results-csv
 #        generate-results-csv --help
 #
-# Joins REDCap SCAN data and the SCAN return of results view in ID3C. Parses
+# Joins REDCap SCAN IRB data and the SCAN return of results view in ID3C. Parses
 # these data into a format appropriate for UW Lab Med's results portal.
 #
 # Resulting transformed csv is output to stdout.
@@ -29,14 +29,7 @@ main() {
 # Exports data using all given REDCap project API tokens, output as one csv.
 # The first export keeps the header, all subsequent ones skip it.
 export-redcap-data() {
-    REDCAP_API_TOKEN="$REDCAP_API_TOKEN_EN" ./export-redcap-scan
-    REDCAP_API_TOKEN="$REDCAP_API_TOKEN_ES" ./export-redcap-scan | tail -n +2
-    REDCAP_API_TOKEN="$REDCAP_API_TOKEN_VI" ./export-redcap-scan | tail -n +2
-    REDCAP_API_TOKEN="$REDCAP_API_TOKEN_ZH_HANS" ./export-redcap-scan | tail -n +2
-    REDCAP_API_TOKEN="$REDCAP_API_TOKEN_ZH_HANT" ./export-redcap-scan | tail -n +2
-    REDCAP_API_TOKEN="$REDCAP_API_TOKEN_SO" ./export-redcap-scan | tail -n +2
-    REDCAP_API_TOKEN="$REDCAP_API_TOKEN_KO" ./export-redcap-scan | tail -n +2
-    REDCAP_API_TOKEN="$REDCAP_API_TOKEN_RU" ./export-redcap-scan | tail -n +2
+    REDCAP_API_TOKEN="$REDCAP_API_TOKEN_IRB_EN" ./export-redcap-scan
 }
 
 print-help() {
