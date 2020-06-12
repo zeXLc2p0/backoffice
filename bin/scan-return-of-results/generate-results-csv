@@ -29,7 +29,7 @@ main() {
 # Exports data using all given REDCap project API tokens, output as one csv.
 # The first export keeps the header, all subsequent ones skip it.
 export-redcap-data() {
-    REDCAP_API_TOKEN="$REDCAP_API_TOKEN_EN" ./export-redcap-scan
+    REDCAP_API_TOKEN="$REDCAP_API_TOKEN_IRB_EN" ./export-redcap-scan
 }
 
 print-help() {
