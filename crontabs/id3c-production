@@ -89,6 +89,7 @@ ENVD=/opt/backoffice/id3c-production/env.d
 # Ingest each SCAN Research REDCap project every 30 min (with the
 # first starting 5 minutes after the SFS/SCAN Surveillance ingests above.)
 5,35 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-irb-en pipenv run id3c etl redcap-det scan-irb-en --commit
+7,37 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-irb-es pipenv run id3c etl redcap-det scan-irb-es --commit
 
 # Ingest FHIR documents every 5 minutes.
 */5  * * * * ubuntu pipenv run id3c etl fhir --commit
