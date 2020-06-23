@@ -30,6 +30,8 @@ main() {
 # The first export keeps the header, all subsequent ones skip it.
 export-redcap-data() {
     REDCAP_API_TOKEN="$REDCAP_API_TOKEN_IRB_EN" ./export-redcap-scan
+    REDCAP_API_TOKEN="$REDCAP_API_TOKEN_IRB_ES" ./export-redcap-scan | tail -n +2
+    REDCAP_API_TOKEN="$REDCAP_API_TOKEN_IRB_ZH_HANT" ./export-redcap-scan | tail -n +2
 }
 
 print-help() {
