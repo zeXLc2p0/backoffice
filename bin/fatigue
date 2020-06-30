@@ -1,0 +1,174 @@
+#!/bin/bash
+# usage: fatigue [--quiet|-q] <cmd> ...
+#        fatigue --help
+#
+# fatigue runs a given command but suppresses repeated errors.  It is intended
+# to be run from a crontab as a wrapper around a command that sometimes fails
+# (exits non-zero).  fatigue is inspired by chronic(1) of moreutils fame.  They
+# nicely compose on the command-line as "chronic fatigue ..." to perform
+# complementary behaviour.  chronic(1) suppresses output unless the command
+# exits non-zero and fatigue suppresses non-zero exit codes for repeated
+# errors.  If chronic(1) is too big of a hammer, then use fatigue's --quiet
+# option.  This will print all output _except_ when a repeat error is detected.
+#
+# When the given command fails for the first time, fatigue will exit with the
+# same non-zero status as the command.  If the same command fails on the next
+# invocation with the same error (~identical stdout + stderr output), fatigue
+# exits with success instead.  When coupled with fatigue's --quiet option or
+# chronic(1), this prevents cron from notifying you about the same failure
+# again.  If the same command fails with a different error, fatigue passes
+# through the non-zero exit status.  If the command succeeds after an error,
+# fatigue's state is cleared.  Separate state is tracked for each unique
+# (command, working directory) pair.
+#
+# Note that fatigue identifies repeat errors only by comparing stdout + stderr.
+# Different non-zero exit codes are not treated as different errors if the
+# output is the same.  Furthermore, any timestamps at the beginning of lines
+# will be ignored for the purposes of comparing output.
+#
+# Note also that the command's stdout and stderr will be buffered and merged
+# into stdout when passed through fatigue.  This is normally not a problem.
+# (If it is for you, it's possible to address, so consider improving the stream
+# handling of fatigue!)
+#
+# A lockfile is automatically used to ensure that only one copy of a given
+# command is running at a time, so that state is handled predictably.
+#
+# State is stored under $XDG_RUNTIME_DIR/fatigue/.
+#
+# Requires awk(1), flock(1), md5sum(1), perl(1), and tee(1).
+#
+# Written by Thomas Sibley <https://tsibley.net>.
+
+# XXX TODO: As a future improvement, support nagging about errors every X
+# interval instead of supressing them indefinitely until resolved.  This could
+# be implemented by comparing the mtime of $old_state against the current time
+# in the same conditional as the MD5 digest comparison.
+set -euo pipefail
+
+: "${XDG_RUNTIME_DIR:?a value is required.}"
+: "${FATIGUE_LOCK_TIMEOUT:=60}" # seconds
+
+main() {
+    quiet=0
+
+    # Option processing.
+    for arg; do
+        case "$arg" in
+            -q|--quiet)
+                quiet=1
+                shift;;
+            -h|--help)
+                usage
+                exit;;
+            *)
+                # Stop processing on first unrecognized option.  The rest is
+                # the command to run.
+                set -- "$@"
+                break;;
+        esac
+    done
+
+    if [[ $# -eq 0 ]]; then
+        usage
+        exit 1
+    fi
+
+    # XDG_RUNTIME_DIR is a user-specific location for non-essential but private
+    # runtime files which must be visible only to the current user.  Since command
+    # output may be private, we store output of failed commands here.  On many
+    # systems, it will be /run/user/$UID.
+    state_dir="$XDG_RUNTIME_DIR/fatigue"
+    mkdir -p "$state_dir"
+
+    # Command state (stdout + stderr) is stored under the MD5 digest of the
+    # command string + working dir, so that each unique command has a separate
+    # state.
+    cmd_id="$(md5 <<<"$PWD $*")"
+    old_state="$state_dir/$cmd_id-old"
+    new_state="$state_dir/$cmd_id-new"
+    lock_file="$state_dir/$cmd_id-lock"
+
+    # Lock based on command id so that multiple copies of ourself don't mess
+    # with the state files at the same time.  The lock will be automatically
+    # released when file descriptor 9 closes, i.e. when this program exits.
+    exec 9>"$lock_file"
+    flock --timeout "$FATIGUE_LOCK_TIMEOUT" 9
+
+    # If the new state file still exists, then something went wrong last time.
+    # Play it safe and start fresh by removing all state.  This means we might
+    # print an error repeatedly, but that's better than failing more silently.
+    if [[ -e "$new_state" ]]; then
+        rm -f "$old_state" "$new_state"
+    fi
+
+    # Run the given command, with output sent to the new state file.
+    "$@" &>"$new_state" && exited=0 || exited=$?
+
+    if [[ $exited -ne 0 ]]; then
+        if [[ ! -e "$old_state" || "$(hash-state "$new_state")" != "$(hash-state "$old_state")" ]]; then
+            # A new error! Save it for later and exit with error.
+            cat "$new_state"
+            mv "$new_state" "$old_state"
+            exit $exited
+        else
+            # Same as the past error; ignore it by exiting success.  Preserves
+            # the original mtime of $old_state, which is when the error first
+            # occurred.
+            [[ $quiet -eq 1 ]] || cat "$new_state"
+            rm "$new_state"
+            exit 0
+        fi
+    else
+        # All's good. Remove all state so future errors don't compare to past
+        # errors resolved by this success.
+        cat "$new_state"
+        rm -f "$old_state" "$new_state"
+        exit 0
+    fi
+}
+
+# Print just the digest, skipping the filename.
+md5() {
+    md5sum "$@" | awk '{print $1}'
+}
+
+# Print the MD5 digest of a state file, after masking.
+hash-state() {
+    mask-timestamps "$@" | md5
+}
+
+# Mask output lines prefixed with a timestamp to ignore them during comparison.
+mask-timestamps() {
+    perl -pe '
+        s/
+            ^
+            # Optional opening [
+            (\[)?
+
+            # ISO 8601-ish string
+            \d{4}-\d\d-\d\d [T ] \d\d:\d\d:\d\d Z?
+
+            # Closing ], if an opening [ was present
+            (?(1)\])
+        //x
+    ' "$@"
+}
+
+# Print the embedded usage at the top of this file.
+usage() {
+    local line
+    while read -r line; do
+        if [[ $line =~ ^#! ]]; then
+            continue
+        elif [[ $line =~ ^# ]]; then
+            line="${line/##/}"
+            line="${line/# /}"
+            echo "$line"
+        else
+            break
+        fi
+    done < "$0"
+}
+
+main "$@"
