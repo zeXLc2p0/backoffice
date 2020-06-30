@@ -1,5 +1,5 @@
 SHELL=/bin/bash
-PATH=/usr/local/bin:/usr/bin:/bin
+PATH=/opt/backoffice/bin:/usr/local/bin:/usr/bin:/bin
 
 LOG_LEVEL=warning
 

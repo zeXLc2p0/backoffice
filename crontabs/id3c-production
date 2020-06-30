@@ -1,5 +1,5 @@
 SHELL=/bin/bash
-PATH=/usr/local/bin:/usr/bin:/bin
+PATH=/opt/backoffice/bin:/usr/local/bin:/usr/bin:/bin
 
 # Point Pipenv at the production environment
 PIPENV_PIPFILE=/opt/backoffice/id3c-production/Pipfile
@@ -40,10 +40,10 @@ ENVD=/opt/backoffice/id3c-production/env.d
 */10 * * * * ubuntu chronic envdir $ENVD/hutch/ /opt/specimen-manifests/update-unattended --push-and-upload
 
 # Upload new UW retrospectives to REDCap once a day at midnight
-0 0 * * * ubuntu pipenv run chronic envdir $ENVD/hutch/ envdir $ENVD/redcap-uw-retrospectives/ /opt/backoffice/bin/import-uw-retrospectives-to-redcap --import
+0 0 * * * ubuntu pipenv run chronic envdir $ENVD/hutch/ envdir $ENVD/redcap-uw-retrospectives/ import-uw-retrospectives-to-redcap --import
 
 # Create and upload REDCap DETs for UW retrospectives once a day at 4 A.M.
-0 4 * * * ubuntu pipenv run chronic envdir $ENVD/redcap-uw-retrospectives/ /opt/backoffice/bin/generate-and-upload-uw-retro-redcap-dets
+0 4 * * * ubuntu pipenv run chronic envdir $ENVD/redcap-uw-retrospectives/ generate-and-upload-uw-retro-redcap-dets
 
 # Run the manifest ETL 5 minutes after new manifest records are uploaded
 5-55/10 * * * * ubuntu pipenv run id3c etl manifest --commit
@@ -53,7 +53,7 @@ ENVD=/opt/backoffice/id3c-production/env.d
 50 * * * * ubuntu pipenv run id3c etl kit manifest --commit
 
 # Parse and upload the latest SCH retrospective data from S3 to ID3C
-51 * * * * ubuntu chronic envdir $ENVD/hutch envdir $ENVD/deidentification /opt/backoffice/bin/upload-sch-retrospective-data-pulls --upload
+51 * * * * ubuntu chronic envdir $ENVD/hutch envdir $ENVD/deidentification upload-sch-retrospective-data-pulls --upload
 
 # Clinical encounter records are manually uploaded right now, so just check
 # once an hour at five 'till.
@@ -97,9 +97,9 @@ ENVD=/opt/backoffice/id3c-production/env.d
 */5  * * * * ubuntu pipenv run id3c etl fhir --commit
 
 # Run the idle database session disconnector routine every minute
-* * * * * ubuntu /opt/backoffice/bin/terminate-idle-sessions
+* * * * * ubuntu terminate-idle-sessions
 # Run the old metabase session disconnector routine every minute
-* * * * * ubuntu /opt/backoffice/bin/terminate-old-metabase-sessions
+* * * * * ubuntu terminate-old-metabase-sessions
 # Run the refresh materialized view routine every 5 minutes include latest
 # ingested FHIR documents in the view
 */5 * * * * ubuntu pipenv run id3c refresh-materialized-view shipping fhir_questionnaire_responses_v1 --commit
