@@ -11,6 +11,9 @@ PGSERVICE=production-etl
 # Base of our env.d directories
 ENVD=/opt/backoffice/id3c-production/env.d
 
+# Configure a private runtime directory for "fatigue".
+XDG_RUNTIME_DIR=/home/ubuntu/run
+
 
 # Longitudinal childcare records are manually uploaded right now, so just check
 # once an hour at five past.

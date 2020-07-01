@@ -7,6 +7,9 @@ PIPENV_PIPFILE=/opt/scan-switchboard/Pipfile
 # SCAN Switchboard uses the same environment variables as id3c-production
 ENVD=/opt/backoffice/id3c-production/env.d
 
+# Configure a private runtime directory for "fatigue".
+XDG_RUNTIME_DIR=/home/ubuntu/run
+
 
 # Refresh the SCAN Switchboard SQLite database every minute
 * * * * * ubuntu chronic fatigue envdir $ENVD/redcap-scan/ pipenv run make -BC /opt/scan-switchboard
