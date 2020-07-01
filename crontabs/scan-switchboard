@@ -1,5 +1,5 @@
 SHELL=/bin/bash
-PATH=/usr/local/bin:/usr/bin:/bin
+PATH=/opt/backoffice/bin:/usr/local/bin:/usr/bin:/bin
 
 # Point Pipenv at the SCAN Switchboard environment
 PIPENV_PIPFILE=/opt/scan-switchboard/Pipfile
@@ -9,4 +9,4 @@ ENVD=/opt/backoffice/id3c-production/env.d
 
 
 # Refresh the SCAN Switchboard SQLite database every minute
-* * * * * ubuntu chronic envdir $ENVD/redcap-scan/ pipenv run make -BC /opt/scan-switchboard
+* * * * * ubuntu chronic fatigue envdir $ENVD/redcap-scan/ pipenv run make -BC /opt/scan-switchboard

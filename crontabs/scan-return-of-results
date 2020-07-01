@@ -1,5 +1,5 @@
 SHELL=/bin/bash
-PATH=/usr/local/bin:/usr/bin:/bin
+PATH=/opt/backoffice/bin:/usr/local/bin:/usr/bin:/bin
 
 # Point Pipenv at the production environment
 PIPENV_PIPFILE=/opt/backoffice/id3c-production/Pipfile
