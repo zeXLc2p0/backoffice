@@ -55,6 +55,7 @@ def main():
         ScanProject(22475, "es", "mail"),
         ScanProject(22474, "zh-Hant", "mail"),
         ScanProject(22472, "ru", "mail"),
+        ScanProject(22477, "vi", "mail"),
 
         # SCAN kiosks
         ScanProject(23089, "en", "kiosk"),
