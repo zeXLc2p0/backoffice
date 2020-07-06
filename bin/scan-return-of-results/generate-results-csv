@@ -33,6 +33,7 @@ export-redcap-data() {
     REDCAP_API_TOKEN="$REDCAP_API_TOKEN_IRB_ES" ./export-redcap-scan | tail -n +2
     REDCAP_API_TOKEN="$REDCAP_API_TOKEN_IRB_ZH_HANT" ./export-redcap-scan | tail -n +2
     REDCAP_API_TOKEN="$REDCAP_API_TOKEN_IRB_VI" ./export-redcap-scan | tail -n +2
+    REDCAP_API_TOKEN="$REDCAP_API_TOKEN_IRB_RU" ./export-redcap-scan | tail -n +2
 }
 
 print-help() {
