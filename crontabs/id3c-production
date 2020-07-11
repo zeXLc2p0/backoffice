@@ -22,14 +22,6 @@ XDG_RUNTIME_DIR=/home/ubuntu/run
 # Genomes are uploaded irregularly.  Once an hour should be good for now.
 10 * * * * ubuntu pipenv run id3c etl consensus-genome --commit
 
-# Audere sends us data at quarter past.  It rarely takes more than a minute,
-# but ensure we process everything they might send by waiting until 20 after.
-20 * * * * ubuntu pipenv run id3c etl enrollments --commit
-
-# Kit records are created/updated from enrollment records from Audere. To ensure
-# that this doesn't run at the same time as the enrollments etl, run at 25 after.
-25 * * * * ubuntu pipenv run id3c etl kit enrollments --commit
-
 # Test results are pushed at arbitrary times now, so check for new ones every 15m.
 */15 * * * * ubuntu fatigue --quiet pipenv run id3c etl presence-absence --commit
 
