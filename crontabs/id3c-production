@@ -40,6 +40,9 @@ XDG_RUNTIME_DIR=/home/ubuntu/run
 # Create and upload REDCap DETs for UW retrospectives once a day at 4 A.M.
 0 4 * * * ubuntu pipenv run chronic envdir $ENVD/redcap-uw-retrospectives/ generate-and-upload-uw-retro-redcap-dets
 
+# Create and upload REDCap DETs for SCAN IRB group enrollments once an hour at a quarter past.
+15 */1 * * * ubuntu pipenv run chronic envdir $ENVD/redcap-scan/ generate-and-group-enrollment-redcap-dets
+
 # Run the manifest ETL 5 minutes after new manifest records are uploaded
 5-55/10 * * * * ubuntu fatigue --quiet pipenv run id3c etl manifest --commit
 
