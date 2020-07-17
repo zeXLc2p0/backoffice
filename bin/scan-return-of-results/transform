@@ -14,10 +14,13 @@ def parse_redcap(redcap_file) -> pd.DataFrame:
     Reads in data from a given *redcap_file*. Returns a pandas.DataFrame
     prepared in the specifications of UW Lab Med's return of results portal.
     """
-    redcap_data = pd.read_csv(redcap_file, dtype = 'string')
-    redcap_data = redcap_data.rename(columns={'birthday': 'birth_date'})
+    redcap_data = (
+        pd.read_csv(redcap_file, dtype = 'string')
+        .pipe(trim_whitespace)
+        .replace("", pd.NA)
+        .rename(columns={'birthday': 'birth_date'}))
 
-    participant_name = lambda row: f"{row['participant_first_name'].strip()} {row['participant_last_name'].strip()}"
+    participant_name = lambda row: f"{row['participant_first_name']} {row['participant_last_name']}"
     redcap_data['pat_name'] = redcap_data.apply(participant_name, axis='columns')
 
     # This invariant protects our filename assumptions.
@@ -45,6 +48,15 @@ def parse_redcap(redcap_file) -> pd.DataFrame:
 
 def normalize_barcode(barcode):
     return barcode.str.upper().str.strip()
+
+
+def trim_whitespace(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Trim leading and trailing whitespace from strings in *df*.
+    """
+    str_columns = df.select_dtypes("string").columns
+    df[str_columns] = df[str_columns].apply(lambda column: column.str.strip())
+    return df
 
 
 def edit_status_code(scan_data: pd.DataFrame) -> pd.DataFrame:
