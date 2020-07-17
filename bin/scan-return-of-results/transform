@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Join the REDCap csv data with an ID3C csv.
+Join the REDCap NDJSON data with an ID3C CSV.
 Parses the joined data to make it suitable for UW Lab Med's return of results
 portal.
 """
@@ -15,7 +15,8 @@ def parse_redcap(redcap_file) -> pd.DataFrame:
     prepared in the specifications of UW Lab Med's return of results portal.
     """
     redcap_data = (
-        pd.read_csv(redcap_file, dtype = 'string')
+        pd.read_json(redcap_file, lines = True, dtype = False, convert_dates = False)
+        .astype("string")
         .pipe(trim_whitespace)
         .replace("", pd.NA)
         .rename(columns={'birthday': 'birth_date'}))
@@ -82,9 +83,9 @@ def edit_status_code(scan_data: pd.DataFrame) -> pd.DataFrame:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description="Join a REDCAP export csv file with a SCAN return of results ID3C export csv file."
+        description="Join a REDCAP export NDJSON file with a SCAN return of results ID3C export CSV file."
     )
-    parser.add_argument("redcap_data", help="CSV export of SCAN records from REDCap")
+    parser.add_argument("redcap_data", help="NDJSON export of SCAN records from REDCap")
     parser.add_argument("id3c_data", help="CSV export of SCAN return of results from ID3C")
     parser.add_argument("output", help="A destination for the output csv", nargs="?",
         default=sys.stdout)
