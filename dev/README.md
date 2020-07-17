@@ -15,3 +15,11 @@ preserved and re-used between runs.  This lets you save a bunch of time and use
 the same dump for a week or two for local dev.
 
 See `./dev/refresh-database --help` for more information.
+
+### Common Error
+If you are running this script on a Mac, you may run into this error:
+```
+./dev/refresh-database: line 107: syntax error near unexpected token `&'
+```
+This is due to the default version of bash on macOS being extremely outdated.
+Install the latest version of bash via Homebrew to run this script.
