@@ -10,8 +10,9 @@ from typing import NamedTuple, Optional
 
 
 REDCAP_API_URL = environ["REDCAP_API_URL"]
-REDCAP_API_TOKEN = lambda lang: environ[(
-    ("REDCAP_API_TOKEN_IRB_%s" % lang)
+REDCAP_API_TOKEN = lambda lang, collection_via: environ[((
+    "REDCAP_API_TOKEN_IRB_%s" % lang if collection_via == "mail" else
+    "REDCAP_API_TOKEN_IRB_%s_%s" % (collection_via, lang))
         .upper()
         .replace("-", "_")
 )]
@@ -23,6 +24,7 @@ FIELDS = [
     "birthday",
     "utm_tube_barcode_2",
     "reenter_barcode",
+    "reenter_barcode_2",
     "return_utm_barcode",
     "contacted",
 ]
@@ -36,18 +38,23 @@ REQUIRED_FIELDS = [
 
 class ScanProject(redcap.Project):
     lang: str
+    collection_via: str
 
-    def __init__(self, project_id: str, lang: str) -> None:
-        super().__init__(REDCAP_API_URL, REDCAP_API_TOKEN(lang), project_id)
+    def __init__(self, project_id: str, lang: str, collection_via: str) -> None:
+        super().__init__(REDCAP_API_URL, REDCAP_API_TOKEN(lang, collection_via), project_id)
         self.lang = lang
+        self.collection_via = collection_via
 
 
 def main():
     projects = [
         # SCAN (research study)
-        ScanProject(22461, "en"),
-        ScanProject(22475, "es"),
-        ScanProject(22474, "zh-Hant"),
+        ScanProject(22461, "en", "mail"),
+        ScanProject(22475, "es", "mail"),
+        ScanProject(22474, "zh-Hant", "mail"),
+
+        # SCAN kiosks
+        ScanProject(23089, "en", "kiosk"),
     ]
 
     for project_records in map(fetch_records, projects):
@@ -60,7 +67,10 @@ def fetch_records(project):
         if not all(len(record[field]) for field in REQUIRED_FIELDS):
             continue
 
-        yield record
+        yield {
+            "project_collection_via": project.collection_via,
+            **record,
+        }
 
 
 if __name__ == "__main__":
