@@ -16,6 +16,11 @@ the same dump for a week or two for local dev.
 
 See `./dev/refresh-database --help` for more information.
 
+### Setting up a database for the first time
+
+If you are setting up a new local dev database, make a postgres user and database named after
+your OS username and assign the user superuser privileges, before running refresh-database
+
 ### Common Error
 If you are running this script on a Mac, you may run into this error:
 ```
