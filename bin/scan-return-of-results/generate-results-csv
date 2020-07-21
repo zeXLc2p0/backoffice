@@ -23,14 +23,7 @@ main() {
     # Change to the ./bin/scan-return-of-results directory in the backoffice checkout
     cd "$(dirname "$0")"
 
-    ./transform <(export-redcap-data) <(./export-id3c-scan-return-results)
-}
-
-# Exports data for all REDCap projects as one NDJSON stream.
-export-redcap-data() {
-    REDCAP_API_TOKEN="$REDCAP_API_TOKEN_IRB_EN" ./export-redcap-scan
-    REDCAP_API_TOKEN="$REDCAP_API_TOKEN_IRB_ES" ./export-redcap-scan
-    REDCAP_API_TOKEN="$REDCAP_API_TOKEN_IRB_ZH_HANT" ./export-redcap-scan
+    ./transform <(./export-redcap-scan) <(./export-id3c-scan-return-results)
 }
 
 print-help() {
