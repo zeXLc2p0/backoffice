@@ -95,6 +95,7 @@ XDG_RUNTIME_DIR=/home/ubuntu/run
 5,35 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-irb-en pipenv run id3c etl redcap-det scan-irb-en --commit
 7,37 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-irb-es pipenv run id3c etl redcap-det scan-irb-es --commit
 9,39 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-irb-zh-Hant pipenv run id3c etl redcap-det scan-irb-zh-Hant --commit
+11,41 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-irb-kiosk-en pipenv run id3c etl redcap-det scan-irb-kiosk-en --commit
 
 # Ingest FHIR documents every 5 minutes.
 */5  * * * * ubuntu fatigue --quiet pipenv run id3c etl fhir --commit
