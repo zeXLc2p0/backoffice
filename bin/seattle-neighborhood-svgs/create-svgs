@@ -1,0 +1,38 @@
+#!/usr/bin/env python3
+"""
+Create SVG elements from exported ID3C paths.
+"""
+import os
+import argparse
+import pandas as pd
+from pathlib import Path
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        description= __doc__,
+        formatter_class=argparse.RawTextHelpFormatter
+    )
+
+    parser.add_argument("input",
+        metavar="<input.csv>",
+        help="A CSV export of the shipping.seattle_neighborhood_districts_v1 "
+            "view.")
+    parser.add_argument("--output-dir",
+        metavar="<output-directory>",
+        default=os.getcwd(),
+        required=False,
+        help="An optional directory under which to save the created SVG files. "
+            "By default, saves to the current working directory.")
+
+    args = parser.parse_args()
+
+    neighborhoods = pd.read_csv(args.input)
+
+    neighborhoods['svg'] = neighborhoods.apply(
+        lambda row: f'<svg viewBox="0 0 100 100"><path d="{row.svg_path}" /></svg>', axis='columns'
+    )
+
+    for _, row in neighborhoods.iterrows():
+        with open(f"{Path(args.output_dir) / row.identifier}.svg", 'w') as f:
+            f.write(row.svg)
