@@ -11,5 +11,5 @@ ENVD=/opt/backoffice/id3c-production/env.d
 XDG_RUNTIME_DIR=/home/ubuntu/run
 
 
-# Refresh the SCAN Switchboard SQLite database every minute
-* * * * * ubuntu chronic fatigue envdir $ENVD/redcap-scan/ pipenv run make -BC /opt/scan-switchboard
+# Refresh the SCAN Switchboard SQLite database every 5 minutes
+*/5 * * * * ubuntu chronic fatigue envdir $ENVD/redcap-scan/ pipenv run make -BC /opt/scan-switchboard
