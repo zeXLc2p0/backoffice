@@ -148,7 +148,10 @@ if __name__ == '__main__':
     id3c_data = pd.read_csv(args.id3c_data, dtype = 'string')
     id3c_data['qrcode'] = normalize_barcode(id3c_data['qrcode'])
 
-    # We can't return results without participant info so keep all from redcap_data
+    # Only keep records we can match from both REDCap and ID3C.  An incorrect
+    # barcode in REDCap or the lack of a record in ID3C may cause records to
+    # drop out in the join, but this is preferable to attaching results to an
+    # incorrect barcode or not having a known status for a barcode.
     joined_data = redcap_data.merge(id3c_data, how='inner', on='qrcode')
     joined_data = edit_status_code(joined_data)
 
