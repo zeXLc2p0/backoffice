@@ -1,25 +1,77 @@
-#!/bin/bash
+#!/usr/bin/env python3
 # usage: export-redcap-scan
 #
-# Exports participant information from the SCAN REDCap projects as CSV.
+# Exports participant information from the SCAN REDCap projects as NDJSON.
 #
-set -euo pipefail
+import json
+from id3c.cli import redcap
+from os import environ
+from typing import NamedTuple, Optional
 
-: "${REDCAP_API_URL:?The REDCAP_API_URL environment variable is required.}"
-: "${REDCAP_API_TOKEN:?The REDCAP_API_TOKEN environment variable is required.}"
 
-fields="record_id,participant_first_name,participant_last_name,birthday,pre_scan_barcode,utm_tube_barcode_2,reenter_barcode,return_utm_barcode,contacted"
-filters="[participant_first_name] != '' and [participant_last_name] != '' and [birthday] != ''"
+REDCAP_API_URL = environ["REDCAP_API_URL"]
+REDCAP_API_TOKEN = lambda lang, collection_via: environ[((
+    "REDCAP_API_TOKEN_IRB_%s" % lang if collection_via == "mail" else
+    "REDCAP_API_TOKEN_IRB_%s_%s" % (collection_via, lang))
+        .upper()
+        .replace("-", "_")
+)]
 
-curl -fsSL -H "Content-Type: application/x-www-form-urlencoded" \
-      -H "Accept: application/json" \
-      -X POST \
-      -d @<(echo "token=$REDCAP_API_TOKEN") \
-      -d format=csv \
-      -d content=record \
-      -d type=flat \
-      -d fields="$fields" \
-      -d filterLogic="$filters" \
-      -d exportDataAccessGroups=false \
-      -d returnFormat=json \
-      "$REDCAP_API_URL"
+FIELDS = [
+    "record_id",
+    "participant_first_name",
+    "participant_last_name",
+    "birthday",
+    "utm_tube_barcode_2",
+    "reenter_barcode",
+    "reenter_barcode_2",
+    "return_utm_barcode",
+    "contacted",
+]
+
+REQUIRED_FIELDS = [
+    "participant_first_name",
+    "participant_last_name",
+    "birthday",
+]
+
+
+class ScanProject(redcap.Project):
+    lang: str
+    collection_via: str
+
+    def __init__(self, project_id: str, lang: str, collection_via: str) -> None:
+        super().__init__(REDCAP_API_URL, REDCAP_API_TOKEN(lang, collection_via), project_id)
+        self.lang = lang
+        self.collection_via = collection_via
+
+
+def main():
+    projects = [
+        # SCAN (research study)
+        ScanProject(22461, "en", "mail"),
+        ScanProject(22475, "es", "mail"),
+        ScanProject(22474, "zh-Hant", "mail"),
+
+        # SCAN kiosks
+        ScanProject(23089, "en", "kiosk"),
+    ]
+
+    for project_records in map(fetch_records, projects):
+        for record in project_records:
+            print(json.dumps(record, indent = None, separators = ",:"), flush = True)
+
+
+def fetch_records(project):
+    for record in project.records(fields = FIELDS, raw = True):
+        if not all(len(record[field]) for field in REQUIRED_FIELDS):
+            continue
+
+        yield {
+            "project_collection_via": project.collection_via,
+            **record,
+        }
+
+
+if __name__ == "__main__":
+    main()
