@@ -34,20 +34,20 @@ loggers:
       - INFO
 
 filters:
-  unknown sample warnings for controls from id3c etl presence-absence:
+  unknown sample warnings for controls and experimental samples from id3c etl presence-absence:
     (): id3c.logging.filters.suppress_records_matching
     name: id3c.cli.command.etl.presence_absence
     levelname: WARNING
     msg:
-      pattern: Skipping results for sample without a known identifier «(.+?_(Plasmid|PBS|Xeno|Water|HAP1)|NWGC_CONTROL|Water_Control|PTC_.+?)»
+      pattern: Skipping results for sample without a known identifier «(.+?_(Plasmid|PBS|Xeno|Water|HAP1|exp)|NWGC_CONTROL|Water_Control|PTC_.+?)»
 
-  unknown sample warnings for controls from id3c.db.find_identifier:
+  unknown sample warnings for controls and experimental samples from id3c.db.find_identifier:
     (): id3c.logging.filters.suppress_records_matching
     name: id3c.db
     funcName: find_identifier
     levelname: WARNING
     msg:
-      pattern: No identifier found for barcode «(.+?_(Plasmid|PBS|Xeno|Water|HAP1)|NWGC_CONTROL|Water_Control|PTC_.+?)»
+      pattern: No identifier found for barcode «(.+?_(Plasmid|PBS|Xeno|Water|HAP1|exp)|NWGC_CONTROL|Water_Control|PTC_.+?)»
 
 handlers:
   console:
@@ -57,8 +57,8 @@ handlers:
       - INFO
     formatter: console
     filters:
-      - unknown sample warnings for controls from id3c etl presence-absence
-      - unknown sample warnings for controls from id3c.db.find_identifier
+      - unknown sample warnings for controls and experimental samples from id3c etl presence-absence
+      - unknown sample warnings for controls and experimental samples from id3c.db.find_identifier
 
   # This handler emits all log levels; filtering is more usefully done by
   # syslog itself.
