@@ -49,6 +49,13 @@ filters:
     msg:
       pattern: No identifier found for barcode «(.+?_(Plasmid|PBS|Xeno|Water|HAP1|exp)|NWGC_CONTROL|Water_Control|PTC_.+?)»
 
+  unknown sample warnings for experimental samples from id3c etl manifest:
+    (): id3c.logging.filters.suppress_records_matching
+    name: id3c.cli.command.etl.manifest
+    levelname: WARNING
+    msg:
+      pattern: Skipping sample with unknown sample barcode «(.+?_exp)»
+
 handlers:
   console:
     class: logging.StreamHandler
@@ -59,6 +66,7 @@ handlers:
     filters:
       - unknown sample warnings for controls and experimental samples from id3c etl presence-absence
       - unknown sample warnings for controls and experimental samples from id3c.db.find_identifier
+      - unknown sample warnings for experimental samples from id3c etl manifest
 
   # This handler emits all log levels; filtering is more usefully done by
   # syslog itself.
