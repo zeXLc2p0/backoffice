@@ -18,7 +18,8 @@ def parse_redcap(redcap_file) -> pd.DataFrame:
         pd.read_json(redcap_file, lines = True, dtype = False, convert_dates = False)
         .astype("string")
         .pipe(trim_whitespace)
-        .replace("", pd.NA)
+        .replace({"": pd.NA})
+        .astype("string")
         .rename(columns={'birthday': 'birth_date'}))
 
     participant_name = lambda row: f"{row['participant_first_name']} {row['participant_last_name']}"
