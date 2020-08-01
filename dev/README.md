@@ -37,3 +37,12 @@ Export a UW ITHS REDCap user's project permissions with:
     ./dev/export-redcap-user --net-id <net-id>
 
 See `./dev/export-redcap-user --help` for more information.
+
+
+## import-redcap-user
+
+Add or update a UW ITHS REDCap user's permissions for a project with:
+
+    ./dev/import-redcap-user --permissions <permissions> --net-id <net-id>
+
+See `./dev/import-redcap-user --help` for more information.
