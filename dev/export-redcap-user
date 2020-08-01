@@ -1,0 +1,90 @@
+#!/usr/bin/env python3
+# usage: ./dev/export-redcap-user --net-id <net-id>
+#
+# Exports the given REDCap user's metadata and permissions from the project
+# specified by the REDCap API token environment variable.
+# Useful for deriving permissions configurations for ./dev/import-redcap-user.
+# The returned user's information is printed to stdout, so you'll likely want to
+# redirect to a new file.
+#
+# Raises an Exception if the given user does not exist in the REDCap project.
+#
+# See the REDCap Export Users API v10.1.4 Documentation for more info.
+#
+# Required environment variables:
+#   - REDCAP_API_TOKEN
+#   - REDCAP_API_URL
+#
+import os
+import json
+import argparse
+import requests
+import logging
+from sys import stderr
+from typing import Dict, Any
+
+
+LOG_LEVEL = os.environ.get("LOG_LEVEL", "debug").upper()
+
+logging.basicConfig(
+    level = logging.ERROR,
+    format = "[%(asctime)s] %(levelname)-8s %(message)s",
+    datefmt = "%Y-%m-%d %H:%M:%S%z",
+    stream = stderr)
+
+logging.captureWarnings(True)
+
+log = logging.getLogger(__name__)
+log.setLevel(LOG_LEVEL)
+
+
+def fetch() -> Dict[str, Any]:
+    """
+    Fetch REDCap user content with a POST request to the REDCap API.
+    """
+    headers = {
+        'Content-type': 'application/x-www-form-urlencoded',
+        'Accept': 'application/json'
+    }
+
+    log.debug(f"Fetching content=user from REDCap")
+
+    params = {
+        'content': 'user',
+        'token': os.environ['REDCAP_API_TOKEN'],
+        'format': 'json',
+        'returnFormat': 'json',
+    }
+
+    response = requests.post(os.environ['REDCAP_API_URL'],
+        data=params,
+        headers=headers
+    )
+
+    log.debug(json.dumps(response.json()))
+    response.raise_for_status()
+
+    return response.json()
+
+
+parser = argparse.ArgumentParser(
+    description= __doc__,
+    formatter_class=argparse.RawTextHelpFormatter
+)
+
+parser.add_argument("--net-id",
+    required=True,
+    metavar="<net-id>",
+    help="A user's UW NetID")
+
+args = parser.parse_args()
+
+users = fetch()
+
+# We only want permissions for the user with the given UW NetID
+try:
+    user = next(u for u in users if u["username"] == f"{args.net_id}@washington.edu")
+except StopIteration as e:
+    raise Exception(f"No user found in the given REDCap project with --net-id {args.net_id}")
+
+print(json.dumps(user))
