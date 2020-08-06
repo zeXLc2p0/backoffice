@@ -1,5 +1,5 @@
 #!/bin/bash
 set -euo pipefail
 psql --quiet --no-align --tuples-only --set ON_ERROR_STOP= <<<"
-    \copy (select * from shipping.scan_return_results_v1) to pstdout with (format csv, header);
+    \copy (select * from shipping.scan_return_results_v1 where swab_type is not null or status_code = 'pending') to pstdout with (format csv, header);
 "
