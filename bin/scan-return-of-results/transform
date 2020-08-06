@@ -118,6 +118,8 @@ def edit_status_code(scan_data: pd.DataFrame) -> pd.DataFrame:
     `inconclusive` but the participant has not yet been contacted
     (`contacted` != 'yes').
 
+    Sets the *scan_data* status to `pending` if a record has a null swab type.
+
     Returns the modified *scan_data*.
     """
     # Assume a null value for `contacted` means not contacted
@@ -129,6 +131,8 @@ def edit_status_code(scan_data: pd.DataFrame) -> pd.DataFrame:
     participant_contacted = scan_data['contacted'] == 'yes'
 
     scan_data.loc[(is_positive | is_inconclusive) & ~(participant_contacted), 'status_code'] = 'pending'
+
+    scan_data.loc[scan_data['swab_type'].isnull(), 'status_code'] = 'pending'
 
     return scan_data
 
