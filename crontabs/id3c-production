@@ -37,10 +37,13 @@ XDG_RUNTIME_DIR=/home/ubuntu/run
 # check if any contain reportable conditions.
 5-50/15 * * * * ubuntu envdir $ENVD/slack pipenv run id3c reportable-conditions notify --commit
 
-# Manifest is uploaded to AWS at arbitrary times now, so check for new records every 10m.
+# The aliquot manifest is uploaded to AWS at arbitrary times now, so check for new records every 10m.
 # This is often the blocker for the presence/absence ETl, so run more frequently than
 # the presence/absence ETL to avoid extended delay of results.
-*/10 * * * * ubuntu chronic fatigue envdir $ENVD/hutch/ pipenv run /opt/specimen-manifests/update-unattended --push-and-upload
+*/10 * * * * ubuntu chronic fatigue envdir $ENVD/aliquot-manifest-processing/ envdir $ENVD/hutch/ pipenv run /opt/specimen-manifests/update-unattended --push-and-upload
+
+# Process the incident report manifest from Google Sheets every 30m.
+*/30 * * * * ubuntu chronic fatigue envdir $ENVD/incident-report-manifest-processing/ envdir $ENVD/google/ pipenv run /opt/specimen-manifests/update-unattended --push-and-upload
 
 # Upload new UW retrospectives to REDCap once a day at midnight
 0 0 * * * ubuntu pipenv run chronic envdir $ENVD/hutch/ envdir $ENVD/redcap-uw-retrospectives/ import-uw-retrospectives-to-redcap --import
