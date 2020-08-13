@@ -90,4 +90,4 @@ with open(args.permissions, 'r') as f:
     permissions = json.loads(f.read())
 
 redcap_data = { **permissions, 'username': f"{args.net_id}@washington.edu" }
-print(fetch(redcap_data))
+print(f"Updated permissions for {fetch(redcap_data)} REDCap users.")
