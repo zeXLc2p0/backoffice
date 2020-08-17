@@ -1,0 +1,61 @@
+#!/bin/bash
+# usage: ./dev/add-user-to-all-projects
+
+# Required environment variables:
+#   - REDCAP_API_URL
+#   - SRC_USER: The UW NetID of the user whose permissions you are copying for
+#       all REDCap projects. See ./dev/export-redcap-user.
+#   - DST_USER: The UW NetID of the destination user whose permissions you are
+#       importing for all REDCap projects. See ./dev/import-redcap-user.
+#   - Many, many REDCap API tokens
+#
+set -euo pipefail
+
+: "${REDCAP_API_URL:?The REDCAP_API_URL environment variable is required.}"
+: "${SRC_USER:?The SRC_USER environment variable is required.}"
+: "${DST_USER:?The DST_USER environment variable is required.}"
+
+
+for token in \
+    "REDCAP_API_TOKEN_SFS_KIOSK" \
+    "REDCAP_API_TOKEN_SFS_SHELTERS" \
+    "REDCAP_API_TOKEN_SFS_SWAB_N_SEND" \
+    "REDCAP_API_TOKEN_SFS_SHELTERS" \
+    "REDCAP_API_TOKEN_SWAB_N_SEND_HEALTHCARE_WORKER" \
+    "REDCAP_API_TOKEN_SFS_ASYMPTOMATIC" \
+    "REDCAP_API_TOKEN_SFS_SWAB_N_SEND_HOME_FLU" \
+    "REDCAP_API_TOKEN_SWAB_N_SEND_ASYMPTOMATIC" \
+    "REDCAP_API_TOKEN_SCAN_EN" \
+    "REDCAP_API_TOKEN_SCAN_VI" \
+    "REDCAP_API_TOKEN_SCAN_ZH_HANS" \
+    "REDCAP_API_TOKEN_SCAN_ES" \
+    "REDCAP_API_TOKEN_SCAN_ZH_HANT" \
+    "REDCAP_API_TOKEN_SCAN_RU" \
+    "REDCAP_API_TOKEN_SCAN_SO" \
+    "REDCAP_API_TOKEN_SCAN_KO" \
+    "REDCAP_API_TOKEN_SCAN_AM" \
+    "REDCAP_API_TOKEN_SCAN_TI" \
+    "REDCAP_API_TOKEN_SCAN_TL" \
+    "REDCAP_API_TOKEN_SCAN_IRB_EN" \
+    "REDCAP_API_TOKEN_SCAN_IRB_TL" \
+    "REDCAP_API_TOKEN_SCAN_IRB_TI" \
+    "REDCAP_API_TOKEN_SCAN_IRB_UR" \
+    "REDCAP_API_TOKEN_SCAN_IRB_AM" \
+    "REDCAP_API_TOKEN_SCAN_IRB_SO" \
+    "REDCAP_API_TOKEN_SCAN_IRB_RU" \
+    "REDCAP_API_TOKEN_SCAN_IRB_ZH_HANS" \
+    "REDCAP_API_TOKEN_SCAN_IRB_ZH_HANT" \
+    "REDCAP_API_TOKEN_SCAN_IRB_ES" \
+    "REDCAP_API_TOKEN_SCAN_IRB_KO" \
+    "REDCAP_API_TOKEN_SCAN_IRB_VI" \
+    "REDCAP_API_TOKEN_SCAN_KIOSK";
+do
+    if ! REDCAP_API_TOKEN="${!token}" ./dev/import-redcap-user \
+        --permissions <(REDCAP_API_TOKEN="${!token}" ./dev/export-redcap-user --net-id "$SRC_USER") \
+        --net-id "$DST_USER"
+    then
+        echo "Failed to import user for token $token" >&2
+        echo >&2
+    fi
+
+done;

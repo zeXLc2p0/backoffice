@@ -28,3 +28,30 @@ If you are running this script on a Mac, you may run into this error:
 ```
 This is due to the default version of bash on macOS being extremely outdated.
 Install the latest version of bash via Homebrew to run this script.
+
+
+## export-redcap-user
+
+Export a UW ITHS REDCap user's project permissions with:
+
+    ./dev/export-redcap-user --net-id <net-id>
+
+See `./dev/export-redcap-user --help` for more information.
+
+
+## import-redcap-user
+
+Add or update a UW ITHS REDCap user's permissions for a project with:
+
+    ./dev/import-redcap-user --permissions <permissions> --net-id <net-id>
+
+See `./dev/import-redcap-user --help` for more information.
+
+
+## add-user-to-all-projects
+
+Copy a current UW ITHS REDCap user's permissions for all projects, and apply them to a new or existing user with:
+
+    ./dev/add-user-to-all-projects
+
+See `./dev/add-user-to-all-projects --help` for more information.
