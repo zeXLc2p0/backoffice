@@ -107,4 +107,4 @@ XDG_RUNTIME_DIR=/home/ubuntu/run
 # Run the refresh materialized view routine every 5 minutes include latest
 # ingested FHIR documents in the view
 */5 * * * * ubuntu fatigue --quiet pipenv run id3c refresh-materialized-view shipping fhir_questionnaire_responses_v1 --commit
-2-57/5 * * * * ubuntu fatigue --quiet pipenv run id3c refresh-materialized-view shipping scan_encounters_v1 --commit
+*/5 * * * * ubuntu fatigue --quiet pipenv run id3c refresh-materialized-view shipping scan_encounters_v1 --commit
