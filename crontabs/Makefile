@@ -2,7 +2,7 @@ SHELL := /bin/bash -euo pipefail
 
 crontabs := \
 	id3c-production \
-	scan-return-of-results \
+	return-of-results \
 	scan-amazon-addresses \
 	scan-switchboard
 
