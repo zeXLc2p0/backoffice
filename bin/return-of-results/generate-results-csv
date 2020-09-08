@@ -20,10 +20,10 @@ main() {
         esac
     done
 
-    # Change to the ./bin/scan-return-of-results directory in the backoffice checkout
+    # Change to the ./bin/return-of-results directory in the backoffice checkout
     cd "$(dirname "$0")"
 
-    ./transform <(./export-redcap-scan) <(./export-id3c-scan-return-results)
+    ./transform <(./export-redcap-scan) <(./export-id3c-return-results)
 }
 
 print-help() {

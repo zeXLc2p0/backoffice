@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-: "${SCAN_LANGS:=en es zh-Hant ru}"
+: "${PDF_LANGS:=en es zh-Hant ru}"
 
 main() {
     local params="${1:-s3://dokku-stack-phi/covid19/scan-study-inbound/scan_return_results.csv}"
@@ -9,7 +9,7 @@ main() {
     local -a mounts
     mounts=()
 
-    debug "SCAN_LANGS = $SCAN_LANGS"
+    debug "PDF_LANGS = $PDF_LANGS"
     debug "params = $params"
     debug "output = $output"
     debug
@@ -39,7 +39,7 @@ main() {
         debug
     fi
 
-    for lang in $SCAN_LANGS; do
+    for lang in $PDF_LANGS; do
         debug "Generating PDFs for language code «${lang}»"
 
         docker run \
