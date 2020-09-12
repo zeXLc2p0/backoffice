@@ -1,0 +1,14 @@
+SHELL=/bin/bash
+PATH=/opt/backoffice/bin:/usr/local/bin:/usr/bin:/bin
+
+# Point Pipenv at the production environment
+PIPENV_PIPFILE=/opt/backoffice/id3c-production/Pipfile
+
+LOG_LEVEL=warning
+PGSERVICE=production-etl
+
+# Base of our env.d directories
+ENVD=/opt/backoffice/id3c-production/env.d
+
+# Generate data file of results for UW Reopening (Husky Testing) and upload to EHS for followup
+7,37 * * * * ubuntu pipenv run envdir $ENVD/redcap-sfs/ envdir $ENVD/redcap-uw-reopening-ehs-transfer /opt/backoffice/bin/uw_ehs_report/generate

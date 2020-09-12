@@ -1,0 +1,5 @@
+#!/bin/bash
+set -euo pipefail
+psql --quiet --no-align --tuples-only --set ON_ERROR_STOP= <<<"
+    \copy (select * from shipping.uw_reopening_ehs_reporting_v1) to pstdout with (format csv, header);
+"

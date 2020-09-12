@@ -1,0 +1,73 @@
+#!/usr/bin/env python3
+# usage: export-redcap-uw-reopening
+#
+# Exports participant information from the UW reopening project as NDJSON.
+#
+import json
+from id3c.cli import redcap
+from os import environ
+from typing import NamedTuple, Optional
+
+
+REDCAP_API_URL = environ["REDCAP_API_URL"]
+
+FIELDS = [
+    "record_id",
+
+    # identifiers
+    "netid",
+    "core_participant_first_name",
+    "core_participant_last_name",
+    "core_birthdate",
+    "phone_number",
+    "phone_number_2",
+    "email",
+    "core_home_street",
+    "core_apartment_number",
+    "core_home_city",
+    "core_home_state",
+    "core_zipcode",
+    "dorm",
+    "dorm_room",
+    'uw_greek_house',
+    "greek_other",
+    "uw_apt_names",
+
+    # free-text items that we don't ingest into ID3C
+    # because they may contain PII
+    "affiliation_other",
+    "uw_school",
+    "sea_employee_type_other",
+    "pronouns_other",
+    "core_sex_other",
+
+    # barcodes
+    "collect_barcode_kiosk",
+    "return_utm_barcode"
+]
+
+
+class HuskyProject(redcap.Project):
+    api_token_env_var:str
+
+    def __init__(self, project_id: str, api_token_env_var: str) -> None:
+        super().__init__(REDCAP_API_URL, environ[api_token_env_var], project_id)
+
+
+def main():
+    projects = [
+        HuskyProject(23854, "REDCAP_API_TOKEN_UW_REOPENING")
+    ]
+
+    for project_records in map(fetch_records, projects):
+        for record in project_records:
+            print(json.dumps(record, indent = None, separators = ",:"), flush = True)
+
+
+def fetch_records(project):
+    for record in project.records(fields = FIELDS, raw = True):
+        yield (record)
+
+
+if __name__ == "__main__":
+    main()

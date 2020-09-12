@@ -1,0 +1,55 @@
+#!/bin/bash
+# usage: ./bin/generate
+#
+# Exports records from the Husky Coronavirus Testing REDCap project,
+# exports records from ID3C via a uw-reopening shipping view,
+# joins the two, and imports the resulting record set into
+# the EH&S Data Transfer for Husky Coronavirus Testing REDCap
+# project.
+#
+
+set -euo pipefail
+
+bin="$(dirname "$0")"
+
+# Relative path to our containing repo
+base="$(dirname "$0")/../.."
+
+main() {
+    for arg; do
+        case "$arg" in
+            -h|--help)
+                print-help
+                exit
+                ;;
+            *)
+        esac
+    done
+
+    datadir="$(TMPDIR="$base" mktemp -d -t uw_ehs_report-XXXXXX)"
+
+    # Always leave and delete this temporary directory regardless of exit code
+    trap "rm -rf '$datadir'" EXIT
+
+    # Generate the report CSV
+    "$bin"/generate-report-csv > "$datadir/uw_ehs_report.csv"
+
+    # Import the CSV into the transfer REDCap project.
+    "$bin"/import-to-uw-ehs-transfer-redcap "$datadir/uw_ehs_report.csv"
+}
+
+print-help() {
+    # Print the help comments at the top of this file ($0)
+    perl -MEnglish -ne '
+        s/^# ?// or exit;
+        print if $INPUT_LINE_NUMBER >= 2;
+    ' "$0"
+}
+
+debug() {
+    if [[ "${LOG_LEVEL:-debug}" == debug ]]; then
+        echo "$@" >&2
+    fi
+}
+
+main "$@"
