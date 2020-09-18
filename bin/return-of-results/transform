@@ -9,9 +9,9 @@ import argparse
 import pandas as pd
 
 
-def parse_redcap(redcap_file) -> pd.DataFrame:
+def parse_scan_redcap(redcap_file) -> pd.DataFrame:
     """
-    Reads in data from a given *redcap_file*. Returns a pandas.DataFrame
+    Reads in data from a given SCAN *redcap_file*. Returns a pandas.DataFrame
     prepared in the specifications of UW Lab Med's return of results portal.
     """
     redcap_data = (
@@ -85,18 +85,55 @@ def parse_redcap(redcap_file) -> pd.DataFrame:
 
     # There should be absolutely no duplicates, but REDCap can't enforce this,
     # so warn and drop any that we find.
-    dups = barcodes.loc[barcodes.duplicated(keep = False)].dropna()
-
-    if not dups.empty:
-        barcodes.drop(dups.index, inplace = True)
-
-        dups_count = len(dups)
-        dups_unique = list(dups.unique())
-        print(f"Dropped {dups_count:,} REDCap records with duplicated barcodes: {dups_unique}", file = sys.stderr)
+    barcodes = drop_duplicate_barcodes(barcodes)
 
     redcap_data['qrcode'] = barcodes
+    redcap_data['source'] = 'scan'
 
-    return redcap_data[['qrcode', 'pat_name', 'birth_date', 'contacted']]
+    return redcap_data[['qrcode', 'pat_name', 'birth_date', 'contacted', 'source']]
+
+
+def parse_uw_reopening_redcap(redcap_file) -> pd.DataFrame:
+    """
+    Reads in data from a given UW Reopening *redcap_file*. Returns a
+    pandas.DataFrame prepared in the specifications of UW Lab Med's return
+    of results portal.
+    """
+    redcap_data = (
+        pd.read_json(redcap_file, lines = True, dtype = False, convert_dates = False)
+        .astype("string")
+        .pipe(trim_whitespace)
+        .replace({"": pd.NA})
+        .astype("string")
+        .rename(columns={"core_birthdate": "birth_date"})
+    )
+
+    participant_name = lambda row: f"{row['core_participant_first_name']} {row['core_participant_last_name']}"
+    redcap_data['pat_name'] = redcap_data.apply(participant_name, axis='columns')
+
+    # This invariant protects our filename assumptions.
+    assert all(redcap_data['birth_date'].str.match(r"^\d{4}-\d{2}-\d{2}$").dropna())
+
+    # Normalize all barcode fields upfront.
+    barcode_fields = {
+        "collect_barcode_kiosk",
+        "return_utm_barcode"}
+
+    for barcode_field in barcode_fields:
+        redcap_data[barcode_field] = normalize_barcode(redcap_data[barcode_field])
+
+    kiosk_barcodes = redcap_data["collect_barcode_kiosk"]
+    mail_barcodes = redcap_data["return_utm_barcode"]
+
+    barcodes = kiosk_barcodes.combine_first(mail_barcodes)
+
+    barcodes = drop_duplicate_barcodes(barcodes)
+
+    redcap_data['qrcode'] = barcodes
+    redcap_data['contacted'] = pd.NA
+    redcap_data['source'] = 'uw_reopening'
+
+    return redcap_data[['qrcode', 'pat_name', 'birth_date', 'contacted', 'source']]
 
 
 def normalize_barcode(barcode):
@@ -112,43 +149,65 @@ def trim_whitespace(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def edit_status_code(scan_data: pd.DataFrame) -> pd.DataFrame:
+def drop_duplicate_barcodes(barcodes: pd.Series) -> pd.Series:
     """
-    Sets the *scan_data* status to `pending` if a test result is `positive` or
+    Find and drop duplicate barcodes from the provided *barcodes* and returns
+    the deduplicated pandas Series
+    """
+    dups = barcodes.loc[barcodes.duplicated(keep = False)].dropna()
+
+    if not dups.empty:
+        barcodes = barcodes.drop(dups.index, inplace = False)
+
+        dups_count = len(dups)
+        dups_unique = list(dups.unique())
+        print(f"Dropped {dups_count:,} REDCap records with duplicated barcodes: {dups_unique}", file = sys.stderr)
+
+    return barcodes
+
+
+def edit_status_code(results: pd.DataFrame) -> pd.DataFrame:
+    """
+    Sets the *results* status to `pending` if a test result is `positive` or
     `inconclusive` but the participant has not yet been contacted
-    (`contacted` != 'yes').
+    (`contacted` != 'yes') for SCAN samples only (`source` == 'scan')
 
-    Sets the *scan_data* status to `pending` if a record has a null swab type.
+    Sets the *results* status to `pending` if a record has a null swab type.
 
-    Returns the modified *scan_data*.
+    Returns the modified *results*.
     """
     # Assume a null value for `contacted` means not contacted
-    scan_data.loc[scan_data['contacted'].isnull(), 'contacted'] = 'no'
+    results.loc[results['contacted'].isnull(), 'contacted'] = 'no'
 
-    is_positive = scan_data['status_code'] == 'positive'
-    is_inconclusive = scan_data['status_code'] == 'inconclusive'
+    is_positive = results['status_code'] == 'positive'
+    is_inconclusive = results['status_code'] == 'inconclusive'
 
-    participant_contacted = scan_data['contacted'] == 'yes'
+    participant_contacted = results['contacted'] == 'yes'
+    is_scan_data = results['source'] == 'scan'
 
-    scan_data.loc[(is_positive | is_inconclusive) & ~(participant_contacted), 'status_code'] = 'pending'
+    results.loc[(is_positive | is_inconclusive) & ~(participant_contacted) & is_scan_data, 'status_code'] = 'pending'
 
-    scan_data.loc[scan_data['swab_type'].isnull(), 'status_code'] = 'pending'
+    results.loc[results['swab_type'].isnull(), 'status_code'] = 'pending'
 
-    return scan_data
+    return results
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description="Join a REDCAP export NDJSON file with a SCAN return of results ID3C export CSV file."
     )
-    parser.add_argument("redcap_data", help="NDJSON export of SCAN records from REDCap")
+    parser.add_argument("scan_redcap_data", help="NDJSON export of SCAN records from REDCap")
+    parser.add_argument("uw_reopening_redcap_data", help="NDJSON export of UW Reopening records from REDCap")
     parser.add_argument("id3c_data", help="CSV export of SCAN return of results from ID3C")
     parser.add_argument("output", help="A destination for the output csv", nargs="?",
         default=sys.stdout)
 
     args = parser.parse_args()
 
-    redcap_data = parse_redcap(args.redcap_data)
+    scan_redcap_data = parse_scan_redcap(args.scan_redcap_data)
+    uw_reopening_redcap_data = parse_uw_reopening_redcap(args.uw_reopening_redcap_data)
+
+    redcap_data = scan_redcap_data.append(uw_reopening_redcap_data)
 
     id3c_data = pd.read_csv(args.id3c_data, dtype = 'string')
     id3c_data['qrcode'] = normalize_barcode(id3c_data['qrcode'])
