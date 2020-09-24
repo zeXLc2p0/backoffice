@@ -100,6 +100,11 @@ XDG_RUNTIME_DIR=/home/ubuntu/run
 15,45 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-irb-husky-en pipenv run id3c etl redcap-det scan-irb-husky-en --commit
 17,47 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-irb-vi pipenv run id3c etl redcap-det scan-irb-vi --commit
 
+# Ingest UW REopening REDCap project every 30 min (after SCAN projects above).
+# We should probably increase the frequency in the near future (for testing
+# quota purposes) when the SmaryStreets cache handling is updated.
+19,49 * * * * ubuntu flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-uw-reopening pipenv run id3c etl redcap-det uw-reopening --commit
+
 # Ingest FHIR documents every 5 minutes.
 */5  * * * * ubuntu fatigue --quiet pipenv run id3c etl fhir --commit
 
