@@ -1,0 +1,99 @@
+#!/usr/bin/env python3
+# usage: export-redcap-uw-reopening
+#
+# Exports participant information from the UW-Reopening REDCap project
+# (Husky Coronavirus Testing) as NDJSON.
+#
+import sys
+import json
+from id3c.cli.redcap import Project
+from os import environ
+from typing import Dict
+
+
+REDCAP_API_URL = environ["REDCAP_API_URL"]
+REDCAP_API_TOKEN = environ["REDCAP_API_TOKEN_UW_REOPENING"]
+REDCAP_PROJECT_ID = 23854
+
+ENROLLMENT_EVENT = "enrollment_arm_1"
+ENROLLMENT_FIELDS = [
+    "core_participant_first_name",
+    "core_participant_last_name",
+    "core_birthdate",
+]
+
+ENCOUNTER_EVENT = "encounter_arm_1"
+ENCOUNTER_FIELDS = [
+    "collect_barcode_kiosk",
+    "return_utm_barcode",
+]
+
+
+
+def main():
+    project = Project(REDCAP_API_URL, REDCAP_API_TOKEN, REDCAP_PROJECT_ID)
+
+    enrollment_records = fetch_enrollment_records(project)
+
+    # Update encounter data with enrollment data based on `record_id`
+    # Skip the record if it does not have enrollment data
+    for record in fetch_encounter_records(project):
+        record_id = record["record_id"]
+        enrollment_data = enrollment_records.get(record_id)
+        if not enrollment_data:
+            continue
+
+        record.update(enrollment_data)
+        print(json.dumps(record, indent = None, separators = ",:"), flush = True)
+
+
+def fetch_enrollment_records(project) -> Dict[str, dict]:
+    """
+    Fetch all enrollment records from *project* from the ENROLLMENT_EVENT.
+    Returns a dictionary of record ids and their corresponding fields for
+    records that have all ENROLLMENT_FIELDS completed.
+
+    Only expects one enrollment event per record_id, will drop any record_id
+    that has multiple records.
+    """
+    redcap_records: Dict[str,dict] = {}
+    duplicate_record_ids = set()
+
+    fields = ["record_id"] + ENROLLMENT_FIELDS
+    for record in project.records(events = [ENROLLMENT_EVENT], fields = fields, raw = True):
+        if not all(len(record[field]) for field in ENROLLMENT_FIELDS):
+            continue
+
+        record_id = record.pop("record_id")
+
+        if record_id in redcap_records:
+            duplicate_record_ids.add(record_id)
+
+        redcap_records[record_id] = { field: record[field] for field in ENROLLMENT_FIELDS }
+
+    if duplicate_record_ids:
+        for record_id in duplicate_record_ids:
+            del redcap_records[record_id]
+
+        print(f"Dropped {len(duplicate_record_ids)} REDCap records with duplicate"
+              f" enrollment record ids: {duplicate_record_ids}", file = sys.stderr)
+
+    return redcap_records
+
+
+def fetch_encounter_records(project):
+    """
+    Fetch all encounter records that are from the ENCOUNTER_EVENT.
+    Only include the encounter record if at least one of the ENCOUNTER_FIELDS
+    is completed.
+    """
+    fields = ["record_id"] + ENCOUNTER_FIELDS
+    for record in project.records(events = [ENCOUNTER_EVENT], fields = fields, raw = True):
+        if not any(len(record[field]) for field in ENCOUNTER_FIELDS):
+            continue
+
+        yield record
+
+
+if __name__ == "__main__":
+    main()
