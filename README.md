@@ -7,6 +7,7 @@ Services:
   * [Metabase](metabase/README.md)
   * [Lab Labels](lab-labels/README.md)
   * [SCAN Switchboard](scan-switchboard/README.md)
+  * [Husky Musher](husky-musher/README.md)
   * [Crontabs](crontabs/README.md)
   * [Dotfiles](dotfiles/README.md)
 
