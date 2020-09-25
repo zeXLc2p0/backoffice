@@ -1,5 +1,6 @@
 # SCAN Switchboard
 
+The SCAN Switchboard source code lives at https://github.com/seattleflu/scan-switchboard.
 This directory contains configuration info for the SCAN Switchboard web app that
 runs on the backoffice server.
 
