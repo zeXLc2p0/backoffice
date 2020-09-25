@@ -1,10 +1,11 @@
 # Husky Musher
 
+The Husky Musher source code lives at https://github.com/seattleflu/husky-musher.
 Musher is served from _/opt/husky-musher_ and manages its own Pipenv there.
 
-## Serving the web API
+## Serving the Flask app
 
-The uWSGI configuration file for serving the web API is _uwsgi.ini_.  This file
+The uWSGI configuration file for serving the Flask app is _uwsgi.ini_.  This file
 is used by referencing it from Ubuntu's app-based configuration layout.
 
 For example, in _/etc/uwsgi/apps-available/husky-musher.ini_:
