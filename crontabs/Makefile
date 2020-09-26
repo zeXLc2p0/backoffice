@@ -4,7 +4,8 @@ crontabs := \
 	id3c-production \
 	return-of-results \
 	scan-amazon-addresses \
-	scan-switchboard
+	scan-switchboard \
+	uw-ehs-report
 
 install: $(crontabs:%=/etc/cron.d/backoffice-%)
 
