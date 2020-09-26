@@ -1,0 +1,195 @@
+#!/usr/bin/env python3
+"""
+Join the REDCap NDJSON data with an ID3C CSV.
+Prepares the joined data for import into the
+EH&S Transfer REDCap project.
+"""
+import sys
+import argparse
+import pandas as pd
+
+
+def parse_redcap(redcap_file) -> pd.DataFrame:
+    """
+    Reads in data from a given *redcap_file*. Returns a pandas.DataFrame
+    with columns renamed for the EH&S import.
+    """
+    redcap_data = (
+        pd.read_json(redcap_file, lines = True, dtype = False, convert_dates = False)
+        .astype("string")
+        .pipe(trim_whitespace)
+        .replace({"": pd.NA})
+        .astype("string")
+        .rename(columns={"dorm_room": "uw_dorm_room_number",
+        "sea_employee_type_other": "employee_category_other",
+        "dorm": "uw_dorm_name",
+        "uw_apt_names": "uw_apartment_name",
+        "core_participant_first_name": "participant_first_name",
+        "core_participant_last_name": "participant_last_name",
+        "core_birthdate": "birthdate",
+        "core_home_street": "home_street",
+        "core_apartment_number": "apartment_number",
+        "core_home_city": "home_city",
+        "core_home_state": "home_state",
+        "core_zipcode": "zipcode",
+        "pronouns_other": "preferred_pronouns_other",
+        "core_sex_other": "sex_other"
+        }))
+
+
+    # Normalize all barcode fields upfront.
+    barcode_fields = {
+        "collect_barcode_kiosk",
+        "return_utm_barcode"}
+
+    for barcode_field in barcode_fields:
+        if barcode_field in redcap_data:
+            redcap_data[barcode_field] = normalize_barcode(redcap_data[barcode_field])
+        else:
+            redcap_data[barcode_field] = pd.Series(dtype = "string")
+
+    kiosk_barcodes = redcap_data["collect_barcode_kiosk"]
+    mail_barcodes = redcap_data["return_utm_barcode"]
+
+    barcodes = kiosk_barcodes.combine_first(mail_barcodes)
+    barcodes = drop_duplicate_values(barcodes)
+    redcap_data['barcode'] = barcodes
+
+    enrollments = redcap_data.query('redcap_event_name == "enrollment_arm_1"')[[ \
+        "record_id",
+        "netid",
+        "affiliation_other",
+        "uw_school",
+        "employee_category_other",
+        "greek_other",
+        "participant_first_name",
+        "participant_last_name",
+        "birthdate",
+        "uw_dorm_room_number",
+        "phone_number",
+        "phone_number_2",
+        "email",
+        "home_street",
+        "apartment_number",
+        "home_city",
+        "home_state",
+        "zipcode",
+        "preferred_pronouns_other",
+        "sex_other",
+        "uw_greek_house",
+        "uw_dorm_name",
+        "uw_apartment_name"
+        ]]
+
+    # This invariant protects our filename assumptions.
+    assert all(enrollments['birthdate'].str.match(r"^\d{4}-\d{2}-\d{2}$").dropna())
+
+    # Drop enrollment records with duplicated NetIDs.
+    netids = enrollments['netid']
+    netids = drop_duplicate_values(netids)
+    enrollments['netid'] = netids
+    enrollments.dropna(subset = {'netid'}, inplace = True)
+
+    encounters = redcap_data.query('redcap_event_name == "encounter_arm_1"')[[ \
+        'record_id', \
+        'barcode' \
+        ]]
+
+    joined_data = enrollments.merge(encounters, how='inner', on='record_id')
+
+    return joined_data
+
+
+def normalize_barcode(barcode):
+    if barcode.empty:
+        return pd.NA
+    return barcode.str.upper().str.strip()
+
+
+def trim_whitespace(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Trim leading and trailing whitespace from strings in *df*.
+    """
+    str_columns = df.select_dtypes("string").columns
+    df[str_columns] = df[str_columns].apply(lambda column: column.str.strip())
+    return df
+
+def drop_duplicate_values(input_series: pd.Series) -> pd.Series:
+    """
+    Find and drop duplicate values from the provided series and returns
+    the deduplicated pandas Series
+    """
+    deduplicated_series = input_series
+
+    dups = input_series.loc[input_series.duplicated(keep = False)].dropna()
+    if not dups.empty:
+        deduplicated_series = input_series.drop(dups.index, inplace = False)
+
+        dups_count = len(dups)
+        dups_unique = list(dups.unique())
+        print(f"Dropped {dups_count:,} REDCap records with duplicated {input_series.name}: {dups_unique}", file = sys.stderr)
+
+    return deduplicated_series
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        description="Join a REDCAP export NDJSON file with a SCAN return of results ID3C export CSV file."
+    )
+    parser.add_argument("redcap_data", help="NDJSON export of SCAN records from REDCap")
+    parser.add_argument("id3c_data", help="CSV export of SCAN return of results from ID3C")
+    parser.add_argument("output", help="A destination for the output csv", nargs="?",
+        default=sys.stdout)
+
+    args = parser.parse_args()
+
+    redcap_data = parse_redcap(args.redcap_data)
+
+    id3c_data = pd.read_csv(args.id3c_data, dtype = 'string')
+    id3c_data['barcode'] = normalize_barcode(id3c_data['barcode'])
+
+    # Placeholder field until the data pull gets implemented in ID3C.
+    id3c_data['symptomatic_when_tested'] = pd.NA
+
+    # When you export a record set from Postgres as CSV, boolean columns
+    # get values of 't' and 'f'. The EH&S transfer REDCap project expects
+    # values of 1 and 0.
+    boolean_fields = [
+        'is_student_athlete',
+        'is_taking_inperson_classes',
+        'works_at_uw',
+        'is_uw_greek_member',
+        'lives_with_uw_students_or_employees',
+        'lives_in_uw_apartment'
+    ]
+
+    for field in boolean_fields:
+        id3c_data[field].replace({'t': 1, 'f': 0}, inplace=True)
+
+    # Only keep records we can match from both REDCap and ID3C.  An incorrect
+    # barcode in REDCap or the lack of a record in ID3C may cause records to
+    # drop out in the join, but this is preferable to attaching results to an
+    # incorrect barcode or not having a known status for a barcode.
+    joined_data = redcap_data.merge(id3c_data, how='inner', on='barcode')
+
+
+    joined_data[[ \
+        'barcode', 'sample_collection_date', 'test_result', 'test_result_date',
+
+        'netid', 'participant_first_name', 'participant_last_name', 'birthdate',
+        'phone_number', 'phone_number_2', 'email' , 'home_street',
+        'apartment_number', 'home_city', 'home_state', 'zipcode',
+
+        'preferred_pronouns', 'preferred_pronouns_other', 'sex', 'sex_other',
+        'age_at_encounter', 'preferred_contact_method_for_study',
+        'preferred_contact_method_for_attestations', 'study_enrollment_date_time',
+        'campus_location', 'affiliation', 'affiliation_other', 'uw_school',
+
+        'is_student_athlete', 'student_level', 'employee_category', 'employee_category_other',
+        'is_taking_inperson_classes', 'works_at_uw', 'on_campus_frequency_code',
+        'on_campus_frequency_description', 'able_to_work_or_study_from_home_code',
+        'able_to_work_or_study_from_home_description','is_uw_greek_member', 'uw_greek_house',
+        'greek_other', 'housing_type', 'number_house_members', 'lives_with_uw_students_or_employees',
+        'uw_dorm_name', 'uw_dorm_room_number', 'lives_in_uw_apartment',
+        'uw_apartment_name', 'study_tier', 'symptomatic_when_tested'
+
+        ]].to_csv(args.output, index=False)
