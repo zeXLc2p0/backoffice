@@ -117,7 +117,8 @@ def trim_whitespace(df: pd.DataFrame) -> pd.DataFrame:
 def drop_duplicate_values(input_series: pd.Series) -> pd.Series:
     """
     Find and drop duplicate values from the provided series and returns
-    the deduplicated pandas Series
+    the deduplicated pandas Series.
+    Avoids printing PII only if the given *input_series.name* is `netid`.
     """
     deduplicated_series = input_series
 
@@ -127,7 +128,8 @@ def drop_duplicate_values(input_series: pd.Series) -> pd.Series:
 
         dups_count = len(dups)
         dups_unique = list(dups.unique())
-        print(f"Dropped {dups_count:,} REDCap records with duplicated {input_series.name}: {dups_unique}", file = sys.stderr)
+        print(f"Dropped {dups_count:,} REDCap records with duplicated {input_series.name}: "
+            f"{dups_unique if input_series.name != 'netid' else '<masked>'}", file = sys.stderr)
 
     return deduplicated_series
 
