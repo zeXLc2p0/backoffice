@@ -43,7 +43,11 @@ FIELDS = [
 
     # barcodes
     "collect_barcode_kiosk",
-    "return_utm_barcode"
+    "return_utm_barcode",
+
+    # non PII fields that we don't ingest into ID3C
+    "illness_kiosk",
+    "illness_swabsend"
 ]
 
 

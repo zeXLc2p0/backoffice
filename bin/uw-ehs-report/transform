@@ -91,9 +91,16 @@ def parse_redcap(redcap_file) -> pd.DataFrame:
     enrollments.dropna(subset = {'netid'}, inplace = True)
 
     encounters = redcap_data.query('redcap_event_name == "encounter_arm_1"')[[ \
-        'record_id', \
-        'barcode' \
+        'record_id',
+        'barcode',
+        'illness_kiosk',
+        'illness_swabsend'
         ]]
+
+    # Set symptomatic_when_tested on encounters.
+    # Use '1' and '0' values to be consistent with the other boolean values we send to REDCap.
+    encounters.loc[(encounters['illness_kiosk'] == 'yes') | (encounters['illness_swabsend'] == 'yes'), 'symptomatic_when_tested'] = '1'
+    encounters.loc[(encounters['illness_kiosk'] == 'no') | (encounters['illness_swabsend'] == 'no'), 'symptomatic_when_tested'] = '0'
 
     joined_data = enrollments.merge(encounters, how='inner', on='record_id')
 
@@ -148,9 +155,6 @@ if __name__ == '__main__':
 
     id3c_data = pd.read_csv(args.id3c_data, dtype = 'string')
     id3c_data['barcode'] = normalize_barcode(id3c_data['barcode'])
-
-    # Placeholder field until the data pull gets implemented in ID3C.
-    id3c_data['symptomatic_when_tested'] = pd.NA
 
     # When you export a record set from Postgres as CSV, boolean columns
     # get values of 't' and 'f'. The EH&S transfer REDCap project expects
