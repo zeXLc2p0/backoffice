@@ -195,7 +195,7 @@ if __name__ == '__main__':
         'on_campus_frequency_description', 'able_to_work_or_study_from_home_code',
         'able_to_work_or_study_from_home_description','is_uw_greek_member', 'uw_greek_house',
         'greek_other', 'housing_type', 'number_house_members', 'lives_with_uw_students_or_employees',
-        'uw_dorm_name', 'lives_in_uw_apartment',
+        'uw_dorm_name', 'uw_dorm_room_number', 'lives_in_uw_apartment',
         'uw_apartment_name', 'study_tier', 'symptomatic_when_tested'
 
         ]].to_csv(args.output, index=False)
