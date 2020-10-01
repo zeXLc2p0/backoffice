@@ -1,6 +1,7 @@
 # SCAN Switchboard
 
 The SCAN Switchboard source code lives at https://github.com/seattleflu/scan-switchboard.
+The crontabs for the Switchboard live in this repo under [backoffice/crontabs/scan-switchboard](https://github.com/seattleflu/backoffice/blob/master/crontabs/scan-switchboard).
 This directory contains configuration info for the SCAN Switchboard web app that
 runs on the backoffice server.
 
