@@ -42,8 +42,9 @@ XDG_RUNTIME_DIR=/home/ubuntu/run
 # the presence/absence ETL to avoid extended delay of results.
 */10 * * * * ubuntu chronic fatigue envdir $ENVD/aliquot-manifest-processing/ envdir $ENVD/hutch/ pipenv run /opt/specimen-manifests/update-unattended --push-and-upload
 
-# Process the incident report manifest from Google Sheets every 30m.
-*/30 * * * * ubuntu chronic fatigue envdir $ENVD/incident-report-manifest-processing/ envdir $ENVD/google/ pipenv run /opt/specimen-manifests/update-unattended --push-and-upload
+# Process the incident report manifest from Google Sheets at :25 and :55 past the hour.
+# Don't run at 10 minutes on the hour so we don't interfere with the aliquot job.
+25,55 * * * * ubuntu chronic fatigue envdir $ENVD/incident-report-manifest-processing/ envdir $ENVD/google/ pipenv run /opt/specimen-manifests/update-unattended --push-and-upload
 
 # Upload new UW retrospectives to REDCap once a day at midnight
 0 0 * * * ubuntu pipenv run chronic envdir $ENVD/hutch/ envdir $ENVD/redcap-uw-retrospectives/ import-uw-retrospectives-to-redcap --import
