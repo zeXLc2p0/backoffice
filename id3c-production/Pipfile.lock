@@ -26,10 +26,10 @@
         },
         "botocore": {
             "hashes": [
-                "sha256:539aaf805ad8842ee3fb7350e0a4853f3db6a95ea9ffbe92add1ad2a6636ee86",
-                "sha256:b929e352a6fd4883cae38ba662fbf6ba93a9251acf476aa1e05b0fac1e81c313"
+                "sha256:3b9179edbba61c96f5d1eaa4328c9cda686bd461e102c5878c4880479c24e268",
+                "sha256:f59437ff69d260faa876a2bb7d76debcbbb3b1a497e9ff49550a1a5501679720"
             ],
-            "version": "==1.18.14"
+            "version": "==1.18.15"
         },
         "cachetools": {
             "hashes": [
@@ -186,7 +186,7 @@
         "id3c": {
             "editable": true,
             "git": "https://github.com/seattleflu/id3c.git",
-            "ref": "4e4b7809907322b1a476675f1f62f6d37981705e"
+            "ref": "80e1b2fc9bf01d5bf09fc09215bd22f47fa62f74"
         },
         "idna": {
             "hashes": [
