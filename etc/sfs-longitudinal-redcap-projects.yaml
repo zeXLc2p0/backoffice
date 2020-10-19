@@ -1,0 +1,16 @@
+---
+project_id: 23854
+source: uw_reopening
+redcap_api_url_env_name: REDCAP_API_URL
+redcap_api_token_env_name: REDCAP_API_TOKEN_UW_REOPENING
+enrollment_event_names:
+  - enrollment_arm_1
+enrollment_fields:
+  - core_participant_first_name
+  - core_participant_last_name
+  - core_birthdate
+encounter_event_names:
+  - encounter_arm_1
+encounter_fields:
+  - collect_barcode_kiosk
+  - return_utm_barcode
