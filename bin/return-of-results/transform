@@ -209,6 +209,9 @@ if __name__ == '__main__':
 
     redcap_data = scan_redcap_data.append(sfs_redcap_data)
 
+    # Check for duplicate barcodes across ALL projects.
+    redcap_data["qrcode"] = drop_duplicate_barcodes(redcap_data["qrcode"])
+
     id3c_data = pd.read_csv(args.id3c_data, dtype = 'string')
     id3c_data['qrcode'] = normalize_barcode(id3c_data['qrcode'])
 
