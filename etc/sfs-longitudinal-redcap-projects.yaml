@@ -14,3 +14,37 @@ encounter_event_names:
 encounter_fields:
   - collect_barcode_kiosk
   - return_utm_barcode
+---
+project_id: 23740
+source: childcare
+redcap_api_url_env_name: REDCAP_API_URL
+redcap_api_token_env_name: REDCAP_API_TOKEN_CHILDCARE
+enrollment_event_names:
+  - enrollment_arm_1
+  - enrollment_arm_2
+enrollment_fields:
+  - core_participant_first_name
+  - core_participant_last_name
+  - core_birthdate
+encounter_event_names:
+  - week1_mon_test_arm_1
+  - week1_thur_test_arm_1
+  - week2_mon_test_arm_1
+  - week2_thur_test_arm_1
+  - week3_mon_test_arm_1
+  - week3_thur_test_arm_1
+  - week4_mon_test_arm_1
+  - week4_thur_test_arm_1
+  - week5_mon_test_arm_1
+  - week5_thur_test_arm_1
+  - week6_mon_test_arm_1
+  - week6_thur_test_arm_1
+  - week7_mon_test_arm_1
+  - week7_thur_test_arm_1
+  - week8_mon_test_arm_1
+  - week8_thur_test_arm_1
+  - enrollment_arm_2
+  - week_2_arm_2
+encounter_fields:
+  - return_utm_barcode
+  - contacted
