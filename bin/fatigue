@@ -105,7 +105,7 @@ main() {
     # Run the given command, with output sent to the new state file.
     "$@" &>"$new_state" && exited=0 || exited=$?
 
-    if [[ $exited -ne 0 ]]; then
+    if [[ $exited -ne 0 || -s "$new_state" ]]; then
         if [[ ! -e "$old_state" || "$(hash-state "$new_state")" != "$(hash-state "$old_state")" ]]; then
             # A new error! Save it for later and exit with error.
             cat "$new_state"
