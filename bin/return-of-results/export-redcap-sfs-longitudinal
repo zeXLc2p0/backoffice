@@ -60,7 +60,7 @@ class SFSProject(Project):
 
 
 def main():
-    with config_file.open() as f:
+    with open(config_file, 'r') as f:
         configs = list(yaml.safe_load_all(f))
 
     for config in configs:
