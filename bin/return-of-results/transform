@@ -93,9 +93,9 @@ def parse_scan_redcap(redcap_file) -> pd.DataFrame:
     return redcap_data[['qrcode', 'pat_name', 'birth_date', 'contacted', 'source']]
 
 
-def parse_uw_reopening_redcap(redcap_file) -> pd.DataFrame:
+def parse_sfs_longitudinal_redcap(redcap_file) -> pd.DataFrame:
     """
-    Reads in data from a given UW Reopening *redcap_file*. Returns a
+    Reads in data from a given SFS longitudinal *redcap_file*. Returns a
     pandas.DataFrame prepared in the specifications of UW Lab Med's return
     of results portal.
     """
@@ -130,8 +130,7 @@ def parse_uw_reopening_redcap(redcap_file) -> pd.DataFrame:
     barcodes = drop_duplicate_barcodes(barcodes)
 
     redcap_data['qrcode'] = barcodes
-    redcap_data['contacted'] = pd.NA
-    redcap_data['source'] = 'uw_reopening'
+    redcap_data.loc[redcap_data['source'] == 'uw_reopening', 'contacted'] = pd.NA
 
     return redcap_data[['qrcode', 'pat_name', 'birth_date', 'contacted', 'source']]
 
@@ -170,7 +169,7 @@ def edit_status_code(results: pd.DataFrame) -> pd.DataFrame:
     """
     Sets the *results* status to `pending` if a test result is `positive` or
     `inconclusive` but the participant has not yet been contacted
-    (`contacted` != 'yes') for SCAN samples only (`source` == 'scan')
+    (`contacted` != 'yes') for SCAN and SFS Childcare samples.
 
     Sets the *results* status to `pending` if a record has a null swab type.
 
@@ -183,9 +182,9 @@ def edit_status_code(results: pd.DataFrame) -> pd.DataFrame:
     is_inconclusive = results['status_code'] == 'inconclusive'
 
     participant_contacted = results['contacted'] == 'yes'
-    is_scan_data = results['source'] == 'scan'
+    require_contacted = results['source'].isin(['scan', 'childcare'])
 
-    results.loc[(is_positive | is_inconclusive) & ~(participant_contacted) & is_scan_data, 'status_code'] = 'pending'
+    results.loc[(is_positive | is_inconclusive) & ~(participant_contacted) & require_contacted, 'status_code'] = 'pending'
 
     results.loc[results['swab_type'].isnull(), 'status_code'] = 'pending'
 
@@ -197,7 +196,7 @@ if __name__ == '__main__':
         description="Join a REDCAP export NDJSON file with a SCAN return of results ID3C export CSV file."
     )
     parser.add_argument("scan_redcap_data", help="NDJSON export of SCAN records from REDCap")
-    parser.add_argument("uw_reopening_redcap_data", help="NDJSON export of UW Reopening records from REDCap")
+    parser.add_argument("sfs_longitudinal_redcap_data", help="NDJSON export of SFS longitudinal records from REDCap")
     parser.add_argument("id3c_data", help="CSV export of SCAN return of results from ID3C")
     parser.add_argument("output", help="A destination for the output csv", nargs="?",
         default=sys.stdout)
@@ -205,9 +204,12 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     scan_redcap_data = parse_scan_redcap(args.scan_redcap_data)
-    uw_reopening_redcap_data = parse_uw_reopening_redcap(args.uw_reopening_redcap_data)
+    sfs_redcap_data = parse_sfs_longitudinal_redcap(args.sfs_longitudinal_redcap_data)
 
-    redcap_data = scan_redcap_data.append(uw_reopening_redcap_data)
+    redcap_data = scan_redcap_data.append(sfs_redcap_data)
+
+    # Check for duplicate barcodes across ALL projects.
+    redcap_data["qrcode"] = drop_duplicate_barcodes(redcap_data["qrcode"])
 
     id3c_data = pd.read_csv(args.id3c_data, dtype = 'string')
     id3c_data['qrcode'] = normalize_barcode(id3c_data['qrcode'])

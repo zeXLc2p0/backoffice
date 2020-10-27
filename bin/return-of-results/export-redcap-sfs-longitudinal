@@ -1,0 +1,130 @@
+#!/usr/bin/env python3
+# usage: export-redcap-sfs-longitudinal
+#
+# Exports participant information from SFS longitudinal REDCap projects as NDJSON.
+# REDCap projects are processed according to the YAML configuration in $CONFIG,
+# which defaults to etc/sfs-longitudinal-redcap-projects.yaml.
+#
+# The $CONFIG file is expected to have at least one YAML document in it with
+# the following format:
+#
+#   ---
+#   project_id: 23854
+#   source: uw_reopening
+#   redcap_api_url_env_name: REDCAP_API_URL
+#   redcap_api_token_env_name: REDCAP_API_TOKEN_UW_REOPENING
+#   enrollment_event_names:
+#     - enrollment_arm_1
+#   enrollment_fields:
+#     - core_participant_first_name
+#     - core_participant_last_name
+#     - core_birthdate
+#   encounter_event_names:
+#     - encounter_arm_1
+#   encounter_fields:
+#     - collect_barcode_kiosk
+#     - return_utm_barcode
+#
+import sys
+import json
+import yaml
+from pathlib import Path
+from id3c.cli.redcap import Project
+from os import environ
+from typing import Dict, List, Any
+
+config_file  = environ.get("CONFIG")
+
+if not config_file:
+    base_dir = Path(__file__).parent.parent.parent.resolve()
+    config_file = base_dir / "etc/sfs-longitudinal-redcap-projects.yaml"
+
+
+class SFSProject(Project):
+    source: str
+    enrollment_event_names: List[str]
+    enrollment_fields: List[str]
+    encounter_event_names: List[str]
+    encounter_fields: List[str]
+
+    def __init__(self, config: Dict[str, Any]):
+        REDCAP_API_URL = environ[config['redcap_api_url_env_name']]
+        REDCAP_API_TOKEN = environ[config['redcap_api_token_env_name']]
+
+        super().__init__(REDCAP_API_URL, REDCAP_API_TOKEN, config['project_id'])
+        self.source = config['source']
+        self.enrollment_event_names = config['enrollment_event_names']
+        self.enrollment_fields = config['enrollment_fields']
+        self.encounter_event_names = config['encounter_event_names']
+        self.encounter_fields = config['encounter_fields']
+
+
+def main():
+    with config_file.open() as f:
+        configs = list(yaml.safe_load_all(f))
+
+    for config in configs:
+        project = SFSProject(config)
+
+        enrollment_records = fetch_enrollment_records(project)
+
+        # Update encounter data with enrollment data based on record.id
+        # Skip the record if it does not have enrollment data
+        for record in fetch_encounter_records(project):
+            enrollment_data = enrollment_records.get(record.id)
+            if not enrollment_data:
+                continue
+
+            record.update(enrollment_data)
+            record['source'] = project.source
+            print(json.dumps(record, indent = None, separators = ",:"), flush = True)
+
+
+def fetch_enrollment_records(project) -> Dict[str, dict]:
+    """
+    Fetch all enrollment records with *project.enrollment_event_names*.
+    Returns a dictionary of record ids and their corresponding fields for
+    records that have all *project.enrollment_fields* completed.
+
+    Only expects one enrollment event per record id, will drop any record id
+    that has multiple records.
+    """
+    redcap_records: Dict[str,dict] = {}
+    duplicate_record_ids = set()
+
+    fields = [project.record_id_field] + project.enrollment_fields
+    for record in project.records(events = project.enrollment_event_names, fields = fields, raw = True):
+        if not all(len(record[field]) for field in project.enrollment_fields):
+            continue
+
+        if record.id in redcap_records:
+            duplicate_record_ids.add(record.id)
+
+        redcap_records[record.id] = { field: record[field] for field in project.enrollment_fields }
+
+    if duplicate_record_ids:
+        for record_id in duplicate_record_ids:
+            del redcap_records[record_id]
+
+        print(f"Dropped {len(duplicate_record_ids)} REDCap records with duplicate"
+              f" enrollment record ids: {duplicate_record_ids}", file = sys.stderr)
+
+    return redcap_records
+
+
+def fetch_encounter_records(project):
+    """
+    Fetch all encounter records with *project.encounter_event_names*.
+    Only include the encounter record if at least one of the
+    *project.encounter_fileds* is completed.
+    """
+    fields = [project.record_id_field] + project.encounter_fields
+    for record in project.records(events = project.encounter_event_names, fields = fields, raw = True):
+        if not any(len(record[field]) for field in project.encounter_fields):
+            continue
+
+        yield record
+
+
+if __name__ == "__main__":
+    main()
