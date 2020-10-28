@@ -66,11 +66,6 @@ XDG_RUNTIME_DIR=/home/ubuntu/run
 # once an hour at five 'till.
 55 * * * * ubuntu promjob "id3c etl clinical" pipenv run id3c etl clinical --commit
 
-# XXX TODO: Explicitly configure the location the geocoding cache when that is
-# supported by our code.  Currently it ends up as cache.pickle in the working
-# directory, which is /home/ubuntu in this case.  Possibly use separate cache
-# files for each REDCap project.
-#
 # XXX TODO: Remove locking of the cache file (to prevent corruption/race
 # conditions) once locking is done by ID3C directly.
 #
@@ -78,11 +73,11 @@ XDG_RUNTIME_DIR=/home/ubuntu/run
 # ingested once every 8 hours. Keeping these in case any data corrections are made.
 # The uw-retro REDCap project is still active, but it only needs to be run
 # once a day after the DET generation at 4 A.M.
-0 0-16/8 * * * ubuntu promjob "id3c etl redcap-det uw-retrospectives"        flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-uw-retrospectives pipenv run id3c etl redcap-det uw-retrospectives --commit
-0 1-17/8 * * * ubuntu promjob "id3c etl redcap-det swab-n-send"              flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-swab-n-send pipenv run id3c etl redcap-det swab-n-send --commit
-0 2-18/8 * * * ubuntu promjob "id3c etl redcap-det kiosk"                    flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-kiosk pipenv run id3c etl redcap-det kiosk --commit
-0 3-19/8 * * * ubuntu promjob "id3c etl redcap-det swab-and-home-flu"        flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-swab-and-home-flu pipenv run id3c etl redcap-det swab-and-home-flu --commit
-0 4-20/8 * * * ubuntu promjob "id3c etl redcap-det asymptomatic-swab-n-send" flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-asymptomatic-swab-n-send pipenv run id3c etl redcap-det asymptomatic-swab-n-send --commit
+0 0-16/8 * * * ubuntu promjob "id3c etl redcap-det uw-retrospectives"        flock -F /home/ubuntu/sfs-cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-uw-retrospectives pipenv run id3c etl redcap-det uw-retrospectives --geocoding-cache /home/ubuntu/sfs-cache.pickle --commit
+0 1-17/8 * * * ubuntu promjob "id3c etl redcap-det swab-n-send"              flock -F /home/ubuntu/sfs-cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-swab-n-send pipenv run id3c etl redcap-det swab-n-send --geocoding-cache /home/ubuntu/sfs-cache.pickle --commit
+0 2-18/8 * * * ubuntu promjob "id3c etl redcap-det kiosk"                    flock -F /home/ubuntu/sfs-cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-kiosk pipenv run id3c etl redcap-det kiosk --geocoding-cache /home/ubuntu/sfs-cache.pickle --commit
+0 3-19/8 * * * ubuntu promjob "id3c etl redcap-det swab-and-home-flu"        flock -F /home/ubuntu/sfs-cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-swab-and-home-flu pipenv run id3c etl redcap-det swab-and-home-flu --geocoding-cache /home/ubuntu/sfs-cache.pickle --commit
+0 4-20/8 * * * ubuntu promjob "id3c etl redcap-det asymptomatic-swab-n-send" flock -F /home/ubuntu/sfs-cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-asymptomatic-swab-n-send pipenv run id3c etl redcap-det asymptomatic-swab-n-send --geocoding-cache /home/ubuntu/sfs-cache.pickle --commit
 
 # Ingest each SCAN Surveillance REDCap project every hour, interleaving the
 # projects so each gets ingested once every 8 hours.
@@ -90,28 +85,28 @@ XDG_RUNTIME_DIR=/home/ubuntu/run
 # SCAN Research Study. Keeping these in case any data corrects are made.
 # Deleted jobs for Surveillance REDCap projects that did not have any records
 # as of 08 June, 2020.
-0 5-21/8 * * * ubuntu promjob "id3c etl redcap-det scan-en"      flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-en pipenv run id3c etl redcap-det scan-en --commit
-0 6-22/8 * * * ubuntu promjob "id3c etl redcap-det scan-es"      flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-es pipenv run id3c etl redcap-det scan-es --commit
-0 7-23/8 * * * ubuntu promjob "id3c etl redcap-det scan-zh-Hant" flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-zh-Hant pipenv run id3c etl redcap-det scan-zh-Hant --commit
+0 5-21/8 * * * ubuntu promjob "id3c etl redcap-det scan-en"      flock -F /home/ubuntu/scan-cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-en pipenv run id3c etl redcap-det scan-en --geocoding-cache /home/ubuntu/scan-cache.pickle --commit
+0 6-22/8 * * * ubuntu promjob "id3c etl redcap-det scan-es"      flock -F /home/ubuntu/scan-cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-es pipenv run id3c etl redcap-det scan-es --geocoding-cache /home/ubuntu/scan-cache.pickle --commit
+0 7-23/8 * * * ubuntu promjob "id3c etl redcap-det scan-zh-Hant" flock -F /home/ubuntu/scan-cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-zh-Hant pipenv run id3c etl redcap-det scan-zh-Hant --geocoding-cache /home/ubuntu/scan-cache.pickle --commit
 
 # Ingest each SCAN Research REDCap project every 30 min (with the
 # first starting 5 minutes after the SFS/SCAN Surveillance ingests above.)
-5,35  * * * * ubuntu promjob "id3c etl redcap-det scan-irb-en"       flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-irb-en pipenv run id3c etl redcap-det scan-irb-en --commit
-7,37  * * * * ubuntu promjob "id3c etl redcap-det scan-irb-es"       flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-irb-es pipenv run id3c etl redcap-det scan-irb-es --commit
-9,39  * * * * ubuntu promjob "id3c etl redcap-det scan-irb-zh-Hant"  flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-irb-zh-Hant pipenv run id3c etl redcap-det scan-irb-zh-Hant --commit
-11,41 * * * * ubuntu promjob "id3c etl redcap-det scan-irb-kiosk-en" flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-irb-kiosk-en pipenv run id3c etl redcap-det scan-irb-kiosk-en --commit
-13,43 * * * * ubuntu promjob "id3c etl redcap-det scan-irb-ru"       flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-irb-ru pipenv run id3c etl redcap-det scan-irb-ru --commit
-15,45 * * * * ubuntu promjob "id3c etl redcap-det scan-irb-husky-en" flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-irb-husky-en pipenv run id3c etl redcap-det scan-irb-husky-en --commit
-17,47 * * * * ubuntu promjob "id3c etl redcap-det scan-irb-vi"       flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-irb-vi pipenv run id3c etl redcap-det scan-irb-vi --commit
+5,35  * * * * ubuntu promjob "id3c etl redcap-det scan-irb-en"       flock -F /home/ubuntu/scan-cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-irb-en pipenv run id3c etl redcap-det scan-irb-en --geocoding-cache /home/ubuntu/scan-cache.pickle --commit
+7,37  * * * * ubuntu promjob "id3c etl redcap-det scan-irb-es"       flock -F /home/ubuntu/scan-cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-irb-es pipenv run id3c etl redcap-det scan-irb-es --geocoding-cache /home/ubuntu/scan-cache.pickle --commit
+9,39  * * * * ubuntu promjob "id3c etl redcap-det scan-irb-zh-Hant"  flock -F /home/ubuntu/scan-cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-irb-zh-Hant pipenv run id3c etl redcap-det scan-irb-zh-Hant --geocoding-cache /home/ubuntu/scan-cache.pickle --commit
+11,41 * * * * ubuntu promjob "id3c etl redcap-det scan-irb-kiosk-en" flock -F /home/ubuntu/scan-cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-irb-kiosk-en pipenv run id3c etl redcap-det scan-irb-kiosk-en --geocoding-cache /home/ubuntu/scan-cache.pickle --commit
+13,43 * * * * ubuntu promjob "id3c etl redcap-det scan-irb-ru"       flock -F /home/ubuntu/scan-cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-irb-ru pipenv run id3c etl redcap-det scan-irb-ru --geocoding-cache /home/ubuntu/scan-cache.pickle --commit
+15,45 * * * * ubuntu promjob "id3c etl redcap-det scan-irb-husky-en" flock -F /home/ubuntu/scan-cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-irb-husky-en pipenv run id3c etl redcap-det scan-irb-husky-en --geocoding-cache /home/ubuntu/scan-cache.pickle --commit
+17,47 * * * * ubuntu promjob "id3c etl redcap-det scan-irb-vi"       flock -F /home/ubuntu/scan-cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-irb-vi pipenv run id3c etl redcap-det scan-irb-vi --geocoding-cache /home/ubuntu/scan-cache.pickle --commit
 
 # Ingest UW REopening REDCap project every 30 min (after SCAN projects above).
 # We should probably increase the frequency in the near future (for testing
 # quota purposes) when the SmaryStreets cache handling is updated.
-19,49 * * * * ubuntu promjob "id3c etl redcap-det uw-reopening" flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-uw-reopening pipenv run id3c etl redcap-det uw-reopening --redcap-api-batch-size 750 --commit
+19,49 * * * * ubuntu promjob "id3c etl redcap-det uw-reopening" flock -F /home/ubuntu/uw-reopening-cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-uw-reopening pipenv run id3c etl redcap-det uw-reopening --redcap-api-batch-size 750 --geocoding-cache /home/ubuntu/uw-reopening-cache.pickle --commit
 
 # Ingest Childcare REDCap project every 30 min (after UW Reopening project above).
 # Use redcap-api-batch-size = 1000 because this REDCap project is longitudinal.
-21,51 * * * * ubuntu promjob "id3c etl redcap-det childcare" flock -F /home/ubuntu/cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-childcare pipenv run id3c etl redcap-det childcare --redcap-api-batch-size 1000 --commit
+21,51 * * * * ubuntu promjob "id3c etl redcap-det childcare" flock -F /home/ubuntu/sfs-cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-childcare pipenv run id3c etl redcap-det childcare --redcap-api-batch-size 1000 --geocoding-cache /home/ubuntu/sfs-cache.pickle --commit
 
 # Ingest FHIR documents every 5 minutes.
 */5  * * * * ubuntu promjob "id3c etl fhir" fatigue --quiet pipenv run id3c etl fhir --commit
