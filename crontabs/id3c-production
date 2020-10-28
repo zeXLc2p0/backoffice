@@ -99,10 +99,8 @@ XDG_RUNTIME_DIR=/home/ubuntu/run
 15,45 * * * * ubuntu promjob "id3c etl redcap-det scan-irb-husky-en" flock -F /home/ubuntu/scan-cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-irb-husky-en pipenv run id3c etl redcap-det scan-irb-husky-en --geocoding-cache /home/ubuntu/scan-cache.pickle --commit
 17,47 * * * * ubuntu promjob "id3c etl redcap-det scan-irb-vi"       flock -F /home/ubuntu/scan-cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-scan-irb-vi pipenv run id3c etl redcap-det scan-irb-vi --geocoding-cache /home/ubuntu/scan-cache.pickle --commit
 
-# Ingest UW REopening REDCap project every 30 min (after SCAN projects above).
-# We should probably increase the frequency in the near future (for testing
-# quota purposes) when the SmaryStreets cache handling is updated.
-19,49 * * * * ubuntu promjob "id3c etl redcap-det uw-reopening" flock -F /home/ubuntu/uw-reopening-cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-uw-reopening pipenv run id3c etl redcap-det uw-reopening --redcap-api-batch-size 750 --geocoding-cache /home/ubuntu/uw-reopening-cache.pickle --commit
+# Ingest UW REopening REDCap project every 10 min
+*/10 * * * * ubuntu promjob "id3c etl redcap-det uw-reopening" flock -F /home/ubuntu/uw-reopening-cache.pickle envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap-uw-reopening pipenv run id3c etl redcap-det uw-reopening --redcap-api-batch-size 750 --geocoding-cache /home/ubuntu/uw-reopening-cache.pickle --commit
 
 # Ingest Childcare REDCap project every 30 min (after UW Reopening project above).
 # Use redcap-api-batch-size = 1000 because this REDCap project is longitudinal.
