@@ -1,0 +1,63 @@
+#!/usr/bin/env python3
+
+from datetime import date
+import subprocess
+
+import click
+
+
+@click.option("--identifier-set", type=str,
+    help = "Name of the identifier set to mint",
+    required = True)
+
+@click.option("--per-sheet", type=int,
+    help = "Number of barcodes that fit onto a sheet given its layout",
+    required = True)
+
+@click.option("--sheets", type=int,
+    help = "Number of sheets to create",
+    required = True)
+
+@click.option("--prefix", type=str,
+    help = "The prefix (including path) of the label PDF files to create",
+    required = True)
+
+@click.option("--max-sheets", type=int,
+    help = "The maximum number of sheets to include in a single PDF file",
+    default = 20,
+    required = False)
+
+@click.command()
+def mint_barcodes_in_batch(identifier_set, per_sheet, sheets, prefix, max_sheets):
+    """
+    Mints barcodes and generates label PDFs. Splits the number of sheets across multiple
+    PDF files to keep the number of sheets per file <= `max_sheets`.
+
+    Label PDF files will be named with this pattern:
+    `prefix``identifier_set`_(number of sheets in the file)_sheets_(current date)_(the iteration number).pdf
+    For example:
+        Peter_collections-uw-observed_15_sheets_2020-10-26_1.pdf
+        Peter_collections-uw-observed_5_sheets_2020-10-26_2.pdf
+    """
+
+    sheets_remaining = sheets
+    iterations = 1
+
+    try:
+        while sheets_remaining > 0:
+            num_sheets = min(sheets_remaining, max_sheets)
+
+            subprocess.run(["pipenv", "run", "id3c", "identifier", "mint",
+                    f"{identifier_set}", f"{per_sheet * num_sheets}", "--quiet", "--labels",
+                    f"{prefix}{identifier_set}_{num_sheets}_sheets_{date.today()}_{iterations}.pdf"],
+                    capture_output=True, check=True)
+            sheets_remaining -= num_sheets
+            iterations += 1
+
+    except subprocess.CalledProcessError as e:
+        print(f'There was an error minting the batch:\n{e.stderr}')
+        return
+
+
+if __name__ == '__main__':
+    mint_barcodes_in_batch()
