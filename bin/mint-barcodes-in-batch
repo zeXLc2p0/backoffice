@@ -44,20 +44,24 @@ def mint_barcodes_in_batch(identifier_set, per_sheet, sheets, prefix, max_sheets
     iterations = 1
 
     try:
+
         while sheets_remaining > 0:
+            print(f"\nRunning iteration: {iterations}")
+
             num_sheets = min(sheets_remaining, max_sheets)
 
-            subprocess.run(["pipenv", "run", "id3c", "identifier", "mint",
+            completion = subprocess.run(["pipenv", "run", "id3c", "identifier", "mint",
                     f"{identifier_set}", f"{per_sheet * num_sheets}", "--quiet", "--labels",
                     f"{prefix}{identifier_set}_{num_sheets}_sheets_{date.today()}_{iterations}.pdf"],
-                    capture_output=True, check=True)
+                    check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding="utf-8")
+            print(completion.stdout)
             sheets_remaining -= num_sheets
             iterations += 1
 
     except subprocess.CalledProcessError as e:
-        print(f'There was an error minting the batch:\n{e.stderr}')
+        print(f"There was an error minting the batch:\n\n{e.stdout}")
         return
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     mint_barcodes_in_batch()
