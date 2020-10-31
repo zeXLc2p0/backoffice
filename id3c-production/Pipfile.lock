@@ -187,7 +187,7 @@
         "id3c": {
             "editable": true,
             "git": "https://github.com/seattleflu/id3c.git",
-            "ref": "3c32e3fb8dccb307b5a360a18c022bed1c01e8f0"
+            "ref": "a2d4b0e0bf68e49e5d28afeaefedeb4fb468db97"
         },
         "idna": {
             "hashes": [
@@ -545,9 +545,9 @@
         },
         "smartystreets-python-sdk": {
             "hashes": [
-                "sha256:fc05f89a4d647bcc77f49618d7e236fd74ee814fbbfb9fa5c7d81a3623ed721b"
+                "sha256:6cc695e67243460899b1608ca5231c611364db87ea2a6f1b3fbe9868051ca1c1"
             ],
-            "version": "==4.7.0"
+            "version": "==4.6.1"
         },
         "uritemplate": {
             "hashes": [
