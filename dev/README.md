@@ -16,6 +16,13 @@ the same dump for a week or two for local dev.
 
 See `./dev/refresh-database --help` for more information.
 
+If you get an error similar to:
+`pg_restore: [archiver] unsupported version (1.14) in file header`
+try a workaround described on
+https://stackoverflow.com/questions/59455783/pg-restore-archiver-unsupported-version-1-14-in-file-header
+Run pg_restore with the `--host=localhost` option. For example:
+`pg_restore --dbname "seattleflu" production.pgdb --host=localhost --user=postgres`
+
 ### Setting up a database for the first time
 
 If you are setting up a new local dev database, make a postgres user and database named after
