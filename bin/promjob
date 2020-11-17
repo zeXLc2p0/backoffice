@@ -1,0 +1,78 @@
+#!/bin/bash
+# usage: promjob <name> <command> [<args> …]
+#
+# Runs a cronjob <command> and afterwards exports basic metrics (start time,
+# end time, duration, exit status) to Prometheus' node_exporter's textfile
+# collector.  A <name> for the cronjob must be given as the first argument; it
+# will be attached to the metrics as a "name" label.
+#
+# Set TEXTFILE_COLLECTOR_DIR to override the default directory for metric
+# collection (/var/lib/prometheus/node-exporter).
+#
+set -euo pipefail
+
+: ${TEXTFILE_COLLECTOR_DIR:=/var/lib/prometheus/node-exporter}
+
+if [[ ! -w "$TEXTFILE_COLLECTOR_DIR" ]]; then
+    echo "error: $TEXTFILE_COLLECTOR_DIR does not exist or is not writable" >&2
+    exit 1
+fi
+
+main() {
+    local cronjob promfile started ended exited
+
+    # Label for the cronjob
+    cronjob="$(escape-label-value "${1:?error: a cronjob name must be provided as the first argument.}")"
+    shift
+
+    # Determine a safe but stable filename for the exported metrics.
+    promfile="$TEXTFILE_COLLECTOR_DIR/$(md5 "$cronjob").prom"
+
+    # Record start time.
+    started="$(date +%s)"
+
+    # Run the passed command, with the effect of "set -e" temporarily disabled,
+    # saving the exit status for later.
+    "$@" && exited=0 || exited=$?
+
+    # Record end time and write metrics atomically.
+    ended="$(date +%s)"
+
+    cat >"$promfile.$$" <<.
+# HELP cronjob_start_time_seconds Start time of the cronjob since Unix epoch in seconds.
+# TYPE cronjob_start_time_seconds gauge
+cronjob_start_time_seconds{name="$cronjob"} $started
+
+# HELP cronjob_end_time_seconds End time of the cronjob since Unix epoch in seconds.
+# TYPE cronjob_end_time_seconds gauge
+cronjob_end_time_seconds{name="$cronjob"} $ended
+
+# HELP cronjob_duration_seconds Duration of the cronjob in seconds.
+# TYPE cronjob_duration_seconds gauge
+cronjob_duration_seconds{name="$cronjob"} $(($ended - $started))
+
+# HELP cronjob_exit_status Exit status of the cronjob.
+# TYPE cronjob_exit_status gauge
+cronjob_exit_status{name="$cronjob"} $exited
+.
+    mv "$promfile.$$" "$promfile"
+
+    # Exit same status as the passed command.
+    exit $exited
+}
+
+escape-label-value() {
+    # Escape " and \ and replace newlines with \n
+    perl -pe '
+        chomp;
+        s/(?=["\\])/\\/g;
+        s/\n/\\n/g;
+    ' <<<"$1"
+}
+
+md5() {
+    # Print just the digest, skipping the filename.
+    md5sum <<<"$1" | awk '{print $1}'
+}
+
+main "$@"
