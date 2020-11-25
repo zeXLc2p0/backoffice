@@ -26,10 +26,10 @@
         },
         "botocore": {
             "hashes": [
-                "sha256:5cee9d02d335a0c43d225da6595e6f95970a01ecaebeba757ac22130f2d31495",
-                "sha256:87d77925ea8d35898ff1627f6f97d396bed44d37fff960daae181a76ba413546"
+                "sha256:4e488351f399501a78b16e1dc466e505ccf63897c936030c56c6d3c37e57939c",
+                "sha256:ccaf3979590b72625b3699d93dabf48f350f9a3304c127fc6830e8ac842b0d96"
             ],
-            "version": "==1.19.22"
+            "version": "==1.19.25"
         },
         "cachetools": {
             "hashes": [
@@ -70,12 +70,11 @@
         },
         "cligj": {
             "hashes": [
-                "sha256:2bf2042a81be581d707f726aef5efbbd935a62af85d5521305026dabeb798f5d",
-                "sha256:394a0905fe6f36821b82f086bf8cc12fef20d99d0a3c26a8a92a9207a18b70c6",
-                "sha256:9881e3b71ff450a83412fadee026347ca15b99c623b9485593da4929cf884ca9"
+                "sha256:07171c1e287f45511f97df4ea071abc5d19924153413d5683a8e4866369bc676",
+                "sha256:b2f1f7247d59a5387bd3013a08b9ed6829e96fafa4a6e6292341efdb46fe6220"
             ],
             "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3' and python_version < '4'",
-            "version": "==0.7.0"
+            "version": "==0.7.1"
         },
         "colorama": {
             "hashes": [
@@ -551,7 +550,7 @@
         "seattleflu-id3c-customizations": {
             "editable": true,
             "git": "https://github.com/seattleflu/id3c-customizations.git",
-            "ref": "a4d320dcdfae4509d9ca4676b62af3467ceea68f"
+            "ref": "d725128f4760d971cf47f23913bee6b05b1c691a"
         },
         "six": {
             "hashes": [
@@ -563,9 +562,9 @@
         },
         "smartystreets-python-sdk": {
             "hashes": [
-                "sha256:4e1684f6bd2a7b526fdab083d3b196be5fe6fd8fc485fe4bb9b9e04d4fe8494b"
+                "sha256:1f36fa1971b83631477c4d7f995c084919f728f223d04f431a6605d07f90197d"
             ],
-            "version": "==4.7.1"
+            "version": "==4.7.2"
         },
         "uritemplate": {
             "hashes": [
