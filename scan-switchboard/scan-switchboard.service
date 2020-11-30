@@ -5,8 +5,7 @@ After=network.target
 [Service]
 WorkingDirectory=/opt/scan-switchboard
 User=nobody
-Environment="PIPENV_VENV_IN_PROJECT=1"
-ExecStart=/usr/local/bin/pipenv run ./bin/serve --config base_url:/switchboard/
+ExecStart=./bin/venv-run ./bin/serve --config base_url:/switchboard/
 Restart=always
 RestartSec=10
 

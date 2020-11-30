@@ -1,9 +1,6 @@
 SHELL=/bin/bash
 PATH=/opt/backoffice/bin:/usr/local/bin:/usr/bin:/bin
 
-# Point Pipenv at the SCAN Switchboard environment
-PIPENV_PIPFILE=/opt/scan-switchboard/Pipfile
-
 # SCAN Switchboard uses the same environment variables as id3c-production
 ENVD=/opt/backoffice/id3c-production/env.d
 
@@ -12,4 +9,4 @@ XDG_RUNTIME_DIR=/home/ubuntu/run
 
 
 # Refresh the SCAN Switchboard SQLite database every 30 minutes
-*/30 * * * * ubuntu promjob "switchboard refresh" chronic fatigue envdir $ENVD/redcap flock -F /opt/scan-switchboard/data/record-barcodes.ndjson pipenv run make -BC /opt/scan-switchboard
+*/30 * * * * ubuntu promjob "switchboard refresh" chronic fatigue envdir $ENVD/redcap flock -F /opt/scan-switchboard/data/record-barcodes.ndjson /opt/scan-switchboard/bin/venv-run make -BC /opt/scan-switchboard
