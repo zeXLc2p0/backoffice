@@ -121,3 +121,8 @@ GEOCODING_CACHE=/home/ubuntu/sfs-cache.pickle
 # ingested FHIR documents in the view
 */5 * * * * ubuntu promjob "refresh-materialized-view: shipping.fhir_questionnaire_responses_v1" fatigue --quiet pipenv run id3c refresh-materialized-view shipping fhir_questionnaire_responses_v1 --commit
 */5 * * * * ubuntu promjob "refresh-materialized-view: shipping.scan_encounters_v1"              fatigue --quiet pipenv run id3c refresh-materialized-view shipping scan_encounters_v1 --commit
+
+# Make UW Reopening testing offers at :15 and :45
+# This job uses data created by redcap-det uw-reopening, etl fhir, and refresh-materialized-view shipping fhir_questionnaire_responses_v1
+# Run at :15 to use the :00 uw-reopening run and :45 to use the :30 uw-reopening run
+15,45  * * * * ubuntu promjob "id3c offer-uw-testing" fatigue --quiet envdir $ENVD/redcap-sfs pipenv run id3c offer-uw-testing --commit
