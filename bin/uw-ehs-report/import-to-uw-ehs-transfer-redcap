@@ -2,6 +2,8 @@
 import argparse
 import os
 import json
+import math
+import numpy as np
 import pandas as pd
 import requests
 import logging
@@ -68,5 +70,12 @@ if __name__ == '__main__':
     if not os.environ.get('REDCAP_API_TOKEN_EHS_TRANSFER_UW') or not os.environ.get('REDCAP_API_URL'):
         log.error("The REDCAP_API_TOKEN_EHS_TRANSFER_UW and REDCAP_API_URL env vars must be set.")
     else:
-        ehs_dataset = pd.read_csv(args.filename).to_json(orient='records')
-        post_to_redcap(ehs_dataset)
+        ehs_dataset = pd.read_csv(args.filename)
+
+        # Post data to REDCap in batches of 10000 records to reduce strain on REDCap servers
+        ehs_dataset_num_rows = ehs_dataset.shape[0]
+        redcap_post_batch_size = 10000
+        num_batches = math.ceil(ehs_dataset_num_rows / redcap_post_batch_size)
+
+        for batch in np.array_split(ehs_dataset, num_batches):
+            post_to_redcap(batch.to_json(orient='records'))
