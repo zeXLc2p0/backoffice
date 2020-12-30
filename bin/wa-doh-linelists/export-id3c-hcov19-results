@@ -1,0 +1,19 @@
+#!/bin/bash
+#
+# Usage: ./export-id3c-hcov19-results DATE
+#
+# Export ID3C linelist data using a given DATE when test results were returned.
+# Results are printed as a CSV to stdout. You'll likely want to redirect output
+# to a new file.
+#
+#
+set -euo pipefail
+
+if [ -z ${1+x} ]; then
+    echo "A positional DATE argument (YYYY-MM-DD) is required."
+    exit 1
+fi
+
+psql --quiet --no-align --tuples-only --set ON_ERROR_STOP= <<<"
+    \copy (select * from shipping.linelist_data_for_wa_doh_v1 where date_tested = '"$1"'::date) to pstdout with (format csv, header);
+"

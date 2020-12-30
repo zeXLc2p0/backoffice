@@ -1,0 +1,249 @@
+#!/usr/bin/env python3
+# usage: transform [-h] --date <date> [--project-id <project ID>]
+#                         --id3c-data <id3c-data.csv>
+#                         [--output-dir <output-directory>]
+#                         [--config-file <config.yaml>]
+# Exports participant information from REDCap merged with test information from
+# ID3C to form a linelist for submission to the Washington Department of Health.
+#
+import os
+import yaml
+import logging
+import argparse
+import requests
+import pandas as pd
+from sys import stderr
+from pathlib import Path
+from typing import Any, Dict
+from datetime import datetime
+from seattleflu.id3c.cli.command.etl.redcap_det_scan import zipcode_map
+
+# Disable chained assignments
+pd.options.mode.chained_assignment = None
+
+LOG_LEVEL = os.environ.get("LOG_LEVEL", "info").upper()
+
+logging.basicConfig(
+    level = logging.ERROR,
+    format = "[%(asctime)s] %(levelname)-8s %(message)s",
+    datefmt = "%Y-%m-%d %H:%M:%S%z",
+    stream = stderr)
+
+logging.captureWarnings(True)
+
+log = logging.getLogger(__name__)
+log.setLevel(LOG_LEVEL)
+
+base_dir = Path(__file__).resolve().parent.parent.parent.resolve()
+
+
+def export_redcap_report(config: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Returns an export of a REDCap report specified by attributes in the given
+    *config*.
+    """
+    data = {
+        'token': os.environ[f"REDCAP_API_TOKEN_redcap.iths.org_{config['project_id']}"],
+        'content': 'report',
+        'format': 'json',
+        'report_id': config['report_id'],
+        'csvDelimiter': '',
+        'rawOrLabel': 'raw',
+        'rawOrLabelHeaders': 'raw',
+        'exportCheckboxLabel': 'false',
+        'returnFormat': 'json'
+    }
+    response = requests.post(os.environ['REDCAP_API_URL'], data=data)
+    response.raise_for_status()
+    return response.json()
+
+def test_results(date: str, config: Dict[str, Any]) -> pd.DataFrame:
+    """
+    Returns a :class:pandas.DataFrame of test results created on the given
+    *date*.
+    """
+    id3c_data = pd.read_csv(args.id3c_data, dtype='string')
+    id3c_data = convert_dates(id3c_data, config)
+    # filter by date. This should be done automatically if using the separate
+    # export-id3c-hcov19-results script, but in case a dataset from a different
+    # source is provided (e.g. an export from Metabase), filter by date_tested.
+    return id3c_data[id3c_data['date_tested'] == date]
+
+def relabel_values(redcap_report: pd.DataFrame, config: Dict[str, Any]) -> pd.DataFrame:
+    """
+    Re-assigns raw values a meaningful label in a given *redcap_report* using
+    logic in id3c-customizations and the provided *config*.
+    """
+    if 'home_zipcode_2' in redcap_report:
+        redcap_report['home_zipcode_2'] = redcap_report['home_zipcode_2'] \
+            .apply(zipcode_map)
+
+    if config.get('raw_values_map'):
+        for column in config['raw_values_map']:
+            redcap_report[column].replace(config['raw_values_map'][column],
+            inplace=True)
+
+    return redcap_report
+
+def fill_missing_data(redcap_report: pd.DataFrame, config: Dict[str, Any]) -> pd.DataFrame:
+    """
+    Enhance data in the given *redcap_report* by coalescing certain columns
+    specified in the given *config*.
+    Also overwrite the 'other' category in some columns with the more detailed
+    response from another column, also specified in the *config*.
+    """
+    # Convert empty strings to NA. We have to do this step after we relabel
+    # values, unless we want to deal with mixed dtypes of object and string.
+    redcap_report.replace({'': pd.NA}, inplace=True)
+
+    # Backfill missing data in some columns with a fallback value
+    if config.get('column_backfill_map'):
+        for column in config.get('column_backfill_map'):
+            filler = config['column_backfill_map'][column]
+            redcap_report[column].fillna(redcap_report[filler], inplace=True)
+
+    # Replace 'other' in categorical columns with the detailed response
+    if config.get('other_value_map'):
+        for column in config['other_value_map']:
+            detail = config['other_value_map'][column]
+            redcap_report[column][redcap_report[column] == 'other'] = redcap_report[detail]
+
+    return redcap_report
+
+def convert_dates(data: pd.DataFrame, config: Dict[str, Any]) -> pd.DataFrame:
+    """
+    Cast date columns in a given :class:pd.DataFrame, *data*, to :class:datetime
+    objects and convert to MM/DD/YYY format.
+    """
+    date_columns = [
+        c for c in config['date_columns'] if c in data
+    ]
+    data[date_columns] = \
+        data[date_columns] \
+            .apply(pd.to_datetime, errors='coerce') \
+            .apply(lambda date: date.dt.strftime('%m/%d/%Y'))
+
+    return data
+
+def overwrite_columns(linelist: pd.DataFrame, config: Dict[str, Any]) -> pd.DataFrame:
+    """
+    Overwrite certain columns in a given *linelist* with data from another
+    column with better detail.
+    """
+    overwrite_column_map = config.get('overwrite_column_map')
+    if overwrite_column_map:
+        for target in overwrite_column_map:
+            value = overwrite_column_map[target]
+            linelist.loc[linelist[value].notnull(), target] = linelist[value]
+
+    return linelist
+
+def fill_empty_columns(linelist: pd.DataFrame, config: Dict[str, Any]) -> pd.DataFrame:
+    """
+    Fill columns specified in the given *config* but absent in the given
+    *linelist* with :class:pandas.NA.
+    """
+    missing_columns = [
+        c for c in universal_config['column_names'] if c not in linelist
+    ]
+    return linelist.assign(**{ c: pd.NA for c in missing_columns })
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawTextHelpFormatter)
+
+    parser.add_argument("--date",
+        metavar="<date>",
+        required=True,
+        help="A linelist export date in YYYY-MM-DD format")
+    parser.add_argument("--project-id",
+        metavar="<project ID>",
+        type=int,
+        help="Optionally export only results for the given REDCap project ID.")
+    parser.add_argument("--id3c-data",
+        metavar="<id3c-data.csv>",
+        required=True,
+        help="The path to the id3c test results export.")
+    parser.add_argument("--output-dir",
+        metavar="<output-directory>",
+        default=base_dir / f"bin/wa-doh-linelists/data",
+        help="The destination directory for the output linelist CSV. Defaults to "
+            "`./bin/wa-doh-linelists/data/`.")
+    parser.add_argument("--config-file",
+        metavar="<config.yaml>",
+        default=base_dir / f"etc/wa-doh-linelists.yaml",
+        help="The source file for the individual REDCap projects' configuration. "
+            "Defaults to `./etc/wa-doh-linelists.yaml` at the top level of this repo.")
+
+    args = parser.parse_args()
+
+    date = datetime.strptime(args.date, '%Y-%m-%d').strftime('%m/%d/%Y')
+
+    with open(args.config_file, 'r') as f:
+        configs = list(yaml.safe_load_all(f))
+        # The first config section is shareable across all projects, SCAN or SFS
+        universal_config = configs.pop(0)
+
+    id3c_data = test_results(date, universal_config)
+
+    # Initialize mega linelist
+    mega_linelist = pd.DataFrame()
+
+    for config in configs:
+        # Check if the optional --project-id parameter was specified
+        if args.project_id and config['project_id'] != args.project_id:
+            continue
+
+        log.info(f"Creating linelist for {config['name']} (PID {config['project_id']})")
+
+        # Filter optionally by test result
+        if config.get('row_filter'):
+            id3c_data = id3c_data.query(config['row_filter'], engine='python')
+
+        # Load REDCap report data. Add columns with static values, strip
+        # strings of commas, and convert empty strings to NA
+        redcap_report = pd.DataFrame.from_dict(
+            export_redcap_report(config), dtype='string') \
+            .rename(columns=config['column_rename_map']) \
+            .assign(**config['static_columns']) \
+            .apply(lambda c: c.str.replace(',', ''))
+
+        if redcap_report.empty:
+            log.debug("The REDCap report returned 0 rows without error. "
+            "This is unusual for SCAN IRB English or HCT. If you expected rows, "
+            "check if filtering is turned on.")
+
+        if config.get('columns_to_drop'):
+            redcap_report.drop(columns=config['columns_to_drop'], inplace=True)
+
+        redcap_report = relabel_values(redcap_report, config)
+        redcap_report = fill_missing_data(redcap_report, config)
+        redcap_report = convert_dates(redcap_report, universal_config)
+
+        # Standardize collection barcode. Drop rows without one.
+        prev = len(redcap_report)
+        redcap_report['collection_barcode'] = redcap_report['collection_barcode'].str.lower()
+        redcap_report = redcap_report[redcap_report.collection_barcode.notnull()]
+        log.debug(f"Dropped {prev - len(redcap_report)} row(s) with a missing `collection_barcode`")
+
+        # Merge REDCap and ID3C data
+        linelist = id3c_data.merge(redcap_report,
+            how='inner',
+            on='collection_barcode',
+            validate='1:1')
+
+        linelist = overwrite_columns(linelist, config)
+        linelist = fill_empty_columns(linelist, universal_config)
+
+        # Append to mega linelist
+        log.info(f"Created linelist with {str(len(linelist))} rows.")
+        mega_linelist = pd.concat([mega_linelist, linelist])
+
+    # Reorder columns
+    mega_linelist = mega_linelist[universal_config['column_names']]
+
+    mega_linelist.sort_values(by=['record_id']) \
+        .to_csv(args.output_dir / f"linelist_{date.replace('/', '')}.csv",
+            index=False)
