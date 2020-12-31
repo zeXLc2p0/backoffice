@@ -122,9 +122,9 @@ GEOCODING_CACHE=/home/ubuntu/sfs-cache.pickle
 */5 * * * * ubuntu promjob "refresh-materialized-view: shipping.fhir_questionnaire_responses_v1" fatigue --quiet pipenv run id3c refresh-materialized-view shipping fhir_questionnaire_responses_v1 --commit
 */5 * * * * ubuntu promjob "refresh-materialized-view: shipping.scan_encounters_v1"              fatigue --quiet pipenv run id3c refresh-materialized-view shipping scan_encounters_v1 --commit
 
-# Run the refresh materialized view routine for UW Reopening encounters every 5 minutes starting at :08 to include
+# Run the refresh materialized view routine for UW Reopening encounters every 8 minutes to include
 # latest data from other jobs, including refreshing the shipping.fhir_questionnaire_responses_v1 materialized view
-8/5 * * * * ubuntu promjob "refresh-materialized-view: shipping.__uw_encounters" fatigue --quiet pipenv run id3c refresh-materialized-view shipping __uw_encounters --commit
+*/8 * * * * ubuntu promjob "refresh-materialized-view: shipping.__uw_encounters" fatigue --quiet pipenv run id3c refresh-materialized-view shipping __uw_encounters --commit
 
 # Make UW Reopening testing offers at :15 and :45
 # This job uses data created by redcap-det uw-reopening, etl fhir, and refresh-materialized-view shipping fhir_questionnaire_responses_v1
