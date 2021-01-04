@@ -10,5 +10,9 @@ PGSERVICE=production-etl
 # Base of our env.d directories
 ENVD=/opt/backoffice/id3c-production/env.d
 
+# Configure a private runtime directory for "fatigue".
+XDG_RUNTIME_DIR=/home/ubuntu/run
+
+
 # Generate data file of results for UW Reopening (Husky Testing) and upload to EHS for followup
 # 7,37 * * * * ubuntu promjob "uw-ehs-report" fatigue --quiet pipenv run envdir $ENVD/redcap-sfs/ envdir $ENVD/redcap-uw-reopening-ehs-transfer /opt/backoffice/bin/uw-ehs-report/generate
