@@ -26,10 +26,10 @@
         },
         "botocore": {
             "hashes": [
-                "sha256:85ca6915ad5471e7f6cd1b00610b74601d2970cbf8e9b1bf255697154cf621a3",
-                "sha256:f7d365c689070368a5a0857aa35a81d7c950556189f23065f42798f810a59cae"
+                "sha256:549aa9619b51c5b103c7bb906497f60824576366aa4e3642b4e57f9f53a06f7d",
+                "sha256:b954c596f8bdf31d5fdf1eff8a2296bde8094e1e22961a79b83bb62ddeba8a49"
             ],
-            "version": "==1.19.46"
+            "version": "==1.19.48"
         },
         "cachetools": {
             "hashes": [
@@ -87,11 +87,11 @@
         },
         "deepdiff": {
             "hashes": [
-                "sha256:273b18d32bb9b956548290b2e3ddf79c515def2dd5738965f4348ae813e710c5",
-                "sha256:e2b74af4da0ef9cd338bb6e8c97242c1ec9d81fcb28298d7bb24acdc19ea79d7"
+                "sha256:2e368943dc257f6fa93d9ce4537dbcd4fea65098208a0f49f675cf40132c1a89",
+                "sha256:5e2b90ebe9d371af493a893306546f69dc117e7a36596b97f8fe56869dd0c35d"
             ],
-            "markers": "python_version >= '3.5'",
-            "version": "==5.0.2"
+            "markers": "python_version >= '3.6'",
+            "version": "==5.2.1"
         },
         "fhir.resources": {
             "hashes": [
