@@ -23,7 +23,7 @@ main() {
     # Change to the ./bin/return-of-results directory in the backoffice checkout
     cd "$(dirname "$0")"
 
-    ./transform <(./export-redcap-scan) <(./export-redcap-sfs-longitudinal) <(./export-id3c-return-results)
+    ./transform <(./export-redcap-scan) <(./export-redcap-sfs-longitudinal) <(./export-id3c-return-results || kill $$)
 }
 
 print-help() {
