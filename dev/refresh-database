@@ -239,12 +239,12 @@ suppress-ignorable-errors() {
 
         s/(?-x:^pg_restore: .+? COMMENT EXTENSION (.+?)\s*)\n
           (?-x:^pg_restore: .+? ERROR:  must be owner of extension .+?)\n
-          (?-x:^Command was: COMMENT ON EXTENSION .+?)\n+
+          (?-x:^\s*Command was: COMMENT ON EXTENSION .+?)\n+
          /COMMENT EXTENSION \1 (failure due to RDS permissions ignored)\n/xmg;
 
         s/(?-x:^pg_restore: .+? TABLE DATA spatial_ref_sys rdsadmin)\n
           (?-x:^pg_restore: .+? ERROR:  permission denied for relation spatial_ref_sys)\n
-          (?-x:^Command was: COPY public\.spatial_ref_sys .+?)\n+
+          (?-x:^\s*Command was: COPY public\.spatial_ref_sys .+?)\n+
          /TABLE DATA spatial_ref_sys (failure due to RDS permissions ignored)\n/xmg;
     '
 }
