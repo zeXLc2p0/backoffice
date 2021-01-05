@@ -15,4 +15,4 @@ XDG_RUNTIME_DIR=/home/ubuntu/run
 
 
 # Generate data file of results for UW Reopening (Husky Testing) and upload to EHS for followup
-# 7,37 * * * * ubuntu promjob "uw-ehs-report" fatigue --quiet pipenv run envdir $ENVD/redcap-sfs/ envdir $ENVD/redcap-uw-reopening-ehs-transfer /opt/backoffice/bin/uw-ehs-report/generate
+7,37 * * * * ubuntu promjob "uw-ehs-report" fatigue --quiet pipenv run envdir $ENVD/redcap-sfs/ envdir $ENVD/redcap-uw-reopening-ehs-transfer /opt/backoffice/bin/uw-ehs-report/generate
