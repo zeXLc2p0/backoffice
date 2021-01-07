@@ -1,0 +1,63 @@
+-- ***** Here is SQL to populate the operations.test_quota table for the test quota,
+-- ***** used for the UW Reopening's test offering job.
+-- ***** One row per hour will get inserted. The insert command will also get raised so
+-- ***** you can see it.
+
+-- ***** Set correct values for these fields at the top:
+-- ***** daily_quota: The total quota for the day. This will get divided between the hours. Remainders get dropped.
+-- ***** start_date: The starting date to insert for.
+-- ***** num_days: The number of days to insert for, including the starting date.
+-- ***** start_hour: The starting hour (lower boundary of the timerange) to insert for. 8 = 08:00 (8 AM)
+-- ***** end_hour: The ending hour (upper boundary of the timerange) to insert for. 20 = 20:00 (8 PM)
+
+DO
+$$
+DECLARE daily_quota int = 1000;
+start_date date = '2021-01-10';
+num_days int = 1;
+start_hour int = 8;
+end_hour int = 20;
+
+hourly_quota int;
+cur_day int = 0;
+cur_date date;
+
+cur_hour int;
+start_ts timestamp;
+end_ts timestamp;
+sql_text text;
+BEGIN
+	hourly_quota = daily_quota / (end_hour - start_hour);
+
+	WHILE cur_day < num_days LOOP
+		cur_date = start_date::date + cur_day;
+		cur_hour = start_hour;
+		WHILE cur_hour < end_hour LOOP
+			start_ts = cur_date::text || ' '|| case when length(cur_hour::text) < 2 then ('0' || cur_hour::text) else cur_hour::text end || ':00:00';
+			end_ts = start_ts + interval '1h';
+
+			sql_text = 'insert into operations.test_quota (name, timespan, max) values (''uw'', tstzrange(''' || start_ts || ''', ''' || end_ts || ''' , ''(]''),' || hourly_quota || ');' ;
+			raise notice '%', sql_text;
+			EXECUTE sql_text;
+			cur_hour = cur_hour + 1;
+		END LOOP;
+		cur_day = cur_day + 1;
+	END LOOP;
+END
+$$
+
+
+
+-- ***** A query to see the total configured for upcoming days
+
+select lower(timespan):: date, sum(max) as total
+from operations.test_quota
+where lower(timespan):: date > current_date
+group by lower(timespan):: date
+order by lower(timespan):: date;
+
+
+-- ***** A command to delete entries. Useful for deleing future entries so that you can run the command to recreate
+-- ***** them, when the quota needs to be adusted.
+-- ***** Don't delete rows where some quota has been used so we always have a record of what we used.
+delete from  operations.test_quota where lower(timespan) > '2021-01-05' and used = 0;
