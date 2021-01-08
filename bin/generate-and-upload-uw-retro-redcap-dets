@@ -28,7 +28,7 @@ main() {
 }
 
 generate-redcap-dets() {
-    id3c redcap-det generate --project-id 19915 --since-date "`date +"%F %T" -d "25 hours ago"`" --include-incomplete
+    id3c redcap-det generate --project-id 19915 --token REDCAP_API_TOKEN --since-date "`date +"%F %T" -d "25 hours ago"`" --include-incomplete
 }
 
 upload-to-id3c() {
