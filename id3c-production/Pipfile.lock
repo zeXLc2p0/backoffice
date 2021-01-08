@@ -188,7 +188,7 @@
         "id3c": {
             "editable": true,
             "git": "https://github.com/seattleflu/id3c.git",
-            "ref": "314ba9ee5a0d75bfa097cc904b71c95ee9f003f5"
+            "ref": "2545d59398bd054b469da0e01de1c8f22ae1cdc4"
         },
         "idna": {
             "hashes": [
@@ -552,7 +552,7 @@
         "seattleflu-id3c-customizations": {
             "editable": true,
             "git": "https://github.com/seattleflu/id3c-customizations.git",
-            "ref": "5f480af789b3ce072a4dcb180b37acaa49dc9f5d"
+            "ref": "9831963a49eab2ef5757e0dfa985e16c1a031dfe"
         },
         "six": {
             "hashes": [
