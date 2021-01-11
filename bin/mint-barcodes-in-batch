@@ -27,17 +27,22 @@ import click
     default = 20,
     required = False)
 
+@click.option("--layout", type=str,
+    help = "The label layout to use",
+    default = "default",
+    required = False)
+
 @click.command()
-def mint_barcodes_in_batch(identifier_set, per_sheet, sheets, prefix, max_sheets):
+def mint_barcodes_in_batch(identifier_set, layout, per_sheet, sheets, prefix, max_sheets):
     """
     Mints barcodes and generates label PDFs. Splits the number of sheets across multiple
     PDF files to keep the number of sheets per file <= `max_sheets`.
 
     Label PDF files will be named with this pattern:
-    `prefix``identifier_set`_(number of sheets in the file)_sheets_(current date)_(the iteration number).pdf
+    `prefix``identifier_set`_(the layout)_(number of sheets in the file)_sheets_(current date)_(the iteration number).pdf
     For example:
-        Peter_collections-uw-observed_15_sheets_2020-10-26_1.pdf
-        Peter_collections-uw-observed_5_sheets_2020-10-26_2.pdf
+        Peter_collections-uw-observed_default_15_sheets_2020-10-26_1.pdf
+        Peter_collections-uw-observed_default_5_sheets_2020-10-26_2.pdf
     """
 
     sheets_remaining = sheets
@@ -51,8 +56,11 @@ def mint_barcodes_in_batch(identifier_set, per_sheet, sheets, prefix, max_sheets
             num_sheets = min(sheets_remaining, max_sheets)
 
             completion = subprocess.run(["pipenv", "run", "id3c", "identifier", "mint",
-                    f"{identifier_set}", f"{per_sheet * num_sheets}", "--quiet", "--labels",
-                    f"{prefix}{identifier_set}_{num_sheets}_sheets_{date.today()}_{iterations}.pdf"],
+                    f"{identifier_set}",
+                    f"{per_sheet * num_sheets}",
+                    "--quiet",
+                    "--layout", f"{layout}",
+                    "--labels", f"{prefix}{identifier_set}_{layout}_{num_sheets}_sheets_{date.today()}_{iterations}.pdf"],
                     check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding="utf-8")
             print(completion.stdout)
             sheets_remaining -= num_sheets
