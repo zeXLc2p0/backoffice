@@ -1,0 +1,34 @@
+#!/bin/bash
+# usage: ./bin/wa-doh-linelists/generate DATE
+#
+# Generates linelists for submission to WA DoH as a CSV.
+# Requires environment variables for the target REDCap projects specified in the
+# configuration file under ./etc/wa-doh-linelists.yaml at the top level of this
+# repo.
+#
+set -euo pipefail
+
+# Change to the top-level of the backoffice checkout
+cd "$(dirname "$0")/../.."
+
+: ${ID3C:=id3c-production}
+
+export PIPENV_PIPFILE="$ID3C/Pipfile"
+
+if [ -z ${1+x} ]; then
+    echo "A positional DATE argument (YYYY-MM-DD) is required."
+    exit 1
+fi
+
+date="$1"
+
+tmpdir="$(mktemp -d -t generate-XXXXXX)"
+trap "rm -rf '$tmpdir'" EXIT
+
+echo "Exporting linelist data from ID3C"
+./bin/wa-doh-linelists/export-id3c-hcov19-results "$date" > "$tmpdir"/id3c.csv
+
+echo "Combining ID3C data with REDCap report data"
+pipenv run ./bin/wa-doh-linelists/transform \
+    --id3c-data "$tmpdir"/id3c.csv \
+    --date "$date"

@@ -1,0 +1,495 @@
+---
+name: All Projects (SCAN + SFS shared config)
+date_columns: [
+  'birthday', 'enrollment_date', 'symptom_duration', 'date_tested',
+  'collection_date', 'nasal_swab_q'
+]
+column_names: [
+  "record_id",
+  "redcap_event_name",
+  "participant_last_name",
+  "participant_first_name",
+  "birthday",
+  "home_street",
+  "apartment_number",
+  "homecity_other",
+  "home_state",
+  "home_zipcode_2",
+  "phone_number",
+  "phone_number_2",
+  "enrollment_date",
+  "symptom_duration",
+  "symptoms___fever",
+  "symptoms___headache",
+  "symptoms___cough",
+  "symptoms___chills",
+  "symptoms___sweats",
+  "symptoms___throat",
+  "symptoms___nausea",
+  "symptoms___nose",
+  "symptoms___tired",
+  "symptoms___ache",
+  "symptoms___breathe",
+  "symptoms___diarrhea",
+  "symptoms___rash",
+  "symptoms___ear",
+  "symptoms___eye",
+  "symptoms___smell_taste",
+  "symptoms___none",
+  "sex_new",
+  "ethnicity",
+  "race___native",
+  "race___asian",
+  "race___ha_pi",
+  "race___black",
+  "race___white",
+  "race___other",
+  "race___dont_say",
+  "income",
+  "pregnant_yesno",
+  "housing_type",
+  "house_members",
+  "doctor_3e8fae___no",
+  "doctor_3e8fae___doc_uc",
+  "doctor_3e8fae___pharmacy",
+  "doctor_3e8fae___hospital",
+  "doctor_3e8fae___tele",
+  "doctor_3e8fae___other",
+  "smoke_9a005a___tobacco",
+  "smoke_9a005a___ecig",
+  "smoke_9a005a___dont_say",
+  "smoke_9a005a___none",
+  "chronic_illness___asthma",
+  "chronic_illness___copd",
+  "chronic_illness___bronchitis",
+  "chronic_illness___cancer",
+  "chronic_illness___diabetes",
+  "chronic_illness___cvd",
+  "chronic_illness___hbp",
+  "chronic_illness___allergy",
+  "chronic_illness___dont_know",
+  "chronic_illness___dont_say",
+  "chronic_illness___none",
+  "overall_risk_health___chronic_lung",
+  "overall_risk_health___chronic_heart",
+  "overall_risk_health___diabetes",
+  "overall_risk_health___immsup",
+  "overall_risk_health___no_overall_risk",
+  "overall_risk_setting___attend_school",
+  "overall_risk_setting___work_vol_school",
+  "overall_risk_setting___work_vol_chc",
+  "overall_risk_setting___work_vol_ltcf",
+  "overall_risk_setting___work_vol_homeless",
+  "overall_risk_setting___work_vol_fr",
+  "overall_risk_setting___work_vol_di",
+  "overall_risk_setting___work_vol_cf",
+  "overall_risk_setting___work_vol_hosp",
+  "overall_risk_setting___work_vol_be",
+  "overall_risk_setting___work_vol_afh",
+  "overall_risk_setting___work_vol_pst",
+  "overall_risk_setting___work_vol_afl",
+  "overall_risk_setting___none",
+  "overall_risk_setting___other",
+  "nasal_swab_q",
+  "collection_date",
+  "travel_countries_phs",
+  "travel_states_phs",
+  "sample_barcode",
+  "date_tested",
+  "test_result",
+  "study_arm",
+  "shelter_name",
+  "chronic_illness___blood",
+  "chronic_illness___immsup",
+  "chronic_illness___liver_kidney",
+  "chronic_illness___neuro",
+  "chronic_illness___aspirin",
+  "worksite___avalon",
+  "worksite___burien_nurse",
+  "worksite___columbia_lutheran",
+  "worksite___crista",
+  "worksite___judson",
+  "worksite___kline_galland",
+  "worksite___life_care",
+  "worksite___mission_renton",
+  "worksite___park",
+  "worksite___queen_anne",
+  "worksite___renton",
+  "worksite___seattle_med",
+  "worksite___shoreline",
+  "worksite___stafford",
+  "worksite___talbot",
+  "worksite___oak_forest_bay",
+  "worksite___mission_bellevue",
+  "worksite___other",
+  "worktype",
+  "prior_test",
+  "prior_test_result",
+  "prior_test_date",
+  "primary_language",
+  "uw_greek_house",
+  "priority_code",
+  "site_name",
+  "site_context",
+  "participant_role",
+  "collection_barcode"
+]
+
+---
+name: SCAN IRB English
+project_id: 22461
+report_id: 52853
+columns_to_drop: [
+  'sex_new',
+  'enrollment_date',
+  'ethnicity',
+  'pregnant_yesno',
+  'symptom_duration',
+]
+column_rename_map: {
+  "return_utm_barcode": "collection_barcode",
+  "language": "primary_language",
+}
+static_columns: {
+  "study_arm": "SCAN",
+}
+
+---
+name: SCAN IRB Spanish
+project_id: 22475
+report_id: 53646
+columns_to_drop: [
+  'sex_new',
+  'enrollment_date',
+  'ethnicity',
+  'pregnant_yesno',
+  'symptom_duration',
+]
+column_rename_map: {
+  "return_utm_barcode": "collection_barcode",
+}
+static_columns: {
+  "study_arm": "SCAN",
+  "primary_language": "Spanish",
+}
+
+---
+name: SCAN IRB Vietnamese
+project_id: 22477
+report_id: 68406
+column_rename_map: {
+  "return_utm_barcode": "collection_barcode",
+}
+static_columns: {
+  "study_arm": "SCAN",
+  "primary_language": "Vietnamese",
+}
+
+---
+name: SCAN IRB Russian
+project_id: 22472
+report_id: 53416
+columns_to_drop: [
+  'sex_new',
+  'enrollment_date',
+  'ethnicity',
+  'pregnant_yesno',
+  'symptom_duration',
+]
+column_rename_map: {
+  "return_utm_barcode": "collection_barcode",
+}
+static_columns: {
+  "study_arm": "SCAN",
+  "primary_language": "Russian",
+}
+
+---
+name: SCAN IRB Traditional Chinese
+project_id: 22474
+report_id: 75488
+columns_to_drop: [
+  'sex_new',
+  'enrollment_date',
+  'ethnicity',
+  'pregnant_yesno',
+  'symptom_duration',
+]
+column_rename_map: {
+  "return_utm_barcode": "collection_barcode",
+}
+static_columns: {
+  "study_arm": "SCAN",
+  "primary_language": "Traditional Chinese",
+}
+
+---
+name: EH&S Data Transer for Husky Coronavirus Testing
+project_id: 24025
+report_id: 60454
+columns_to_drop: [
+  "test_result_date",
+  "test_result",
+]
+column_rename_map: {
+  "barcode": "collection_barcode",
+  "birthdate": "birthday",
+  "home_city": "homecity_other",
+  "zipcode": "home_zipcode_2",
+  "number_house_members": "house_members",
+  "affiliation" : "participant_role",
+}
+static_columns: {
+  "study_arm": "SFS-UW",
+  "site_name_static": "Husky Coronavirus Testing",
+}
+column_backfill_map: {
+  "uw_dorm_name": "site_name_static",
+}
+other_value_map: {
+  "uw_greek_house": "greek_other",
+  "participant_role": "affiliation_other",
+  "uw_dorm_name": "uw_apartment_name",
+}
+overwrite_column_map: {
+  "site_name": "uw_dorm_name",
+  "uw_school": "uw_dorm_room_number",
+  "site_context": "uw_school",
+}
+
+---
+name: SCAN Kiosk / In-Person Enrollments
+project_id: 23089
+report_id: 56995
+columns_to_drop: [
+  'sex_new',
+  'ethnicity',
+  'pregnant_yesno',
+  'symptom_duration',
+]
+column_rename_map: {
+  "utm_tube_barcode_2" : "collection_barcode",
+  "language" : "primary_language",
+}
+static_columns: {
+  "study_arm": "SCAN",
+}
+
+---
+name: Seattle Flu Study - Shelters Intervention
+project_id: 16949
+report_id: 48564
+row_filter: " test_result != 'negative'"
+column_rename_map: {
+  'sfs_barcode_0': 'collection_barcode',
+  'sfs_barcode_manual': 'collection_barcode_manual',
+  'race___1': 'race___native',
+  'race___2': 'race___asian',
+  'race___3': 'race___ha_pi',
+  'race___4': 'race___black',
+  'race___5': 'race___white',
+  'race___6': 'race___other',
+  'race___999': 'race___dont_say',
+  'symptoms___1': 'symptoms___fever',
+  'symptoms___2': 'symptoms___headache',
+  'symptoms___3': 'symptoms___cough',
+  'symptoms___4': 'symptoms___chills',
+  'symptoms___5': 'symptoms___sweats',
+  'symptoms___6': 'symptoms___throat',
+  'symptoms___7': 'symptoms___nausea',
+  'symptoms___8': 'symptoms___nose',
+  'symptoms___9': 'symptoms___tired',
+  'symptoms___10': 'symptoms___ache',
+  'symptoms___11': 'symptoms___breathe',
+  'symptoms___12': 'symptoms___diarrhea',
+  'symptoms___13': 'symptoms___ear',
+  'symptoms___14': 'symptoms___rash',
+  'symptoms___000': 'symptoms___none',
+  'home_zipcode': 'home_zipcode_2',
+  'home_street_optional': 'home_street',
+  'homecity_other': 'homecity_other_details',
+  'seattle_home': 'homecity_other',
+  'chronic_illness___1': 'chronic_illness___asthma',
+  'chronic_illness___2': 'chronic_illness___blood',
+  'chronic_illness___3': 'chronic_illness___copd',
+  'chronic_illness___4': 'chronic_illness___bronchitis',
+  'chronic_illness___5': 'chronic_illness___cancer',
+  'chronic_illness___6': 'chronic_illness___diabetes',
+  'chronic_illness___7': 'chronic_illness___cvd',
+  'chronic_illness___8': 'chronic_illness___immsup',
+  'chronic_illness___9': 'chronic_illness___liver_kidney',
+  'chronic_illness___10': 'chronic_illness___neuro',
+  'chronic_illness___11': 'chronic_illness___aspirin',
+  'chronic_illness___0': 'chronic_illness___none',
+  'chronic_illness___888': 'chronic_illness___dont_know',
+  'chronic_illness___999': 'chronic_illness___dont_say',
+  'smoke___1': 'smoke_9a005a___tobacco',
+  'smoke___2': 'smoke_9a005a___ecig',
+  'smoke___0': 'smoke_9a005a___dont_say',
+  'smoke___999': 'smoke_9a005a___none',
+  'phone': 'phone_number',
+  'study_id': 'record_id',
+  'language': 'primary_language',
+  'shelter_staff_yn': 'participant_role',
+  'site_type': 'shelter_name',
+}
+static_columns: {
+  "study_arm": "SFS-Sh",
+  "site_context_static": "Shelter",
+}
+raw_values_map: {
+  sex: {
+    '1': 'male',
+    '2': 'female',
+    '3': 'other',
+    '999': 'prefer not to say',
+  },
+  hispanic: {
+    '0': 'no',
+    '1', 'yes',
+    '999': 'prefer not to say'
+  },
+  homecity_other: {
+    '1': 'seattle',
+    '2': 'other',
+  },
+  participant_role: {
+    '1': 'Staff',
+    '0': 'Resident'
+  },
+  shelter_name: {
+    '1': 'st. martins',
+    '2': 'desc',
+    '3': 'marys place - burien',
+    '4': 'marys place - white center',
+    '5': 'marys place - north seattle',
+    '6': 'roots',
+    '7': 'compass - first presbyterian',
+    '8': 'compass - jan and peters place womens shelter',
+    '9': 'compass - blaine center mens shelter',
+    '10': 'marys place - regrade',
+    '11': 'red lion hotel',
+    '888': 'other'
+  }
+}
+column_backfill_map: {
+  "collection_barcode": "collection_barcode_manual",
+  "primary_language": "language_other",
+}
+other_value_map: {
+  "shelter_name": "site_other",
+  "homecity_other": "homecity_other_details",
+}
+overwrite_column_map: {
+  "sex_new": "sex",
+  "ethnicity": "hispanic",
+  "site_name": "shelter_name",
+  "site_context": "site_context_static",
+}
+
+---
+name: Seattle Flu Study - Asymptomatic Enrollments
+project_id: 19212
+report_id: 47722
+row_filter: " test_result != 'negative'"
+column_rename_map: {
+  'race___1': 'race___native',
+  'race___2': 'race___asian',
+  'race___3': 'race___ha_pi',
+  'race___4': 'race___black',
+  'race___5': 'race___white',
+  'race___6': 'race___other',
+  'race___999': 'race___dont_say',
+  'symptoms___1': 'symptoms___fever',
+  'symptoms___2': 'symptoms___headache',
+  'symptoms___3': 'symptoms___cough',
+  'symptoms___4': 'symptoms___chills',
+  'symptoms___5': 'symptoms___sweats',
+  'symptoms___6': 'symptoms___throat',
+  'symptoms___7': 'symptoms___nausea',
+  'symptoms___8': 'symptoms___nose',
+  'symptoms___9': 'symptoms___tired',
+  'symptoms___10': 'symptoms___ache',
+  'symptoms___11': 'symptoms___breathe',
+  'symptoms___12': 'symptoms___diarrhea',
+  'symptoms___000': 'symptoms___none',
+  'home_zipcode': 'home_zipcode_2',
+  'home_street_optional': 'home_street',
+  'homecity_other': 'homecity_other_details',
+  'seattle_home': 'homecity_other',
+  'chronic_illness___1': 'chronic_illness___asthma',
+  'chronic_illness___2': 'chronic_illness___blood',
+  'chronic_illness___3': 'chronic_illness___copd',
+  'chronic_illness___4': 'chronic_illness___bronchitis',
+  'chronic_illness___5': 'chronic_illness___cancer',
+  'chronic_illness___6': 'chronic_illness___diabetes',
+  'chronic_illness___7': 'chronic_illness___cvd',
+  'chronic_illness___8': 'chronic_illness___immsup',
+  'chronic_illness___9': 'chronic_illness___liver_kidney',
+  'chronic_illness___0': 'chronic_illness___none',
+  'chronic_illness___888': 'chronic_illness___dont_know',
+  'chronic_illness___999': 'chronic_illness___dont_say',
+  'smoke___1': 'smoke_9a005a___tobacco',
+  'smoke___2': 'smoke_9a005a___ecig',
+  'smoke___0': 'smoke_9a005a___dont_say',
+  'smoke___999': 'smoke_9a005a___none',
+  'phone': 'phone_number',
+  'sfs_barcode_0': 'collection_barcode',
+  'sfs_barcode_manual': 'collection_barcode_manual',
+  'language': 'primary_language',
+  'shelter_staff_yn': 'participant_role',
+  'site_type': 'shelter_name',
+}
+static_columns: {
+  "study_arm": "SFS-Sh",
+  "site_context_static": "Shelter",
+}
+raw_values_map: {
+  sex: {
+    '1': 'male',
+    '2': 'female',
+    '3': 'other',
+    '999': 'prefer not to say',
+  },
+  hispanic: {
+    '1': 'yes',
+    '2': 'no',
+    '3': 'prefer not to say'
+  },
+  homecity_other: {
+    '1': 'seattle',
+    '2': 'other',
+  },
+  participant_role: {
+    '1': 'Staff',
+    '0': 'Resident'
+  },
+  shelter_name: {
+    '1': 'st. martins',
+    '2': 'desc',
+    '3': 'marys place - burien',
+    '4': 'marys place - white center',
+    '5': 'marys place - north seattle',
+    '6': 'roots',
+    '7': 'compass - first presbyterian',
+    '8': 'compass - jan and peters place womens shelter',
+    '9': 'compass - blaine center mens shelter',
+    '10': 'marys place - regrade',
+    '11': 'red lion hotel',
+    '888': 'other'
+  }
+}
+column_backfill_map: {
+  "collection_barcode": "collection_barcode_manual",
+  "primary_language": "language_other",
+}
+other_value_map: {
+  "shelter_name": "site_other",
+  "homecity_other": "homecity_other_details",
+}
+overwrite_column_map: {
+  "sex_new": "sex",
+  "ethnicity": "hispanic",
+  "site_name": "shelter_name",
+  "site_context": "site_context_static",
+}
