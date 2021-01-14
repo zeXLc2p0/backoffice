@@ -36,6 +36,8 @@ set -euo pipefail
 # Absolute path to our containing repo
 base="$(cd "$(dirname "$0")/.."; pwd)"
 
+redcap_api_token_name=REDCAP_API_TOKEN_redcap.iths.org_19915
+
 : ${CONFIG:="$base/etc/uw-retrospectives-manifest.yaml"}
 
 main() {
@@ -59,8 +61,10 @@ main() {
 
     # Check this early before we do any work rather than failing at the end.
     if [[ $import == import-to-redcap ]]; then
-        : "${REDCAP_API_URL:?The environment variable REDCAP_API_URL is required.}"
-        : "${REDCAP_API_TOKEN:?The environment variable REDCAP_API_TOKEN is required.}"
+        if [[ -z "$(getenv $redcap_api_token_name)" ]]; then
+            echo "The environment variable $redcap_api_token_name is required" >&2
+            exit 1
+        fi
     fi
 
     if [[ $debug == 1 ]]; then
@@ -116,8 +120,8 @@ as-redcap-records() {
 
 import-to-redcap() {
     echo "Importing to REDCap..." >&2
-    curl -fsS "$REDCAP_API_URL" \
-        -d token="$REDCAP_API_TOKEN" \
+    curl -fsS https://redcap.iths.org/api/ \
+        -d token="$(getenv $redcap_api_token_name)" \
         -d format=json \
         -d content=record \
         -d type=flat \
@@ -140,6 +144,14 @@ cp-records() {
         *)
             cp -pv "$new" "$old" >&2;;
     esac
+}
+
+getenv() {
+    # Gets the value of an environment variable that doesn't have a legal shell
+    # variable name (e.g. includes periods), and thus isn't accessible directly
+    # via the shell.  Consider avoiding such names in the future, but for now,
+    # use this workaround when necessary.
+    python3 -c 'import os, sys; print(os.environ.get(sys.argv[1], ""))' "$1"
 }
 
 print-help() {
