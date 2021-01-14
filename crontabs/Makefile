@@ -4,12 +4,14 @@ CROND ?= /etc/cron.d
 crontabs := \
 	id3c-production \
 	return-of-results \
-	scan-amazon-addresses \
 	scan-switchboard \
 	uw-ehs-report
 
+old_crontabs := \
+	scan-amazon-addresses
 
 install: $(crontabs:%=$(CROND)/backoffice-%)
+	@rm -fv $(old_crontabs:%=$(CROND)/backoffice-%)
 
 $(CROND)/backoffice-%: %
 	@install -cv $< $@
