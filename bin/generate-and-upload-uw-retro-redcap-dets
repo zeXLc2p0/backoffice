@@ -20,15 +20,11 @@ main() {
         esac
     done
 
-    # Check this early before we do any work rather than failing at the end.
-    : "${REDCAP_API_URL:?The environment variable REDCAP_API_URL is required.}"
-    : "${REDCAP_API_TOKEN:?The environment variable REDCAP_API_TOKEN is required.}"
-
     upload-to-id3c <(generate-redcap-dets)
 }
 
 generate-redcap-dets() {
-    id3c redcap-det generate --project-id 19915 --token REDCAP_API_TOKEN --since-date "`date +"%F %T" -d "25 hours ago"`" --include-incomplete
+    id3c redcap-det generate --api-url https://redcap.iths.org/api/ --project-id 19915 --since-date "`date +"%F %T" -d "25 hours ago"`" --include-incomplete
 }
 
 upload-to-id3c() {
