@@ -36,7 +36,7 @@ from typing import Dict, List, Any
 config_file  = environ.get("CONFIG")
 
 if not config_file:
-    base_dir = Path(__file__).parent.parent.parent.resolve()
+    base_dir = Path(__file__).resolve().parent.parent.parent
     config_file = base_dir / "etc/sfs-longitudinal-redcap-projects.yaml"
 
 
