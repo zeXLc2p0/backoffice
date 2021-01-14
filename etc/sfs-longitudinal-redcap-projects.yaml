@@ -1,8 +1,8 @@
 ---
-project_id: 23854
+redcap:
+  url: https://redcap.iths.org
+  project: 23854
 source: uw_reopening
-redcap_api_url_env_name: REDCAP_API_URL
-redcap_api_token_env_name: REDCAP_API_TOKEN_UW_REOPENING
 enrollment_event_names:
   - enrollment_arm_1
 enrollment_fields:
@@ -15,10 +15,10 @@ encounter_fields:
   - collect_barcode_kiosk
   - return_utm_barcode
 ---
-project_id: 23740
+redcap:
+  url: https://redcap.iths.org
+  project: 23740
 source: childcare
-redcap_api_url_env_name: REDCAP_API_URL
-redcap_api_token_env_name: REDCAP_API_TOKEN_CHILDCARE
 enrollment_event_names:
   - enrollment_arm_1
   - enrollment_arm_2
