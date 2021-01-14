@@ -1,4 +1,5 @@
 SHELL := /bin/bash -euo pipefail
+CROND ?= /etc/cron.d
 
 crontabs := \
 	id3c-production \
@@ -7,7 +8,8 @@ crontabs := \
 	scan-switchboard \
 	uw-ehs-report
 
-install: $(crontabs:%=/etc/cron.d/backoffice-%)
 
-/etc/cron.d/backoffice-%: %
+install: $(crontabs:%=$(CROND)/backoffice-%)
+
+$(CROND)/backoffice-%: %
 	@install -cv $< $@
