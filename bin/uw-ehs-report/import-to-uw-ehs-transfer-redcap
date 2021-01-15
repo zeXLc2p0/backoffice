@@ -38,17 +38,14 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    if not os.environ.get('REDCAP_API_TOKEN_EHS_TRANSFER_UW') or not os.environ.get('REDCAP_API_URL'):
-        log.error("The REDCAP_API_TOKEN_EHS_TRANSFER_UW and REDCAP_API_URL env vars must be set.")
-    else:
-        project = redcap.Project(os.environ['REDCAP_API_URL'], os.environ['REDCAP_API_TOKEN_EHS_TRANSFER_UW'], 24025)
+    project = redcap.Project("https://redcap.iths.org", 24025)
 
-        ehs_dataset = pd.read_csv(args.filename)
+    ehs_dataset = pd.read_csv(args.filename)
 
-        # Post data to REDCap in batches of 10000 records to reduce strain on REDCap servers
-        ehs_dataset_num_rows = ehs_dataset.shape[0]
-        redcap_post_batch_size = 10000
-        num_batches = math.ceil(ehs_dataset_num_rows / redcap_post_batch_size)
+    # Post data to REDCap in batches of 10000 records to reduce strain on REDCap servers
+    ehs_dataset_num_rows = ehs_dataset.shape[0]
+    redcap_post_batch_size = 10000
+    num_batches = math.ceil(ehs_dataset_num_rows / redcap_post_batch_size)
 
-        for batch in np.array_split(ehs_dataset, num_batches):
-            project.update_records(batch.to_dict(orient='records'), date_format = "MDY")
+    for batch in np.array_split(ehs_dataset, num_batches):
+        project.update_records(batch.to_dict(orient='records'), date_format = "MDY")
