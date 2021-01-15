@@ -51,16 +51,9 @@ FIELDS = [
 ]
 
 
-class HuskyProject(redcap.Project):
-    api_token_env_var:str
-
-    def __init__(self, project_id: str, api_token_env_var: str) -> None:
-        super().__init__(REDCAP_API_URL, environ[api_token_env_var], project_id)
-
-
 def main():
     projects = [
-        HuskyProject(23854, "REDCAP_API_TOKEN_UW_REOPENING")
+        redcap.Project(REDCAP_API_URL, 23854)
     ]
 
     for project_records in map(fetch_records, projects):
