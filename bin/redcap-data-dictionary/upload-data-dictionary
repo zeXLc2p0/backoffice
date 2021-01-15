@@ -6,15 +6,16 @@ the new data dictionary into the specified REDCap project.
 \b
     This requires two environment variables:
     * REDCAP_API_URL
-    * REDCAP_API_TOKEN
+    * REDCAP_API_TOKEN_redcap.iths.org_<project-id>
 
 """
+import os
 import argparse
 import json
 import pandas as pd
+import id3c.cli.redcap as redcap
 from typing import Dict, List
 from pathlib import Path
-from post_to_redcap import post_to_redcap
 
 
 base = Path(__file__).resolve().parent
@@ -99,24 +100,18 @@ def add_tags_to_choice_values(open_tag: str, choice_values: str, close_tag: str)
     return new_choices.rstrip("|")
 
 
-def import_data_dictionary(data_dictionary: List[Dict[str,str]]):
-    """
-    Import data dictionary to REDCap project indicated by the environment
-    variables REDCAP_API_URL and REDCAP_API_TOKEN.
-    """
-    parameters = {
-        'data': json.dumps(data_dictionary)
-    }
-
-    post_to_redcap('metadata', parameters)
-
-
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description= __doc__,
         formatter_class=argparse.RawTextHelpFormatter
     )
+
+    parser.add_argument("--project-id",
+        metavar="<project-id>",
+        required=True,
+        type=int,
+        help="The project ID of the REDCap project whose metadata you wish to "
+             "upload.")
 
     parser.add_argument("--field-names",
         metavar="<field_names.csv>",
@@ -162,5 +157,6 @@ if __name__ == '__main__':
                                         args.html_attributes,
                                         args.output)
 
-    if args.import_to_redcap:
-        import_data_dictionary(new_data_dictionary)
+    dry_run = not args.import_to_redcap
+    project = redcap.Project(os.environ['REDCAP_API_URL'], args.project_id, dry_run=dry_run)
+    project.update_metadata(new_data_dictionary)
