@@ -106,8 +106,11 @@ main() {
     log "Restoring filtered roles"
     psql --no-psqlrc < production-roles-filtered.sql |& suppress-ignorable-errors
 
+    log "Removing comments on extensions from the TOC"
+    pg_restore --list production.pgdb \
+        | grep -vE 'COMMENT - EXTENSION|TABLE DATA public spatial_ref_sys rdsadmin' > production.toc
     log "Restoring database dump"
-    pg_restore --dbname "$PGDATABASE" production.pgdb |& suppress-ignorable-errors || true
+    pg_restore --dbname "$PGDATABASE" --use-list production.toc production.pgdb |& suppress-ignorable-errors || true
 
     log "Finished in $(elapsed-time)"
 }
@@ -236,16 +239,6 @@ suppress-ignorable-errors() {
     # process so that real, unexpected errors aren't lost in familiar noise.
     perl -000pe '
         s/^ERROR:  role (.+?) already exists/CREATE ROLE \1 (already exists, skipped)/mg;
-
-        s/(?-x:^pg_restore: .+? COMMENT EXTENSION (.+?)\s*)\n
-          (?-x:^pg_restore: .+? ERROR:  must be owner of extension .+?)\n
-          (?-x:^Command was: COMMENT ON EXTENSION .+?)\n+
-         /COMMENT EXTENSION \1 (failure due to RDS permissions ignored)\n/xmg;
-
-        s/(?-x:^pg_restore: .+? TABLE DATA spatial_ref_sys rdsadmin)\n
-          (?-x:^pg_restore: .+? ERROR:  permission denied for relation spatial_ref_sys)\n
-          (?-x:^Command was: COPY public\.spatial_ref_sys .+?)\n+
-         /TABLE DATA spatial_ref_sys (failure due to RDS permissions ignored)\n/xmg;
     '
 }
 
