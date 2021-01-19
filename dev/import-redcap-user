@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# usage: ./dev/import-redcap-user --permissions <permissions> --net-id <net-id>
+# usage: ./dev/import-redcap-user --permissions <permissions> --net-id <net-id> --project-id <project-id>
 #
 # Imports a REDCap user to the project specified by the REDCap API token
 # environment variable, granting them the given permissions.
@@ -13,59 +13,10 @@
 #   - REDCAP_API_URL
 #
 import os
+import sys
 import json
 import argparse
-import requests
-import logging
-import sys
-from sys import stderr
-from typing import Dict, Any
-
-
-LOG_LEVEL = os.environ.get("LOG_LEVEL", "debug").upper()
-
-logging.basicConfig(
-    level = logging.ERROR,
-    format = "[%(asctime)s] %(levelname)-8s %(message)s",
-    datefmt = "%Y-%m-%d %H:%M:%S%z",
-    stream = stderr)
-
-logging.captureWarnings(True)
-
-log = logging.getLogger(__name__)
-log.setLevel(LOG_LEVEL)
-
-
-def fetch(data: Dict[str, Any]) -> int:
-    """
-    Fetch REDCap user content with a POST request to the REDCap API using the
-    given *data*. Returns the number of REDCap users whose permissions were
-    updated.
-    """
-    headers = {
-        'Content-type': 'application/x-www-form-urlencoded',
-        'Accept': 'application/json'
-    }
-
-    log.debug(f"Fetching content=user from REDCap with data {data}")
-
-    params = {
-        'content': 'user',
-        'token': os.environ['REDCAP_API_TOKEN'],
-        'format': 'json',
-        'returnFormat': 'json',
-        'data': json.dumps([data])
-    }
-
-    response = requests.post(os.environ['REDCAP_API_URL'],
-        data=params,
-        headers=headers
-    )
-
-    log.debug(json.dumps(response.json()))
-    response.raise_for_status()
-
-    return response.json()
+import id3c.cli.redcap as redcap
 
 
 parser = argparse.ArgumentParser(
@@ -73,6 +24,9 @@ parser = argparse.ArgumentParser(
     formatter_class=argparse.RawTextHelpFormatter
 )
 
+parser.add_argument("--project-id",
+    required=True,
+    help="A REDCap project ID")
 parser.add_argument("--permissions",
     required=True,
     default=sys.stdin,
@@ -90,4 +44,8 @@ with open(args.permissions, 'r') as f:
     permissions = json.loads(f.read())
 
 redcap_data = { **permissions, 'username': f"{args.net_id}@washington.edu" }
-print(f"Updated permissions for {fetch(redcap_data)} REDCap users.")
+
+project = redcap.Project(os.environ['REDCAP_API_URL'], args.project_id)
+count = project.update_users([redcap_data])
+
+print(f"Updated permissions for {count} REDCap users.")
