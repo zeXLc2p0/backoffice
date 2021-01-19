@@ -16,45 +16,46 @@ set -euo pipefail
 : "${DST_USER:?The DST_USER environment variable is required.}"
 
 
-for token in \
-    "REDCAP_API_TOKEN_SFS_KIOSK" \
-    "REDCAP_API_TOKEN_SFS_SHELTERS" \
-    "REDCAP_API_TOKEN_SFS_SWAB_N_SEND" \
-    "REDCAP_API_TOKEN_SFS_SHELTERS" \
-    "REDCAP_API_TOKEN_SWAB_N_SEND_HEALTHCARE_WORKER" \
-    "REDCAP_API_TOKEN_SFS_ASYMPTOMATIC" \
-    "REDCAP_API_TOKEN_SFS_SWAB_N_SEND_HOME_FLU" \
-    "REDCAP_API_TOKEN_SWAB_N_SEND_ASYMPTOMATIC" \
-    "REDCAP_API_TOKEN_SCAN_EN" \
-    "REDCAP_API_TOKEN_SCAN_VI" \
-    "REDCAP_API_TOKEN_SCAN_ZH_HANS" \
-    "REDCAP_API_TOKEN_SCAN_ES" \
-    "REDCAP_API_TOKEN_SCAN_ZH_HANT" \
-    "REDCAP_API_TOKEN_SCAN_RU" \
-    "REDCAP_API_TOKEN_SCAN_SO" \
-    "REDCAP_API_TOKEN_SCAN_KO" \
-    "REDCAP_API_TOKEN_SCAN_AM" \
-    "REDCAP_API_TOKEN_SCAN_TI" \
-    "REDCAP_API_TOKEN_SCAN_TL" \
-    "REDCAP_API_TOKEN_SCAN_IRB_EN" \
-    "REDCAP_API_TOKEN_SCAN_IRB_TL" \
-    "REDCAP_API_TOKEN_SCAN_IRB_TI" \
-    "REDCAP_API_TOKEN_SCAN_IRB_UR" \
-    "REDCAP_API_TOKEN_SCAN_IRB_AM" \
-    "REDCAP_API_TOKEN_SCAN_IRB_SO" \
-    "REDCAP_API_TOKEN_SCAN_IRB_RU" \
-    "REDCAP_API_TOKEN_SCAN_IRB_ZH_HANS" \
-    "REDCAP_API_TOKEN_SCAN_IRB_ZH_HANT" \
-    "REDCAP_API_TOKEN_SCAN_IRB_ES" \
-    "REDCAP_API_TOKEN_SCAN_IRB_KO" \
-    "REDCAP_API_TOKEN_SCAN_IRB_VI" \
-    "REDCAP_API_TOKEN_SCAN_KIOSK";
+for pid in \
+    16637 \
+    16691 \
+    16949 \
+    17421 \
+    17542 \
+    19209 \
+    19212 \
+    19338 \
+    20190 \
+    20759 \
+    21512 \
+    21514 \
+    21520 \
+    21521 \
+    21808 \
+    21809 \
+    21810 \
+    21950 \
+    21951 \
+    21953 \
+    22461 \
+    22467 \
+    22468 \
+    22469 \
+    22470 \
+    22471 \
+    22472 \
+    22473 \
+    22474 \
+    22475 \
+    22476 \
+    22477 \
+    23089 ;
 do
-    if ! REDCAP_API_TOKEN="${!token}" ./dev/import-redcap-user \
-        --permissions <(REDCAP_API_TOKEN="${!token}" ./dev/export-redcap-user --net-id "$SRC_USER") \
-        --net-id "$DST_USER"
+    if ! ./dev/import-redcap-user \
+        --permissions <(./dev/export-redcap-user --project-id "$pid" --net-id "$SRC_USER") \
+        --project-id "$pid" --net-id "$DST_USER"
     then
-        echo "Failed to import user for token $token" >&2
+        echo "Failed to import user for PID $pid" >&2
         echo >&2
     fi
 
