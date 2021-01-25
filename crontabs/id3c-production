@@ -120,14 +120,14 @@ GEOCODING_CACHE=/home/ubuntu/sfs-cache.pickle
 * * * * * ubuntu promjob "terminate-idle-sessions" fatigue --quiet terminate-idle-sessions
 # Run the old metabase session disconnector routine every minute
 * * * * * ubuntu promjob "terminate-old-metabase-sessions" fatigue --quiet terminate-old-metabase-sessions
-# Run the refresh materialized view routine every 5 minutes include latest
+# Run the refresh materialized view routine every 10 minutes include latest
 # ingested FHIR documents in the view
-*/5 * * * * ubuntu promjob "refresh-materialized-view: shipping.fhir_questionnaire_responses_v1" flock -F --nonblock --conflict-exit-code 0 "$FLOCK_DIR/shipping.fhir_questionnaire_responses_v1" fatigue --quiet pipenv run id3c refresh-materialized-view shipping fhir_questionnaire_responses_v1 --commit
-*/5 * * * * ubuntu promjob "refresh-materialized-view: shipping.scan_encounters_v1"              flock -F --nonblock --conflict-exit-code 0 "$FLOCK_DIR/shipping.scan_encounters_v1" fatigue --quiet pipenv run id3c refresh-materialized-view shipping scan_encounters_v1 --commit
+*/10 * * * * ubuntu promjob "refresh-materialized-view: shipping.fhir_questionnaire_responses_v1" flock -F --nonblock --conflict-exit-code 0 "$FLOCK_DIR/shipping.fhir_questionnaire_responses_v1" fatigue --quiet pipenv run id3c refresh-materialized-view shipping fhir_questionnaire_responses_v1 --commit
+*/10 * * * * ubuntu promjob "refresh-materialized-view: shipping.scan_encounters_v1"              flock -F --nonblock --conflict-exit-code 0 "$FLOCK_DIR/shipping.scan_encounters_v1" fatigue --quiet pipenv run id3c refresh-materialized-view shipping scan_encounters_v1 --commit
 
-# Run the refresh materialized view routine for UW Reopening encounters every 8 minutes to include
+# Run the refresh materialized view routine for UW Reopening encounters every 10 minutes to include
 # latest data from other jobs, including refreshing the shipping.fhir_questionnaire_responses_v1 materialized view
-*/8 * * * * ubuntu promjob "refresh-materialized-view: shipping.__uw_encounters" flock -F --nonblock --conflict-exit-code 0 "$FLOCK_DIR/shipping.__uw_encounters" fatigue --quiet pipenv run id3c refresh-materialized-view shipping __uw_encounters --commit
+*/10 * * * * ubuntu promjob "refresh-materialized-view: shipping.__uw_encounters" flock -F --nonblock --conflict-exit-code 0 "$FLOCK_DIR/shipping.__uw_encounters" fatigue --quiet pipenv run id3c refresh-materialized-view shipping __uw_encounters --commit
 
 # Make UW Reopening testing offers at :15 and :45
 # This job uses data created by redcap-det uw-reopening, etl fhir, and refresh-materialized-view shipping fhir_questionnaire_responses_v1
