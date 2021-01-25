@@ -1,13 +1,17 @@
 SHELL := /bin/bash -euo pipefail
+CROND ?= /etc/cron.d
 
 crontabs := \
 	id3c-production \
 	return-of-results \
-	scan-amazon-addresses \
 	scan-switchboard \
 	uw-ehs-report
 
-install: $(crontabs:%=/etc/cron.d/backoffice-%)
+old_crontabs := \
+	scan-amazon-addresses
 
-/etc/cron.d/backoffice-%: %
+install: $(crontabs:%=$(CROND)/backoffice-%)
+	@rm -fv $(old_crontabs:%=$(CROND)/backoffice-%)
+
+$(CROND)/backoffice-%: %
 	@install -cv $< $@
