@@ -48,4 +48,4 @@ if __name__ == '__main__':
     num_batches = math.ceil(ehs_dataset_num_rows / redcap_post_batch_size)
 
     for batch in np.array_split(ehs_dataset, num_batches):
-        project.update_records(json.loads(batch.to_json(orient='records')), date_format = "MDY")
+        project.update_records(json.loads(batch.to_json(orient='records')), date_format = "MDY", check_count = False)
