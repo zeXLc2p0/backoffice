@@ -39,6 +39,8 @@ main() {
         debug
     fi
 
+    # Produce PDFs in each language for samples collected under
+    # the `IRB` pre_analytical_specimen_collection
     for lang in $PDF_LANGS; do
         debug "Generating PDFs for language code «${lang}»"
 
@@ -55,7 +57,7 @@ main() {
                     --template "scan-irb/report-$lang.tex" \
                     --params "$params" \
                     --output "$output-$lang.pdf" \
-                    --filter 'status_code not in ["not-received", "pending"]'
+                    --filter 'status_code not in ["not-received", "pending"] and pre_analytical_specimen_collection == "IRB" '
     done;
 }
 

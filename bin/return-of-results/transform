@@ -221,4 +221,9 @@ if __name__ == '__main__':
     joined_data = redcap_data.merge(id3c_data, how='inner', on='qrcode')
     joined_data = edit_status_code(joined_data)
 
-    joined_data[['qrcode', 'pat_name', 'birth_date', 'collect_ts', 'result_ts', 'status_code', 'swab_type', 'staff_observed']].to_csv(args.output, index=False)
+    # Caution: a side effect of adding columns here is that the pipeline will consider all results as new
+    # when it diffs against the previous run's output, and attempt to regenerate all results PDFs.
+    # That process is incredibly slow, so it may be prudent to manually backfill new columns into the
+    # previous_results.csv in S3
+
+    joined_data[['qrcode', 'pat_name', 'birth_date', 'collect_ts', 'result_ts', 'status_code', 'swab_type', 'staff_observed', 'pre_analytical_specimen_collection']].to_csv(args.output, index=False)
