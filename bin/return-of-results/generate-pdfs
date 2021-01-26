@@ -8,6 +8,7 @@ main() {
     local output="${2:-s3://dokku-stack-phi/covid19/results-scan-study/{qrcode\}-{birth_date\}}"
     local -a mounts
     mounts=()
+    local docker_container_build_number="27"
 
     debug "PDF_LANGS = $PDF_LANGS"
     debug "params = $params"
@@ -52,13 +53,31 @@ main() {
             --env=LOG_LEVEL \
             --user "$(id -u):$(id -g)" \
             "${mounts[@]}" \
-            seattleflu/lab-result-reports:build-27 \
+            seattleflu/lab-result-reports:build-$docker_container_build_number \
                 fill-template \
                     --template "scan-irb/report-$lang.tex" \
                     --params "$params" \
                     --output "$output-$lang.pdf" \
                     --filter 'status_code not in ["not-received", "pending"] and pre_analytical_specimen_collection == "IRB" '
     done;
+
+    # Produce PDFs only in EN for samples collected under the
+    # `clinical` pre_analytical_specimen_collection because the
+    # PDF content was not translated
+    docker run \
+            --rm \
+            --interactive \
+            --env=AWS_ACCESS_KEY_ID \
+            --env=AWS_SECRET_ACCESS_KEY \
+            --env=LOG_LEVEL \
+            --user "$(id -u):$(id -g)" \
+            "${mounts[@]}" \
+            seattleflu/lab-result-reports:build-$docker_container_build_number \
+                fill-template \
+                    --template "clinical/report-en.tex" \
+                    --params "$params" \
+                    --output "$output-en.pdf" \
+                    --filter 'status_code not in ["not-received", "pending"] and pre_analytical_specimen_collection == "clinical" '
 }
 
 debug() {

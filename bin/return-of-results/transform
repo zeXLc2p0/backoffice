@@ -135,6 +135,35 @@ def parse_sfs_longitudinal_redcap(redcap_file) -> pd.DataFrame:
     return redcap_data[['qrcode', 'pat_name', 'birth_date', 'contacted', 'source']]
 
 
+def parse_sfs_classic_redcap(redcap_file) -> pd.DataFrame:
+    """
+    Reads in data from a given SFS classic *redcap_file*. Returns a
+    pandas.DataFrame prepared in the specifications of UW Lab Med's return
+    of results portal.
+    """
+    redcap_data = (
+        pd.read_json(redcap_file, lines = True, dtype = False, convert_dates = False)
+        .astype("string")
+        .pipe(trim_whitespace)
+        .replace({"": pd.NA})
+        .astype("string")
+        .rename(columns={"core_participant_birth_date": "birth_date", "participant_contacted": "contacted"})
+    )
+
+    participant_name = lambda row: f"{row['core_participant_first_name']} {row['core_participant_last_name']}"
+    redcap_data['pat_name'] = redcap_data.apply(participant_name, axis='columns')
+
+    # This invariant protects our filename assumptions.
+    assert all(redcap_data['birth_date'].str.match(r"^\d{4}-\d{2}-\d{2}$").dropna())
+
+    redcap_data['prioritized_barcode'] = normalize_barcode(redcap_data['prioritized_barcode'])
+    barcodes = redcap_data['prioritized_barcode']
+    barcodes = drop_duplicate_barcodes(barcodes)
+    redcap_data['qrcode'] = barcodes
+
+    return redcap_data[['qrcode', 'pat_name', 'birth_date', 'contacted', 'source', 'contact_before_releasing_result', 'ordering_provider']]
+
+
 def normalize_barcode(barcode):
     return barcode.str.upper().str.strip()
 
@@ -169,7 +198,8 @@ def edit_status_code(results: pd.DataFrame) -> pd.DataFrame:
     """
     Sets the *results* status to `pending` if a test result is `positive` or
     `inconclusive` but the participant has not yet been contacted
-    (`contacted` != 'yes') for SCAN and SFS Childcare samples.
+    (`contacted` != 'yes') for SCAN and SFS Childcare samples or for records
+    with `contact_before_releasing_result` == 'true'
 
     Sets the *results* status to `pending` if a record has a null swab type.
 
@@ -182,7 +212,13 @@ def edit_status_code(results: pd.DataFrame) -> pd.DataFrame:
     is_inconclusive = results['status_code'] == 'inconclusive'
 
     participant_contacted = results['contacted'] == 'yes'
-    require_contacted = results['source'].isin(['scan', 'childcare'])
+
+    # To prevent a row's `require_contacted` value from getting set as pd.NA and then failing where we compare
+    # its value with the boolean values of the other series (is_positive, is_inconclusive, participant_contacted),
+    # first check that the value is not pd.NA before comparing its string value.
+    require_contacted_lambda = lambda row: (row['source'] is not pd.NA and row['source'] in ['scan', 'childcare']) \
+        or (row['contact_before_releasing_result'] is not pd.NA and row['contact_before_releasing_result'] == 'true')
+    require_contacted = results.apply(require_contacted_lambda, axis='columns')
 
     results.loc[(is_positive | is_inconclusive) & ~(participant_contacted) & require_contacted, 'status_code'] = 'pending'
 
@@ -197,6 +233,7 @@ if __name__ == '__main__':
     )
     parser.add_argument("scan_redcap_data", help="NDJSON export of SCAN records from REDCap")
     parser.add_argument("sfs_longitudinal_redcap_data", help="NDJSON export of SFS longitudinal records from REDCap")
+    parser.add_argument("sfs_classic_redcap_data", help="NDJSON export of SFS classic records from REDCap")
     parser.add_argument("id3c_data", help="CSV export of SCAN return of results from ID3C")
     parser.add_argument("output", help="A destination for the output csv", nargs="?",
         default=sys.stdout)
@@ -204,9 +241,14 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     scan_redcap_data = parse_scan_redcap(args.scan_redcap_data)
-    sfs_redcap_data = parse_sfs_longitudinal_redcap(args.sfs_longitudinal_redcap_data)
+    sfs_longitudinal_redcap_data = parse_sfs_longitudinal_redcap(args.sfs_longitudinal_redcap_data)
+    sfs_classic_redcap_data = parse_sfs_classic_redcap(args.sfs_classic_redcap_data)
 
-    redcap_data = scan_redcap_data.append(sfs_redcap_data)
+    redcap_data = scan_redcap_data.append(sfs_longitudinal_redcap_data).append(sfs_classic_redcap_data)
+
+    # After appending the DataFrames, columns that were not in all sets originally will
+    # have empty string values in the final DataFrame. Replace those with pd.NA.
+    redcap_data.replace("", pd.NA, inplace = True)
 
     # Check for duplicate barcodes across ALL projects.
     redcap_data["qrcode"] = drop_duplicate_barcodes(redcap_data["qrcode"])
@@ -226,4 +268,4 @@ if __name__ == '__main__':
     # That process is incredibly slow, so it may be prudent to manually backfill new columns into the
     # previous_results.csv in S3
 
-    joined_data[['qrcode', 'pat_name', 'birth_date', 'collect_ts', 'result_ts', 'status_code', 'swab_type', 'staff_observed', 'pre_analytical_specimen_collection']].to_csv(args.output, index=False)
+    joined_data[['qrcode', 'pat_name', 'birth_date', 'collect_ts', 'result_ts', 'status_code', 'swab_type', 'staff_observed', 'pre_analytical_specimen_collection', 'ordering_provider']].to_csv(args.output, index=False)

@@ -1,0 +1,15 @@
+---
+redcap:
+  url: https://redcap.iths.org
+  project: 27619 # Clinical COVID Testing (Congregate Settings)
+source: adult_family_home_workplace_outbreak
+contact_before_releasing_result: false
+contacted_field: null
+participant_first_name_field: core_participant_first_name
+participant_last_name_field: core_participant_last_name
+participant_birthdate_field: core_birthdate
+additional_fields:
+  - {"name":"ordering_provider", "required": true}
+prioritized_barcode_fields:
+  - core_collection_barcode
+  - return_collection_barcode
