@@ -132,7 +132,6 @@ column_names: [
   "site_name",
   "site_context",
   "participant_role",
-  "collection_barcode"
 ]
 
 ---
