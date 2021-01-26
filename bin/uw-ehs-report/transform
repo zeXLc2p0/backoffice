@@ -7,6 +7,7 @@ EH&S Transfer REDCap project.
 import sys
 import argparse
 import pandas as pd
+from id3c.cli.io.pandas import dump_ndjson
 
 
 def parse_redcap(redcap_file) -> pd.DataFrame:
@@ -146,8 +147,8 @@ if __name__ == '__main__':
     )
     parser.add_argument("redcap_data", help="NDJSON export of SCAN records from REDCap")
     parser.add_argument("id3c_data", help="CSV export of SCAN return of results from ID3C")
-    parser.add_argument("output", help="A destination for the output csv", nargs="?",
-        default=sys.stdout)
+    parser.add_argument("output", help="A destination for the output NDJSON", nargs="?",
+        default=sys.stdout, type=argparse.FileType("w"))
 
     args = parser.parse_args()
 
@@ -184,7 +185,7 @@ if __name__ == '__main__':
     joined_data = redcap_data.merge(id3c_data, how='inner', on='barcode')
 
 
-    joined_data[[ \
+    dump_ndjson(joined_data[[ \
         'barcode', 'sample_collection_date', 'test_result', 'test_result_date',
 
         'netid', 'participant_first_name', 'participant_last_name', 'birthdate',
@@ -204,4 +205,4 @@ if __name__ == '__main__':
         'uw_dorm_name', 'uw_dorm_room_number', 'lives_in_uw_apartment',
         'uw_apartment_name', 'study_tier', 'symptomatic_when_tested'
 
-        ]].to_csv(args.output, index=False)
+        ]], file = args.output)

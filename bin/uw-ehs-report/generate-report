@@ -1,12 +1,12 @@
 #!/bin/bash
-# usage: generate-report-csv
-#        generate-report-csv --help
+# usage: generate-report
+#        generate-report --help
 #
 # Joins REDCap Husky Coronavirus Testing data to data from the
 # shipping.uw_reopening_ehs_reporting_v1 view in ID3C.
 # Parses these data into a format appropriate to submit to UW EH&S.
 #
-# Resulting transformed csv is output to stdout.
+# Resulting transformed NDJSON is output to stdout.
 #
 set -euo pipefail
 
