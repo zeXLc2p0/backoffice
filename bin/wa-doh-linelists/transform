@@ -246,4 +246,5 @@ if __name__ == "__main__":
 
     mega_linelist.sort_values(by=['record_id']) \
         .to_csv(args.output_dir / f"linelist_{date.replace('/', '')}.csv",
-            index=False)
+            index=False,
+            line_terminator='\r\n')
