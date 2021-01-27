@@ -98,7 +98,6 @@ column_names: [
   "date_tested",
   "test_result",
   "study_arm",
-  "shelter_name",
   "chronic_illness___blood",
   "chronic_illness___immsup",
   "chronic_illness___liver_kidney",
