@@ -56,7 +56,7 @@ def relabel_values(redcap_report: pd.DataFrame, config: Dict[str, Any]) -> pd.Da
     """
     if config.get('relabel_zipcodes'):
         redcap_report['home_zipcode_2'] = redcap_report['home_zipcode_2'] \
-            .apply(zipcode_map)
+            .apply(lambda zipcode: zipcode_map(zipcode) if zipcode != '' else zipcode)
 
     if config.get('raw_values_map'):
         for column in config['raw_values_map']:
