@@ -26,16 +26,7 @@ main() {
         esac
     done
 
-    datadir="$(TMPDIR="$base" mktemp -d -t uw_ehs_report-XXXXXX)"
-
-    # Always leave and delete this temporary directory regardless of exit code
-    trap "rm -rf '$datadir'" EXIT
-
-    # Generate the report CSV
-    "$bin"/generate-report-csv > "$datadir/uw_ehs_report.csv"
-
-    # Import the CSV into the transfer REDCap project.
-    "$bin"/import-to-uw-ehs-transfer-redcap "$datadir/uw_ehs_report.csv"
+    "$bin"/generate-report | "$bin"/import-to-uw-ehs-transfer-redcap -
 }
 
 print-help() {
