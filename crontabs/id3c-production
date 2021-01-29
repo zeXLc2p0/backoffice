@@ -34,7 +34,7 @@ FLOCK_DIR=/var/run/lock
 25 * * * * ubuntu promjob "id3c etl kit enrollments" pipenv run id3c etl kit enrollments --commit
 
 # Test results are pushed at arbitrary times now, so check for new ones every 15m.
-*/15 * * * * ubuntu promjob "id3c etl presence-absence" fatigue --quiet pipenv run id3c etl presence-absence --commit
+*/15 * * * * ubuntu promjob "id3c etl presence-absence" pipenv run id3c etl presence-absence --commit
 
 # 5 minutes after presence/absence results are uploaded,
 # check if any contain reportable conditions.
