@@ -8,7 +8,7 @@ main() {
     local output="${2:-s3://dokku-stack-phi/covid19/results-scan-study/{qrcode\}-{birth_date\}}"
     local -a mounts
     mounts=()
-    local docker_container_build_number="27"
+    local docker_container_build_number="28"
 
     debug "PDF_LANGS = $PDF_LANGS"
     debug "params = $params"
