@@ -244,7 +244,10 @@ if __name__ == '__main__':
     sfs_longitudinal_redcap_data = parse_sfs_longitudinal_redcap(args.sfs_longitudinal_redcap_data)
     sfs_classic_redcap_data = parse_sfs_classic_redcap(args.sfs_classic_redcap_data)
 
-    redcap_data = scan_redcap_data.append(sfs_longitudinal_redcap_data).append(sfs_classic_redcap_data)
+    # Combine the DataFrames by appending to the first.
+    # Use `ignore_index = True` to prevent duplicate index values.
+    redcap_data = scan_redcap_data.append(sfs_longitudinal_redcap_data, ignore_index = True) \
+        .append(sfs_classic_redcap_data, ignore_index = True)
 
     # After appending the DataFrames, columns that were not in all sets originally will
     # have empty string values in the final DataFrame. Replace those with pd.NA.
