@@ -227,6 +227,27 @@ def edit_status_code(results: pd.DataFrame) -> pd.DataFrame:
     return results
 
 
+def check_data_quality(joined_data: pd.DataFrame) -> None:
+    """
+    Performs some data quality checks on the final `joined_data`
+    DataFrame and warns (by writing to sys.stderr) about records
+    that have quality issues.
+    """
+
+    # Check the `pre_analytical_specimen_collection` column
+    # pd.NA is included by ~ isin
+    no_pre_analytical_specimen_collection = joined_data[~joined_data['pre_analytical_specimen_collection'].isin \
+        (['IRB', 'clinical'])]
+
+    if not no_pre_analytical_specimen_collection.empty:
+        print(f"{len(no_pre_analytical_specimen_collection)} records have a bad pre_analytical_specimen_collection value.",
+            file = sys.stderr)
+        no_pre_analytical_specimen_collection.apply \
+            (lambda row: print(f"qrcode: «{row['qrcode']}», pre_analytical_specimen_collection: "
+            f"«{row['pre_analytical_specimen_collection']}»",
+                file = sys.stderr), axis='columns')
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description="Join a REDCAP export NDJSON file with a SCAN return of results ID3C export CSV file."
@@ -265,6 +286,8 @@ if __name__ == '__main__':
     # incorrect barcode or not having a known status for a barcode.
     joined_data = redcap_data.merge(id3c_data, how='inner', on='qrcode')
     joined_data = edit_status_code(joined_data)
+
+    check_data_quality(joined_data)
 
     # Caution: a side effect of adding columns here is that the pipeline will consider all results as new
     # when it diffs against the previous run's output, and attempt to regenerate all results PDFs.
