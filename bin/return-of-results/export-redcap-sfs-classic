@@ -1,0 +1,139 @@
+#!/usr/bin/env python3
+# usage: export-redcap-sfs-classic
+#
+# Exports participant information from SFS "classic" mode REDCap projects as NDJSON.
+# REDCap projects are processed according to the YAML configuration in $CONFIG,
+# which defaults to etc/sfs-classic-redcap-projects.yaml.
+#
+# The $CONFIG file is expected to have at least one YAML document in it with
+# the following format:
+#
+# ---
+# redcap:
+#   url: https://redcap.iths.org
+#   project: 27619 # Clinical COVID Testing (Congregate Settings)
+# source: adult_family_home_workplace_outbreak
+# contact_before_releasing_result: false
+# contacted_field: null
+# participant_first_name_field: core_participant_first_name
+# participant_last_name_field: core_participant_last_name
+# participant_birthdate_field: core_birthdate
+# additional_fields:
+#   - {"name":"ordering_provider", "required": true}
+# prioritized_barcode_fields:
+#   - core_collection_barcode
+#   - return_collection_barcode
+
+import sys
+import json
+import yaml
+from pathlib import Path
+from id3c.cli.redcap import Project
+from os import environ
+from typing import Dict, List, Any
+
+config_file  = environ.get("CONFIG")
+
+if not config_file:
+    base_dir = Path(__file__).resolve().parent.parent.parent
+    config_file = base_dir / "etc/sfs-classic-redcap-projects.yaml"
+
+
+class SFSProject(Project):
+    source: str
+    contact_before_releasing_result: bool
+    contacted_field: str
+    participant_first_name_field: str
+    participant_last_name_field: str
+    participant_birthdate_field: str
+    additional_fields: List[Dict[str, Any]]
+    prioritized_barcode_fields: List[str]
+
+    def __init__(self, config: Dict[str, Any]):
+        super().__init__(config['redcap']['url'], config['redcap']['project'])
+        self.source = config['source']
+        self.contact_before_releasing_result = config['contact_before_releasing_result']
+        self.contacted_field = config.get('contacted_field')
+        self.participant_first_name_field = config['participant_first_name_field']
+        self.participant_last_name_field = config['participant_last_name_field']
+        self.participant_birthdate_field = config['participant_birthdate_field']
+        self.additional_fields = config.get('additional_fields') or []
+        self.prioritized_barcode_fields = config['prioritized_barcode_fields']
+
+
+def main():
+    with open(config_file, 'r') as f:
+        configs = list(yaml.safe_load_all(f))
+
+    for config in configs:
+        project = SFSProject(config)
+
+        assert (not project.contact_before_releasing_result or (project.contact_before_releasing_result and project.contacted_field)), \
+        "If the project requires contact before releasing the result, you must specify the `contacted_field` field. Correct the project " \
+        f"with source: {project.source}."
+
+        for record in fetch_records(project):
+            record['source'] = project.source
+            record['contact_before_releasing_result'] = str(project.contact_before_releasing_result).lower()
+
+            barcode = None
+
+            for field in project.prioritized_barcode_fields:
+                if record.get(field):
+                    barcode = record[field]
+                    break
+
+            record['prioritized_barcode'] = barcode
+
+            # Use the record only if it has the necessary barcode fields populated
+            if barcode:
+
+                # Don't retain the raw barcode fields now that we have the prioritized one
+                for field in project.prioritized_barcode_fields:
+                    del record[field]
+
+                print(json.dumps(record, indent = None, separators = ",:"), flush = True)
+
+
+def fetch_records(project) -> List[Dict[str, dict]]:
+    """
+    Fetch all records from the REDCap project.
+    """
+    redcap_records = []
+
+    participant_fields = {project.participant_first_name_field,
+        project.participant_last_name_field, project.participant_birthdate_field}
+
+    fields = {project.record_id_field, *participant_fields, *project.prioritized_barcode_fields,
+        *[entry['name'] for entry in project.additional_fields]}
+
+    required_fields = {*participant_fields,
+        *[entry['name'] for entry in project.additional_fields if entry['required'] == True]
+        }
+
+    if project.contacted_field:
+        fields.add(project.contacted_field)
+        required_fields.add(project.contacted_field)
+
+    for record in project.records(fields = fields, raw = True):
+        if not all(len(record[field]) for field in required_fields):
+            continue
+
+        # Standardize the name of some keys
+        record['core_participant_first_name'] = record.pop(project.participant_first_name_field)
+        record['core_participant_last_name'] = record.pop(project.participant_last_name_field)
+        record['core_participant_birth_date'] = record.pop(project.participant_birthdate_field)
+
+        if project.contacted_field:
+            record['participant_contacted'] = record.pop(project.contacted_field)
+        else:
+            # Use "" to match a REDCap unset variable
+            record['participant_contacted'] = ""
+
+        redcap_records.append(record)
+
+    return redcap_records
+
+
+if __name__ == "__main__":
+    main()
