@@ -43,11 +43,11 @@ FLOCK_DIR=/var/run/lock
 # The aliquot manifest is uploaded to AWS at arbitrary times now, so check for new records every 10m.
 # This is often the blocker for the presence/absence ETl, so run more frequently than
 # the presence/absence ETL to avoid extended delay of results.
-*/10 * * * * ubuntu promjob "manifest update: aliquots" chronic fatigue envdir $ENVD/aliquot-manifest-processing/ envdir $ENVD/hutch/ pipenv run /opt/specimen-manifests/update-unattended --push-and-upload
+*/10 * * * * ubuntu chronic fatigue promjob "manifest update: aliquots" envdir $ENVD/aliquot-manifest-processing/ envdir $ENVD/hutch/ pipenv run /opt/specimen-manifests/update-unattended --push-and-upload
 
 # Process the incident report manifest from Google Sheets at :25 and :55 past the hour.
 # Don't run at 10 minutes on the hour so we don't interfere with the aliquot job.
-25,55 * * * * ubuntu promjob "manifest update: incidents" chronic fatigue envdir $ENVD/incident-report-manifest-processing/ envdir $ENVD/google/ pipenv run /opt/specimen-manifests/update-unattended --push-and-upload
+25,55 * * * * ubuntu chronic fatigue promjob "manifest update: incidents" envdir $ENVD/incident-report-manifest-processing/ envdir $ENVD/google/ pipenv run /opt/specimen-manifests/update-unattended --push-and-upload
 
 # Upload new UW retrospectives to REDCap once a day at midnight
 0 0 * * * ubuntu promjob "redcap-uw-retrospectives: import-to-redcap" pipenv run chronic envdir $ENVD/hutch/ envdir $ENVD/redcap import-uw-retrospectives-to-redcap --import
@@ -56,7 +56,7 @@ FLOCK_DIR=/var/run/lock
 0 4 * * * ubuntu promjob "redcap-uw-retrospectives: generate-and-upload-dets" pipenv run chronic envdir $ENVD/redcap generate-and-upload-uw-retro-redcap-dets
 
 # Run the manifest ETL 5 minutes after new manifest records are uploaded
-5-55/10 * * * * ubuntu promjob "id3c etl manifest" fatigue --quiet pipenv run id3c etl manifest --commit
+5-55/10 * * * * ubuntu fatigue --quiet promjob "id3c etl manifest" pipenv run id3c etl manifest --commit
 
 # Kit records are created/updated from manifest records. To ensure that this
 # doesn't run at the same time as manifest etl, run ten 'till.
@@ -114,22 +114,22 @@ GEOCODING_CACHE=/home/ubuntu/sfs-cache.pickle
 21,51 * * * * ubuntu promjob "id3c etl redcap-det childcare" flock -F $GEOCODING_CACHE envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap pipenv run id3c etl redcap-det childcare --redcap-api-batch-size 1000 --commit
 
 # Ingest FHIR documents every 5 minutes.
-*/5  * * * * ubuntu promjob "id3c etl fhir" fatigue --quiet pipenv run id3c etl fhir --commit
+*/5  * * * * ubuntu fatigue --quiet promjob "id3c etl fhir" pipenv run id3c etl fhir --commit
 
 # Run the idle database session disconnector routine every minute
-* * * * * ubuntu promjob "terminate-idle-sessions" fatigue --quiet terminate-idle-sessions
+* * * * * ubuntu fatigue --quiet promjob "terminate-idle-sessions" terminate-idle-sessions
 # Run the old metabase session disconnector routine every minute
-* * * * * ubuntu promjob "terminate-old-metabase-sessions" fatigue --quiet terminate-old-metabase-sessions
+* * * * * ubuntu fatigue --quiet promjob "terminate-old-metabase-sessions" terminate-old-metabase-sessions
 # Run the refresh materialized view routine every 10 minutes include latest
 # ingested FHIR documents in the view
-*/10 * * * * ubuntu promjob "refresh-materialized-view: shipping.fhir_questionnaire_responses_v1" flock -F --nonblock --conflict-exit-code 0 "$FLOCK_DIR/shipping.fhir_questionnaire_responses_v1" fatigue --quiet pipenv run id3c refresh-materialized-view shipping fhir_questionnaire_responses_v1 --commit
-*/10 * * * * ubuntu promjob "refresh-materialized-view: shipping.scan_encounters_v1"              flock -F --nonblock --conflict-exit-code 0 "$FLOCK_DIR/shipping.scan_encounters_v1" fatigue --quiet pipenv run id3c refresh-materialized-view shipping scan_encounters_v1 --commit
+*/10 * * * * ubuntu fatigue --quiet promjob "refresh-materialized-view: shipping.fhir_questionnaire_responses_v1" flock -F --nonblock --conflict-exit-code 0 "$FLOCK_DIR/shipping.fhir_questionnaire_responses_v1" pipenv run id3c refresh-materialized-view shipping fhir_questionnaire_responses_v1 --commit
+*/10 * * * * ubuntu fatigue --quiet promjob "refresh-materialized-view: shipping.scan_encounters_v1"              flock -F --nonblock --conflict-exit-code 0 "$FLOCK_DIR/shipping.scan_encounters_v1" pipenv run id3c refresh-materialized-view shipping scan_encounters_v1 --commit
 
 # Run the refresh materialized view routine for UW Reopening encounters every 10 minutes to include
 # latest data from other jobs, including refreshing the shipping.fhir_questionnaire_responses_v1 materialized view
-*/10 * * * * ubuntu promjob "refresh-materialized-view: shipping.__uw_encounters" flock -F --nonblock --conflict-exit-code 0 "$FLOCK_DIR/shipping.__uw_encounters" fatigue --quiet pipenv run id3c refresh-materialized-view shipping __uw_encounters --commit
+*/10 * * * * ubuntu fatigue --quiet promjob "refresh-materialized-view: shipping.__uw_encounters" flock -F --nonblock --conflict-exit-code 0 "$FLOCK_DIR/shipping.__uw_encounters" pipenv run id3c refresh-materialized-view shipping __uw_encounters --commit
 
 # Make UW Reopening testing offers at :15 and :45
 # This job uses data created by redcap-det uw-reopening, etl fhir, and refresh-materialized-view shipping fhir_questionnaire_responses_v1
 # Run at :15 to use the :00 uw-reopening run and :45 to use the :30 uw-reopening run
-15,45  * * * * ubuntu promjob "id3c offer-uw-testing" fatigue --quiet envdir $ENVD/redcap pipenv run id3c offer-uw-testing --commit
+15,45  * * * * ubuntu fatigue --quiet promjob "id3c offer-uw-testing" envdir $ENVD/redcap pipenv run id3c offer-uw-testing --commit
