@@ -15,4 +15,4 @@ XDG_RUNTIME_DIR=/home/ubuntu/run
 
 
 # Generate data file and PDFs for returning SFS results via UW Lab Med's SecureLink portal
-5,35 * * * * ubuntu promjob "return of results" flock --no-fork --nonblock /var/lock/return-of-results fatigue --quiet pipenv run envdir $ENVD/redcap envdir $ENVD/securelink/ /opt/backoffice/bin/return-of-results/generate
+5,35 * * * * ubuntu fatigue --quiet promjob "return of results" flock --no-fork --nonblock /var/lock/return-of-results pipenv run envdir $ENVD/redcap envdir $ENVD/securelink/ /opt/backoffice/bin/return-of-results/generate
