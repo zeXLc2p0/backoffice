@@ -217,7 +217,7 @@ def edit_status_code(results: pd.DataFrame) -> pd.DataFrame:
     # its value with the boolean values of the other series (is_positive, is_inconclusive, participant_contacted),
     # first check that the value is not pd.NA before comparing its string value.
     require_contacted_lambda = lambda row: (row['source'] is not pd.NA and row['source'] \
-        in ['scan', 'childcare', 'snohomish_schools']) \
+        in ['scan', 'childcare', 'snohomish_schools', '2021_childcare']) \
         or (row['contact_before_releasing_result'] is not pd.NA and row['contact_before_releasing_result'] == 'true')
     require_contacted = results.apply(require_contacted_lambda, axis='columns')
 
