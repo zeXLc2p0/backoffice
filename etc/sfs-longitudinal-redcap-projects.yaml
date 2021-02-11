@@ -49,3 +49,88 @@ encounter_event_names:
 encounter_fields:
   - return_utm_barcode
   - contacted
+---
+redcap:
+  url: https://redcap.iths.org
+  project: 27574
+source: snohomish_schools
+enrollment_event_names:
+  - enrollment_arm_1
+  - enrollment_arm_2
+enrollment_fields:
+  - core_participant_first_name
+  - core_participant_last_name
+  - core_birthdate
+encounter_event_names:
+  - week_1_arm_1
+  - week_2_arm_1
+  - week_3_arm_1
+  - week_4_arm_1
+  - week_5_arm_1
+  - week_6_arm_1
+  - week_7_arm_1
+  - week_8_arm_1
+  - week_9_arm_1
+  - week_10_arm_1
+  - week_11_arm_1
+  - week_12_arm_1
+  - week_13_arm_1
+  - week_14_arm_1
+  - week_15_arm_1
+  - week_2_arm_2
+encounter_fields:
+  - collect_barcode_kiosk
+  - return_utm_barcode
+  - contacted
+---
+redcap:
+  url: https://redcap.iths.org
+  project: 29351
+source: 2021_childcare
+enrollment_event_names:
+  - enrollment_arm_1
+  - enrollment_arm_2
+enrollment_fields:
+  - core_participant_first_name
+  - core_participant_last_name
+  - core_birthdate
+encounter_event_names:
+  - week1_test_1_arm_1
+  - week1_test_2_arm_1
+  - week2_test_1_arm_1
+  - week2_test_2_arm_1
+  - week3_test_1_arm_1
+  - week3_test_2_arm_1
+  - week4_test_1_arm_1
+  - week4_test_2_arm_1
+  - week5_test_1_arm_1
+  - week5_test_2_arm_1
+  - week6_test_1_arm_1
+  - week6_test_2_arm_1
+  - week7_test_1_arm_1
+  - week7_test_2_arm_1
+  - week8_test_1_arm_1
+  - week8_test_2_arm_1
+  - week9_test_1_arm_1
+  - week9_test_2_arm_1
+  - week10_test_1_arm_1
+  - week10_test_2_arm_1
+  - week11_test_1_arm_1
+  - week11_test_2_arm_1
+  - week12_test_1_arm_1
+  - week12_test_2_arm_1
+  - week13_test_1_arm_1
+  - week13_test_2_arm_1
+  - week14_test_1_arm_1
+  - week14_test_2_arm_1
+  - week15_test_1_arm_1
+  - week15_test_2_arm_1
+  - week16_test_1_arm_1
+  - week16_test_2_arm_1
+  - week17_test_1_arm_1
+  - week17_test_2_arm_1
+  - unscheduled_arm_1
+  - week_2_arm_2
+encounter_fields:
+  - return_utm_barcode
+  - contacted
