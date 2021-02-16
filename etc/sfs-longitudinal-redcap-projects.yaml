@@ -134,3 +134,24 @@ encounter_event_names:
 encounter_fields:
   - return_utm_barcode
   - contacted
+---
+redcap:
+  url: https://redcap.iths.org
+  project: 24499
+source: apple_respiratory
+enrollment_event_names:
+  - enrollment_arm_1
+enrollment_fields:
+  - core_participant_first_name
+  - core_participant_last_name
+  - core_birthdate
+encounter_event_names:
+  - baseline_test_arm_1
+  - illness_episode_arm_1
+  - serial_event_1_arm_1
+  - serial_event_2_arm_1
+  - serial_event_3_arm_1
+  - serial_event_4_arm_1
+encounter_fields:
+  - collection_barcode
+  - contacted
