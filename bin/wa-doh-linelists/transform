@@ -54,7 +54,7 @@ def relabel_values(redcap_report: pd.DataFrame, config: Dict[str, Any]) -> pd.Da
     Re-assigns raw values a meaningful label in a given *redcap_report* using
     logic in id3c-customizations and the provided *config*.
     """
-    if 'home_zipcode_2' in redcap_report:
+    if config.get('relabel_zipcodes'):
         redcap_report['home_zipcode_2'] = redcap_report['home_zipcode_2'] \
             .apply(zipcode_map)
 

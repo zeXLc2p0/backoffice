@@ -151,6 +151,7 @@ column_rename_map: {
 static_columns: {
   "study_arm": "SCAN",
 }
+relabel_zipcodes: True
 
 ---
 name: SCAN IRB Spanish
@@ -170,6 +171,7 @@ static_columns: {
   "study_arm": "SCAN",
   "primary_language": "Spanish",
 }
+relabel_zipcodes: True
 
 ---
 name: SCAN IRB Vietnamese
@@ -182,6 +184,7 @@ static_columns: {
   "study_arm": "SCAN",
   "primary_language": "Vietnamese",
 }
+relabel_zipcodes: True
 
 ---
 name: SCAN IRB Russian
@@ -201,6 +204,7 @@ static_columns: {
   "study_arm": "SCAN",
   "primary_language": "Russian",
 }
+relabel_zipcodes: True
 
 ---
 name: SCAN IRB Traditional Chinese
@@ -220,6 +224,7 @@ static_columns: {
   "study_arm": "SCAN",
   "primary_language": "Traditional Chinese",
 }
+relabel_zipcodes: True
 
 ---
 name: EH&S Data Transer for Husky Coronavirus Testing
@@ -272,6 +277,7 @@ column_rename_map: {
 static_columns: {
   "study_arm": "SCAN",
 }
+relabel_zipcodes: True
 
 ---
 name: Seattle Flu Study - Shelters Intervention
