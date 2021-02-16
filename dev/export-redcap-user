@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# usage: ./dev/export-redcap-user --net-id <net-id>
+# usage: ./dev/export-redcap-user --net-id <net-id> --project-id <project-id>
 #
 # Exports the given REDCap user's metadata and permissions from the project
 # specified by the REDCap API token environment variable.
@@ -18,59 +18,18 @@
 import os
 import json
 import argparse
-import requests
-import logging
-from sys import stderr
-from typing import Dict, Any
-
-
-LOG_LEVEL = os.environ.get("LOG_LEVEL", "debug").upper()
-
-logging.basicConfig(
-    level = logging.ERROR,
-    format = "[%(asctime)s] %(levelname)-8s %(message)s",
-    datefmt = "%Y-%m-%d %H:%M:%S%z",
-    stream = stderr)
-
-logging.captureWarnings(True)
-
-log = logging.getLogger(__name__)
-log.setLevel(LOG_LEVEL)
-
-
-def fetch() -> Dict[str, Any]:
-    """
-    Fetch REDCap user content with a POST request to the REDCap API.
-    """
-    headers = {
-        'Content-type': 'application/x-www-form-urlencoded',
-        'Accept': 'application/json'
-    }
-
-    log.debug(f"Fetching content=user from REDCap")
-
-    params = {
-        'content': 'user',
-        'token': os.environ['REDCAP_API_TOKEN'],
-        'format': 'json',
-        'returnFormat': 'json',
-    }
-
-    response = requests.post(os.environ['REDCAP_API_URL'],
-        data=params,
-        headers=headers
-    )
-
-    log.debug(json.dumps(response.json()))
-    response.raise_for_status()
-
-    return response.json()
+import id3c.cli.redcap as redcap
 
 
 parser = argparse.ArgumentParser(
     description= __doc__,
     formatter_class=argparse.RawTextHelpFormatter
 )
+
+parser.add_argument("--project-id",
+    required=True,
+    metavar="<project-id>",
+    help="A REDCap project ID")
 
 parser.add_argument("--net-id",
     required=True,
@@ -79,7 +38,8 @@ parser.add_argument("--net-id",
 
 args = parser.parse_args()
 
-users = fetch()
+project = redcap.Project(os.environ['REDCAP_API_URL'], args.project_id)
+users = project.users()
 
 # We only want permissions for the user with the given UW NetID
 try:

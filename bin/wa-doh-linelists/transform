@@ -10,12 +10,12 @@ import os
 import yaml
 import logging
 import argparse
-import requests
 import pandas as pd
 from sys import stderr
 from pathlib import Path
 from typing import Any, Dict
 from datetime import datetime
+from id3c.cli import redcap
 from seattleflu.id3c.cli.command.etl.redcap_det_scan import zipcode_map
 
 # Disable chained assignments
@@ -36,26 +36,6 @@ log.setLevel(LOG_LEVEL)
 
 base_dir = Path(__file__).resolve().parent.parent.parent.resolve()
 
-
-def export_redcap_report(config: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Returns an export of a REDCap report specified by attributes in the given
-    *config*.
-    """
-    data = {
-        'token': os.environ[f"REDCAP_API_TOKEN_redcap.iths.org_{config['project_id']}"],
-        'content': 'report',
-        'format': 'json',
-        'report_id': config['report_id'],
-        'csvDelimiter': '',
-        'rawOrLabel': 'raw',
-        'rawOrLabelHeaders': 'raw',
-        'exportCheckboxLabel': 'false',
-        'returnFormat': 'json'
-    }
-    response = requests.post(os.environ['REDCAP_API_URL'], data=data)
-    response.raise_for_status()
-    return response.json()
 
 def test_results(date: str, config: Dict[str, Any]) -> pd.DataFrame:
     """
@@ -202,10 +182,12 @@ if __name__ == "__main__":
         if config.get('row_filter'):
             id3c_data = id3c_data.query(config['row_filter'], engine='python')
 
+        project = redcap.Project(os.environ['REDCAP_API_URL'], config['project_id'])
         # Load REDCap report data. Add columns with static values, strip
         # strings of commas, and convert empty strings to NA
         redcap_report = pd.DataFrame.from_dict(
-            export_redcap_report(config), dtype='string') \
+            project.report(config['report_id'], raw=True), \
+            dtype='string') \
             .rename(columns=config['column_rename_map']) \
             .assign(**config['static_columns']) \
             .apply(lambda c: c.str.replace(',', ''))
