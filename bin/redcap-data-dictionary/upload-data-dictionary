@@ -159,4 +159,4 @@ if __name__ == '__main__':
 
     dry_run = not args.import_to_redcap
     project = redcap.Project(os.environ['REDCAP_API_URL'], args.project_id, dry_run=dry_run)
-    project.update_metadata(new_data_dictionary)
+    project.update_fields(new_data_dictionary)
