@@ -26,11 +26,11 @@
         },
         "botocore": {
             "hashes": [
-                "sha256:65e2fb81f941dfefa8cc3ef72d46a62d4b6219b8eb6550062b644b36935f6e4f",
-                "sha256:cd621cdd14a81d2c3c5276516066d9e6ea20a515cf3113a80ad74f3f8b04a093"
+                "sha256:8c84eac6daf38890714e005623083106d68e9b2088e62132fdbf7d2b1228ecbd",
+                "sha256:a601ee5a4ae66832f328ca362b5404d22b75f1c181f6cc0934f3cfca749eb27d"
             ],
             "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4, 3.5'",
-            "version": "==1.20.8"
+            "version": "==1.20.10"
         },
         "cachetools": {
             "hashes": [
@@ -88,11 +88,11 @@
         },
         "deepdiff": {
             "hashes": [
-                "sha256:752995dbd23e9971571c9f45b0bba9462cad3e968a505d644de492d6ff47d4fa",
-                "sha256:ca2484da3cc9ec944a998fb3d03062e64e4c74b84519fb8e5eea53be88514e54"
+                "sha256:3d3da4bd7e01fb5202088658ed26427104c748dda56a0ecfac9ce9a1d2d00844",
+                "sha256:ae2cb98353309f93fbfdda4d77adb08fb303314d836bb6eac3d02ed71a10b40e"
             ],
             "markers": "python_version >= '3.6'",
-            "version": "==5.2.2"
+            "version": "==5.2.3"
         },
         "fhir.resources": {
             "hashes": [
@@ -158,11 +158,11 @@
         },
         "google-auth": {
             "hashes": [
-                "sha256:1b461d079b5650efe492a7814e95c536ffa9e7a96e39a6d16189c1604f18554f",
-                "sha256:8ce6862cf4e9252de10045f05fa80393fde831da9c2b45c39288edeee3cde7f2"
+                "sha256:d3640ea61ee025d5af00e3ffd82ba0a06dd99724adaf50bdd52f49daf29f3f65",
+                "sha256:da5218cbf33b8461d7661d6b4ad91c12c0107e2767904d5e3ae6408031d5463e"
             ],
             "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4, 3.5'",
-            "version": "==1.26.1"
+            "version": "==1.27.0"
         },
         "google-auth-httplib2": {
             "hashes": [
@@ -597,7 +597,7 @@
         "seattleflu-id3c-customizations": {
             "editable": true,
             "git": "https://github.com/seattleflu/id3c-customizations.git",
-            "ref": "0665321eb1dd82f8380af82893c3f76eae3ea44d"
+            "ref": "08246bef03d745edc763088bf60a1eedc8f7e5c3"
         },
         "six": {
             "hashes": [
