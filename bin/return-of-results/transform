@@ -93,51 +93,9 @@ def parse_scan_redcap(redcap_file) -> pd.DataFrame:
     return redcap_data[['qrcode', 'pat_name', 'birth_date', 'contacted', 'source']]
 
 
-def parse_sfs_longitudinal_redcap(redcap_file) -> pd.DataFrame:
+def parse_configuration_driven_redcap(redcap_file) -> pd.DataFrame:
     """
-    Reads in data from a given SFS longitudinal *redcap_file*. Returns a
-    pandas.DataFrame prepared in the specifications of UW Lab Med's return
-    of results portal.
-    """
-    redcap_data = (
-        pd.read_json(redcap_file, lines = True, dtype = False, convert_dates = False)
-        .astype("string")
-        .pipe(trim_whitespace)
-        .replace({"": pd.NA})
-        .astype("string")
-        .rename(columns={"core_birthdate": "birth_date"})
-    )
-
-    participant_name = lambda row: f"{row['core_participant_first_name']} {row['core_participant_last_name']}"
-    redcap_data['pat_name'] = redcap_data.apply(participant_name, axis='columns')
-
-    # This invariant protects our filename assumptions.
-    assert all(redcap_data['birth_date'].str.match(r"^\d{4}-\d{2}-\d{2}$").dropna())
-
-    # Normalize all barcode fields upfront.
-    barcode_fields = {
-        "collect_barcode_kiosk",
-        "return_utm_barcode"}
-
-    for barcode_field in barcode_fields:
-        redcap_data[barcode_field] = normalize_barcode(redcap_data[barcode_field])
-
-    kiosk_barcodes = redcap_data["collect_barcode_kiosk"]
-    mail_barcodes = redcap_data["return_utm_barcode"]
-
-    barcodes = kiosk_barcodes.combine_first(mail_barcodes)
-
-    barcodes = drop_duplicate_barcodes(barcodes)
-
-    redcap_data['qrcode'] = barcodes
-    redcap_data.loc[redcap_data['source'] == 'uw_reopening', 'contacted'] = pd.NA
-
-    return redcap_data[['qrcode', 'pat_name', 'birth_date', 'contacted', 'source']]
-
-
-def parse_sfs_classic_redcap(redcap_file) -> pd.DataFrame:
-    """
-    Reads in data from a given SFS classic *redcap_file*. Returns a
+    Reads in data from a given configuration driven *redcap_file*. Returns a
     pandas.DataFrame prepared in the specifications of UW Lab Med's return
     of results portal.
     """
@@ -160,6 +118,10 @@ def parse_sfs_classic_redcap(redcap_file) -> pd.DataFrame:
     barcodes = redcap_data['prioritized_barcode']
     barcodes = drop_duplicate_barcodes(barcodes)
     redcap_data['qrcode'] = barcodes
+
+    # The longitudinal parser currently does not return `ordering_provider`
+    if not 'ordering_provider' in redcap_data.columns:
+        redcap_data['ordering_provider'] = pd.NA
 
     return redcap_data[['qrcode', 'pat_name', 'birth_date', 'contacted', 'source', 'contact_before_releasing_result', 'ordering_provider']]
 
@@ -216,8 +178,7 @@ def edit_status_code(results: pd.DataFrame) -> pd.DataFrame:
     # To prevent a row's `require_contacted` value from getting set as pd.NA and then failing where we compare
     # its value with the boolean values of the other series (is_positive, is_inconclusive, participant_contacted),
     # first check that the value is not pd.NA before comparing its string value.
-    require_contacted_lambda = lambda row: (row['source'] is not pd.NA and row['source'] \
-        in ['scan', 'childcare', 'snohomish_schools', '2021_childcare']) \
+    require_contacted_lambda = lambda row: (row['source'] is not pd.NA and row['source'] == 'scan') \
         or (row['contact_before_releasing_result'] is not pd.NA and row['contact_before_releasing_result'] == 'true')
     require_contacted = results.apply(require_contacted_lambda, axis='columns')
 
@@ -263,8 +224,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     scan_redcap_data = parse_scan_redcap(args.scan_redcap_data)
-    sfs_longitudinal_redcap_data = parse_sfs_longitudinal_redcap(args.sfs_longitudinal_redcap_data)
-    sfs_classic_redcap_data = parse_sfs_classic_redcap(args.sfs_classic_redcap_data)
+    sfs_longitudinal_redcap_data = parse_configuration_driven_redcap(args.sfs_longitudinal_redcap_data)
+    sfs_classic_redcap_data = parse_configuration_driven_redcap(args.sfs_classic_redcap_data)
 
     # Combine the DataFrames by appending to the first.
     # Use `ignore_index = True` to prevent duplicate index values.

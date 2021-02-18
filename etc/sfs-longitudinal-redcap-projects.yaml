@@ -3,15 +3,16 @@ redcap:
   url: https://redcap.iths.org
   project: 23854
 source: uw_reopening
+contact_before_releasing_result: false
+contacted_field: null
+participant_first_name_field: core_participant_first_name
+participant_last_name_field: core_participant_last_name
+participant_birthdate_field: core_birthdate
 enrollment_event_names:
   - enrollment_arm_1
-enrollment_fields:
-  - core_participant_first_name
-  - core_participant_last_name
-  - core_birthdate
 encounter_event_names:
   - encounter_arm_1
-encounter_fields:
+prioritized_barcode_fields:
   - collect_barcode_kiosk
   - return_utm_barcode
 ---
@@ -19,13 +20,14 @@ redcap:
   url: https://redcap.iths.org
   project: 23740
 source: childcare
+contact_before_releasing_result: true
+contacted_field: contacted
+participant_first_name_field: core_participant_first_name
+participant_last_name_field: core_participant_last_name
+participant_birthdate_field: core_birthdate
 enrollment_event_names:
   - enrollment_arm_1
   - enrollment_arm_2
-enrollment_fields:
-  - core_participant_first_name
-  - core_participant_last_name
-  - core_birthdate
 encounter_event_names:
   - week1_mon_test_arm_1
   - week1_thur_test_arm_1
@@ -46,21 +48,21 @@ encounter_event_names:
   - unscheduled_arm_1
   - enrollment_arm_2
   - week_2_arm_2
-encounter_fields:
+prioritized_barcode_fields:
   - return_utm_barcode
-  - contacted
 ---
 redcap:
   url: https://redcap.iths.org
   project: 27574
 source: snohomish_schools
+contact_before_releasing_result: true
+contacted_field: contacted
+participant_first_name_field: core_participant_first_name
+participant_last_name_field: core_participant_last_name
+participant_birthdate_field: core_birthdate
 enrollment_event_names:
   - enrollment_arm_1
   - enrollment_arm_2
-enrollment_fields:
-  - core_participant_first_name
-  - core_participant_last_name
-  - core_birthdate
 encounter_event_names:
   - week_1_arm_1
   - week_2_arm_1
@@ -78,22 +80,22 @@ encounter_event_names:
   - week_14_arm_1
   - week_15_arm_1
   - week_2_arm_2
-encounter_fields:
+prioritized_barcode_fields:
   - collect_barcode_kiosk
   - return_utm_barcode
-  - contacted
 ---
 redcap:
   url: https://redcap.iths.org
   project: 29351
 source: 2021_childcare
+contact_before_releasing_result: true
+contacted_field: contacted
+participant_first_name_field: core_participant_first_name
+participant_last_name_field: core_participant_last_name
+participant_birthdate_field: core_birthdate
 enrollment_event_names:
   - enrollment_arm_1
   - enrollment_arm_2
-enrollment_fields:
-  - core_participant_first_name
-  - core_participant_last_name
-  - core_birthdate
 encounter_event_names:
   - week1_test_1_arm_1
   - week1_test_2_arm_1
@@ -131,6 +133,5 @@ encounter_event_names:
   - week17_test_2_arm_1
   - unscheduled_arm_1
   - week_2_arm_2
-encounter_fields:
+prioritized_barcode_fields:
   - return_utm_barcode
-  - contacted
