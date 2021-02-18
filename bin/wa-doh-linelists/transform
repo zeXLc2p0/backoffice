@@ -56,7 +56,7 @@ def relabel_values(redcap_report: pd.DataFrame, config: Dict[str, Any]) -> pd.Da
     """
     if config.get('relabel_zipcodes'):
         redcap_report['home_zipcode_2'] = redcap_report['home_zipcode_2'] \
-            .apply(zipcode_map)
+            .apply(lambda zipcode: zipcode_map(zipcode) if zipcode != '' else zipcode)
 
     if config.get('raw_values_map'):
         for column in config['raw_values_map']:
@@ -210,11 +210,28 @@ if __name__ == "__main__":
         redcap_report = redcap_report[redcap_report.collection_barcode.notnull()]
         log.debug(f"Dropped {prev - len(redcap_report)} row(s) with a missing `collection_barcode`")
 
-        # Merge REDCap and ID3C data
-        linelist = id3c_data.merge(redcap_report,
-            how='inner',
-            on='collection_barcode',
-            validate='1:1')
+        try:
+            # Merge REDCap and ID3C data
+            linelist = id3c_data.merge(redcap_report,
+                how='inner',
+                on='collection_barcode',
+                validate='1:1')
+
+        # Abort if duplicated collection barcodes exist. We don't want this
+        # pipeline to choose which is the "right" barcode for a record.
+        except pd.errors.MergeError as e:
+            mask = redcap_report.duplicated(subset='collection_barcode', keep=False)
+            duplicated_collection_barcodes = redcap_report[mask] \
+                [['record_id', 'collection_barcode']] \
+                .sort_values(by='collection_barcode') \
+                .reset_index(drop=True)
+
+            if duplicated_collection_barcodes.empty:
+                raise e
+
+            raise Exception("Duplicate barcodes detected in project "
+                f"{config['project_id']!r}: {config['name']!r}\n\n"
+                f"{duplicated_collection_barcodes}")
 
         linelist = overwrite_columns(linelist, config)
         linelist = fill_empty_columns(linelist, universal_config)
