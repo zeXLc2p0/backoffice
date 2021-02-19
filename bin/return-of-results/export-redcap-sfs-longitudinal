@@ -8,22 +8,25 @@
 # The $CONFIG file is expected to have at least one YAML document in it with
 # the following format:
 #
-#   ---
-#   redcap:
-#       url: https://redcap.iths.org
-#       project: 23854
-#   source: uw_reopening
-#   enrollment_event_names:
-#     - enrollment_arm_1
-#   enrollment_fields:
-#     - core_participant_first_name
-#     - core_participant_last_name
-#     - core_birthdate
-#   encounter_event_names:
-#     - encounter_arm_1
-#   encounter_fields:
-#     - collect_barcode_kiosk
-#     - return_utm_barcode
+# ---
+# redcap:
+#   url: https://redcap.iths.org
+#   project: 23854
+# source: uw_reopening
+# contact_before_releasing_result: false
+# contacted_field: null
+# participant_first_name_field: core_participant_first_name
+# participant_last_name_field: core_participant_last_name
+# participant_birthdate_field: core_birthdate
+# enrollment_event_names:
+#   - enrollment_arm_1
+# encounter_event_names:
+#   - encounter_arm_1
+# additional_fields:
+#  - {"name":"ordering_provider", "required": true}
+# prioritized_barcode_fields:
+#   - collect_barcode_kiosk
+#   - return_utm_barcode
 #
 import sys
 import json
@@ -42,18 +45,30 @@ if not config_file:
 
 class SFSProject(Project):
     source: str
+    contact_before_releasing_result: bool
+    contacted_field: str
+    participant_first_name_field: str
+    participant_last_name_field: str
+    participant_birthdate_field: str
     enrollment_event_names: List[str]
-    enrollment_fields: List[str]
     encounter_event_names: List[str]
-    encounter_fields: List[str]
+    additional_fields: List[Dict[str, Any]]
+    prioritized_barcode_fields: List[str]
+
 
     def __init__(self, config: Dict[str, Any]):
         super().__init__(config['redcap']['url'], config['redcap']['project'])
         self.source = config['source']
+        self.contact_before_releasing_result = config['contact_before_releasing_result']
+        self.contacted_field = config.get('contacted_field')
+        self.participant_first_name_field = config['participant_first_name_field']
+        self.participant_last_name_field = config['participant_last_name_field']
+        self.participant_birthdate_field = config['participant_birthdate_field']
         self.enrollment_event_names = config['enrollment_event_names']
-        self.enrollment_fields = config['enrollment_fields']
         self.encounter_event_names = config['encounter_event_names']
-        self.encounter_fields = config['encounter_fields']
+        self.additional_fields = config.get('additional_fields') or []
+        self.prioritized_barcode_fields = config['prioritized_barcode_fields']
+
 
 
 def main():
@@ -63,18 +78,41 @@ def main():
     for config in configs:
         project = SFSProject(config)
 
+        assert (not project.contact_before_releasing_result or (project.contact_before_releasing_result and project.contacted_field)), \
+        "If the project requires contact before releasing the result, you must specify the `contacted_field` field. Correct the project " \
+        f"with source: {project.source}."
+
         enrollment_records = fetch_enrollment_records(project)
 
         # Update encounter data with enrollment data based on record.id
         # Skip the record if it does not have enrollment data
         for record in fetch_encounter_records(project):
             enrollment_data = enrollment_records.get(record.id)
+
             if not enrollment_data:
                 continue
 
             record.update(enrollment_data)
             record['source'] = project.source
-            print(json.dumps(record, indent = None, separators = ",:"), flush = True)
+            record['contact_before_releasing_result'] = str(project.contact_before_releasing_result).lower()
+
+            barcode = None
+
+            for field in project.prioritized_barcode_fields:
+                if record.get(field):
+                    barcode = record[field]
+                    break
+
+            record['prioritized_barcode'] = barcode
+
+            # Use the record only if it has the necessary barcode fields populated
+            if barcode:
+
+                # Don't retain the raw barcode fields now that we have the prioritized one
+                for field in project.prioritized_barcode_fields:
+                    del record[field]
+
+                print(json.dumps(record, indent = None, separators = ",:"), flush = True)
 
 
 def fetch_enrollment_records(project) -> Dict[str, dict]:
@@ -89,15 +127,20 @@ def fetch_enrollment_records(project) -> Dict[str, dict]:
     redcap_records: Dict[str,dict] = {}
     duplicate_record_ids = set()
 
-    fields = [project.record_id_field] + project.enrollment_fields
+    fields = [project.record_id_field, project.participant_first_name_field,
+        project.participant_last_name_field, project.participant_birthdate_field]
+
     for record in project.records(events = project.enrollment_event_names, fields = fields, raw = True):
-        if not all(len(record[field]) for field in project.enrollment_fields):
+        if not all(len(record[field]) for field in fields):
             continue
 
         if record.id in redcap_records:
             duplicate_record_ids.add(record.id)
 
-        redcap_records[record.id] = { field: record[field] for field in project.enrollment_fields }
+        redcap_records[record.id] = {'core_participant_first_name' : record[project.participant_first_name_field],
+            'core_participant_last_name': record[project.participant_last_name_field],
+            'core_participant_birth_date': record[project.participant_birthdate_field]
+            }
 
     if duplicate_record_ids:
         for record_id in duplicate_record_ids:
@@ -115,10 +158,25 @@ def fetch_encounter_records(project):
     Only include the encounter record if at least one of the
     *project.encounter_fileds* is completed.
     """
-    fields = [project.record_id_field] + project.encounter_fields
+    fields = {project.record_id_field, *project.prioritized_barcode_fields,
+        *[entry['name'] for entry in project.additional_fields]}
+
+    required_fields = {*[entry['name'] for entry \
+        in project.additional_fields if entry['required'] == True]
+        }
+
+    if project.contacted_field:
+        fields.add(project.contacted_field)
+
     for record in project.records(events = project.encounter_event_names, fields = fields, raw = True):
-        if not any(len(record[field]) for field in project.encounter_fields):
+        if len(required_fields) > 0 and not any(len(record[field]) for field in required_fields):
             continue
+
+        if project.contacted_field:
+            record['participant_contacted'] = record.pop(project.contacted_field)
+        else:
+            # Use "" to match a REDCap unset variable
+            record['participant_contacted'] = ""
 
         yield record
 
