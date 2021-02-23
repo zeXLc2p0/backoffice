@@ -111,7 +111,7 @@ GEOCODING_CACHE=/home/ubuntu/uw-reopening-cache.pickle
 # Ingest Childcare 2021 REDCap project every 30 min (after UW Reopening project above).
 # Use redcap-api-batch-size = 1000 because this REDCap project is longitudinal.
 GEOCODING_CACHE=/home/ubuntu/sfs-cache.pickle
-# 21,51 * * * * ubuntu promjob "id3c etl redcap-det childcare-2021" flock -F $GEOCODING_CACHE envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap pipenv run id3c etl redcap-det childcare-2021 --redcap-api-batch-size 1000 --commit
+21,51 * * * * ubuntu promjob "id3c etl redcap-det childcare-2021" flock -F $GEOCODING_CACHE envdir $ENVD/deidentification envdir $ENVD/smartystreets envdir $ENVD/redcap pipenv run id3c etl redcap-det childcare-2021 --redcap-api-batch-size 1000 --commit
 
 # Ingest FHIR documents every 5 minutes.
 */5  * * * * ubuntu fatigue --quiet promjob "id3c etl fhir" pipenv run id3c etl fhir --commit
