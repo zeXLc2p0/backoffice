@@ -37,7 +37,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     project = redcap.Project(os.environ['REDCAP_API_URL'], args.project_id)
-    data_dictionary = project.metadata()
+    data_dictionary = project.fields
 
     if args.output:
         with open(args.output, 'w') as outfile:
