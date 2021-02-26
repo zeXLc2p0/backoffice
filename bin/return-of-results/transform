@@ -7,6 +7,7 @@ portal.
 import sys
 import argparse
 import pandas as pd
+from typing import Optional
 
 
 def parse_scan_redcap(redcap_file) -> pd.DataFrame:
@@ -93,11 +94,11 @@ def parse_scan_redcap(redcap_file) -> pd.DataFrame:
     return redcap_data[['qrcode', 'pat_name', 'birth_date', 'contacted', 'source']]
 
 
-def parse_configuration_driven_redcap(redcap_file) -> pd.DataFrame:
+def parse_configuration_driven_redcap(redcap_file) -> Optional[pd.DataFrame]:
     """
-    Reads in data from a given configuration driven *redcap_file*. Returns a
-    pandas.DataFrame prepared in the specifications of UW Lab Med's return
-    of results portal.
+    Reads in data from a given configuration driven *redcap_file*. If there is data,
+    returns a pandas.DataFrame prepared in the specifications of UW Lab Med's return
+    of results portal. If there is no data, returns None.
     """
     redcap_data = (
         pd.read_json(redcap_file, lines = True, dtype = False, convert_dates = False)
@@ -107,6 +108,9 @@ def parse_configuration_driven_redcap(redcap_file) -> pd.DataFrame:
         .astype("string")
         .rename(columns={"core_participant_birth_date": "birth_date", "participant_contacted": "contacted"})
     )
+
+    if len(redcap_data) == 0:
+        return None
 
     participant_name = lambda row: f"{row['core_participant_first_name']} {row['core_participant_last_name']}"
     redcap_data['pat_name'] = redcap_data.apply(participant_name, axis='columns')
@@ -223,13 +227,18 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    scan_redcap_data = parse_scan_redcap(args.scan_redcap_data)
+    # Use the SCAN DataFrame as the base `redcap_data` DataFrame
+    redcap_data = parse_scan_redcap(args.scan_redcap_data)
     sfs_longitudinal_redcap_data = parse_configuration_driven_redcap(args.sfs_longitudinal_redcap_data)
     sfs_classic_redcap_data = parse_configuration_driven_redcap(args.sfs_classic_redcap_data)
 
     # Combine the DataFrames by appending to the first.
     # Use `ignore_index = True` to prevent duplicate index values.
-    redcap_data = scan_redcap_data.append([sfs_longitudinal_redcap_data, sfs_classic_redcap_data], ignore_index = True)
+    if not sfs_longitudinal_redcap_data is None:
+        redcap_data = redcap_data.append(sfs_longitudinal_redcap_data, ignore_index = True)
+
+    if not sfs_classic_redcap_data is None:
+        redcap_data = redcap_data.append(sfs_classic_redcap_data, ignore_index = True)
 
     # Check for duplicate barcodes across ALL projects.
     redcap_data["qrcode"] = drop_duplicate_barcodes(redcap_data["qrcode"])
