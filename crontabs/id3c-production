@@ -31,7 +31,8 @@ FLOCK_DIR=/var/run/lock
 
 # Kit records are created/updated from enrollment records from Audere. To ensure
 # that this doesn't run at the same time as the enrollments etl, run at 25 after.
-25 * * * * ubuntu promjob "id3c etl kit enrollments" pipenv run id3c etl kit enrollments --commit
+# 03/03/2021: We no longer need the kit jobs to run, so commenting this out.
+#25 * * * * ubuntu promjob "id3c etl kit enrollments" pipenv run id3c etl kit enrollments --commit
 
 # Test results are pushed at arbitrary times now, so check for new ones every 15m.
 */15 * * * * ubuntu promjob "id3c etl presence-absence" pipenv run id3c etl presence-absence --commit
@@ -60,7 +61,8 @@ FLOCK_DIR=/var/run/lock
 
 # Kit records are created/updated from manifest records. To ensure that this
 # doesn't run at the same time as manifest etl, run ten 'till.
-50 * * * * ubuntu promjob "id3c etl kit manifest" pipenv run id3c etl kit manifest --commit
+# 03/03/2021: We no longer need the kit jobs to run, so commenting this out.
+#50 * * * * ubuntu promjob "id3c etl kit manifest" pipenv run id3c etl kit manifest --commit
 
 # Parse and upload the latest SCH retrospective data from S3 to ID3C
 51 * * * * ubuntu promjob "SCH retrospectives" chronic envdir $ENVD/hutch envdir $ENVD/deidentification upload-sch-retrospective-data-pulls --upload
