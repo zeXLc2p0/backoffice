@@ -178,3 +178,13 @@ extra_columns:
   mrn: mrn
   accession_no: accession
   sample_origin: sample_origin
+---
+workbook: s3://fh-pi-bedford-t/seattleflu/bbi/2020_2021_sfs_aliquoting_09.xlsx
+sheet: aliquoting
+sample_column: sample_id
+extra_columns:
+  barcode: sample_id
+  collection_date: collection_date
+  mrn: mrn
+  accession_no: accession
+  sample_origin: sample_origin
