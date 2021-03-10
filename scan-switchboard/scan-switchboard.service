@@ -5,7 +5,7 @@ After=network.target
 [Service]
 WorkingDirectory=/opt/scan-switchboard
 User=nobody
-ExecStart=/opt/scan-switchboard/bin/venv-run ./bin/serve --config base_url:/switchboard/
+ExecStart=/opt/scan-switchboard/bin/venv-run ./bin/serve --setting base_url /switchboard/
 Restart=always
 RestartSec=10
 
