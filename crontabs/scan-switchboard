@@ -9,4 +9,4 @@ XDG_RUNTIME_DIR=/home/ubuntu/run
 
 
 # Refresh the SCAN Switchboard SQLite database every 30 minutes
-*/30 * * * * ubuntu chronic fatigue promjob "switchboard refresh" envdir $ENVD/redcap flock -F /opt/scan-switchboard/data/record-barcodes.ndjson /opt/scan-switchboard/bin/venv-run make -BC /opt/scan-switchboard
+*/30 * * * * ubuntu chronic fatigue promjob "switchboard refresh" envdir $ENVD/redcap flock -F /opt/scan-switchboard/data/record-barcodes.csv /opt/scan-switchboard/bin/venv-run make -BC /opt/scan-switchboard
