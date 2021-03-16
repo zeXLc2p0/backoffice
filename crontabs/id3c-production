@@ -122,16 +122,11 @@ GEOCODING_CACHE=/home/ubuntu/sfs-cache.pickle
 * * * * * ubuntu fatigue --quiet promjob "terminate-idle-sessions" terminate-idle-sessions
 # Run the old metabase session disconnector routine every minute
 * * * * * ubuntu fatigue --quiet promjob "terminate-old-metabase-sessions" terminate-old-metabase-sessions
-# Run the refresh materialized view routine every 10 minutes include latest
-# ingested FHIR documents in the view
-*/10 * * * * ubuntu fatigue --quiet promjob "refresh-materialized-view: shipping.fhir_questionnaire_responses_v1" flock -F --nonblock --conflict-exit-code 0 "$FLOCK_DIR/shipping.fhir_questionnaire_responses_v1" pipenv run id3c refresh-materialized-view shipping fhir_questionnaire_responses_v1 --commit
-*/10 * * * * ubuntu fatigue --quiet promjob "refresh-materialized-view: shipping.scan_encounters_v1"              flock -F --nonblock --conflict-exit-code 0 "$FLOCK_DIR/shipping.scan_encounters_v1" pipenv run id3c refresh-materialized-view shipping scan_encounters_v1 --commit
 
-# Run the refresh materialized view routine for UW Reopening encounters every 10 minutes to include
-# latest data from other jobs, including refreshing the shipping.fhir_questionnaire_responses_v1 materialized view
-*/10 * * * * ubuntu fatigue --quiet promjob "refresh-materialized-view: shipping.__uw_encounters" flock -F --nonblock --conflict-exit-code 0 "$FLOCK_DIR/shipping.__uw_encounters" pipenv run id3c refresh-materialized-view shipping __uw_encounters --commit
+# Refresh materialized shipping views every 30 minutes to include
+# latest data, including latest ingested FHIR documents
+*/30 * * * * ubuntu fatigue --quiet promjob "refresh-materialized-shipping-views" flock -F --nonblock --conflict-exit-code 0 "$FLOCK_DIR/refresh_materialized_shipping_views" pipenv run refresh-materialized-shipping-views
 
 # Make UW Reopening testing offers at :15 and :45
-# This job uses data created by redcap-det uw-reopening, etl fhir, and refresh-materialized-view shipping fhir_questionnaire_responses_v1
-# Run at :15 to use the :00 uw-reopening run and :45 to use the :30 uw-reopening run
-15,45  * * * * ubuntu fatigue --quiet promjob "id3c offer-uw-testing" envdir $ENVD/redcap pipenv run id3c offer-uw-testing --commit
+# This job uses data created by redcap-det uw-reopening, etl fhir, and materialized shipping views.
+25,55  * * * * ubuntu fatigue --quiet promjob "id3c offer-uw-testing" envdir $ENVD/redcap pipenv run id3c offer-uw-testing --commit
