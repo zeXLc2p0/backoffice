@@ -115,8 +115,8 @@ if __name__ == '__main__':
 
     parser.add_argument("--field-names",
         metavar="<field_names.csv>",
-        default=base / 'field_names_for_html_tags.csv',
-        help="An CSV file containing all REDCap project field names "
+        required=True,
+        help="A CSV file containing all REDCap project field names "
              "that need the HTML attributes. "
              "Assumes the CSV file only contains one column of all field names.")
 
