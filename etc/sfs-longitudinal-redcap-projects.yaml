@@ -53,7 +53,73 @@ prioritized_barcode_fields:
 ---
 redcap:
   url: https://redcap.iths.org
-  project: 27574
+  project: 27574 # English
+source: snohomish_schools
+contact_before_releasing_result: true
+contacted_field: contacted
+participant_first_name_field: core_participant_first_name
+participant_last_name_field: core_participant_last_name
+participant_birthdate_field: core_birthdate
+enrollment_event_names:
+  - enrollment_arm_1
+  - enrollment_arm_2
+encounter_event_names:
+  - week_1_arm_1
+  - week_2_arm_1
+  - week_3_arm_1
+  - week_4_arm_1
+  - week_5_arm_1
+  - week_6_arm_1
+  - week_7_arm_1
+  - week_8_arm_1
+  - week_9_arm_1
+  - week_10_arm_1
+  - week_11_arm_1
+  - week_12_arm_1
+  - week_13_arm_1
+  - week_14_arm_1
+  - week_15_arm_1
+  - week_2_arm_2
+prioritized_barcode_fields:
+  - collect_barcode_kiosk
+  - return_utm_barcode
+---
+redcap:
+  url: https://redcap.iths.org
+  project: 32751 # Russian
+source: snohomish_schools
+contact_before_releasing_result: true
+contacted_field: contacted
+participant_first_name_field: core_participant_first_name
+participant_last_name_field: core_participant_last_name
+participant_birthdate_field: core_birthdate
+enrollment_event_names:
+  - enrollment_arm_1
+  - enrollment_arm_2
+encounter_event_names:
+  - week_1_arm_1
+  - week_2_arm_1
+  - week_3_arm_1
+  - week_4_arm_1
+  - week_5_arm_1
+  - week_6_arm_1
+  - week_7_arm_1
+  - week_8_arm_1
+  - week_9_arm_1
+  - week_10_arm_1
+  - week_11_arm_1
+  - week_12_arm_1
+  - week_13_arm_1
+  - week_14_arm_1
+  - week_15_arm_1
+  - week_2_arm_2
+prioritized_barcode_fields:
+  - collect_barcode_kiosk
+  - return_utm_barcode
+---
+redcap:
+  url: https://redcap.iths.org
+  project: 32756 # Spanish
 source: snohomish_schools
 contact_before_releasing_result: true
 contacted_field: contacted
