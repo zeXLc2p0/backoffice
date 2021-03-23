@@ -26,11 +26,11 @@
         },
         "botocore": {
             "hashes": [
-                "sha256:63951595a736dfc9759f57e33bec6eaea4f09c4800626ef5309437060b263e48",
-                "sha256:98ff1eb210d394a1ffe736b33c8a7be68f30f0a03550b559c5bb6fdf0c29328d"
+                "sha256:749bdb151e340329f1b25600bfe9d223e930f8ba26bd74b71478ca5781f2feaf",
+                "sha256:c4fe4fea1d6a3934dd8c670ee83b128f935a64078786fe8afb8a662446304926"
             ],
             "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4, 3.5'",
-            "version": "==1.20.30"
+            "version": "==1.20.34"
         },
         "cachetools": {
             "hashes": [
@@ -189,7 +189,7 @@
         "id3c": {
             "editable": true,
             "git": "https://github.com/seattleflu/id3c.git",
-            "ref": "1e3967d6c24e9cadb34cae1c5e1e79415a2250dc"
+            "ref": "4a89004e18500d75830c7da5d406d010318bae8a"
         },
         "idna": {
             "hashes": [
@@ -627,9 +627,9 @@
         },
         "smartystreets-python-sdk": {
             "hashes": [
-                "sha256:ef93adace3558909cec1477ca92bd96574924ee8bb40901e3839b81b163dfccd"
+                "sha256:3dd626fca7ec1c76808977883cd0af3ea1730b7ade6211904ffcd19e3f049e43"
             ],
-            "version": "==4.7.3"
+            "version": "==4.8.0"
         },
         "typing-extensions": {
             "hashes": [
