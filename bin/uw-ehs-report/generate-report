@@ -12,6 +12,8 @@ set -euo pipefail
 
 : "${REDCAP_API_URL:?The REDCAP_API_URL environment variable is required.}"
 
+base="$(dirname "$0")/../.."
+
 main() {
     for arg; do
         case "$arg" in
@@ -21,10 +23,18 @@ main() {
         esac
     done
 
+    datadir="$(TMPDIR="$base" mktemp -d -t ehs-export-XXXXXX)"
+
+    # Always leave and delete this temporary directory regardless of exit code
+    trap "rm -rf '$datadir'" EXIT
+
     # Change to the ./bin/uw_ehs_report directory in the backoffice checkout
     cd "$(dirname "$0")"
 
-    ./transform <(./export-redcap-uw-reopening) <(./export-id3c-uw-ehs-report)
+    ./export-redcap-uw-reopening > "$datadir/redcap_data.ndjson"
+    ./export-id3c-uw-ehs-report > "$datadir/id3c_results.csv"
+
+    ./transform "$datadir/redcap_data.ndjson" "$datadir/id3c_results.csv"
 }
 
 print-help() {
