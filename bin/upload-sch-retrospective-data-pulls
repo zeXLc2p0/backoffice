@@ -67,7 +67,7 @@ main() {
     do
         retrospective_ndjson_file="${retrospective_spreadsheet_file%.@(csv|xls|xlsx)}.ndjson"
 
-        echo "Checking for parsed retrospective data «$retrospective_ndjson_file»"
+        echo "Checking for parsed retrospective data «${retrospective_ndjson_file}»"
         if [[ -e "$retrospective_ndjson_file" ]]; then
             echo "Parsed data found. Continuing"
             echo
