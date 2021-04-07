@@ -254,3 +254,12 @@ when '20' then 'diarrhea'
 end as SymptomDescription
 from screeningsymptoms
 );
+
+ALTER TABLE dbo.screeningdata ALTER COLUMN ScanCode VARCHAR(MAX);
+ALTER TABLE dbo.screeningdata ALTER COLUMN Locale VARCHAR(MAX);
+ALTER TABLE dbo.screeningdata ALTER COLUMN UtmSource VARCHAR(MAX);
+ALTER TABLE dbo.screeningdata ALTER COLUMN UtmMedium VARCHAR(MAX);
+ALTER TABLE dbo.screeningdata ALTER COLUMN UtmCampaign VARCHAR(MAX);
+ALTER TABLE dbo.screeningdata ALTER COLUMN UtmAudience VARCHAR(MAX);
+ALTER TABLE dbo.screeningdata ALTER COLUMN ScreenerSymptoms VARCHAR(MAX);
+
