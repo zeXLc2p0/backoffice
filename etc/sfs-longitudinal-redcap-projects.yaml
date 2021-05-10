@@ -222,3 +222,59 @@ encounter_event_names:
   - serial_event_4_arm_1
 prioritized_barcode_fields:
   - collection_barcode
+---
+redcap:
+  url: https://redcap.iths.org
+  project: 34101 # English
+source: yakima_schools
+contact_before_releasing_result: true
+contacted_field: contacted
+participant_first_name_field: core_participant_first_name
+participant_last_name_field: core_participant_last_name
+participant_birthdate_field: core_birthdate
+enrollment_event_names:
+  - enrollment_arm_1
+  - enrollment_arm_2
+encounter_event_names:
+  - week_1_arm_1
+  - week_2_arm_1
+  - week_3_arm_1
+  - week_4_arm_1
+  - week_5_arm_1
+  - week_6_arm_1
+  - week_7_arm_1
+  - week_8_arm_1
+  - week_9_arm_1
+  - week_10_arm_1
+  - week_2_arm_2
+prioritized_barcode_fields:
+  - collect_barcode_kiosk
+  - return_utm_barcode
+---
+redcap:
+  url: https://redcap.iths.org
+  project: 34701 # Spanish
+source: yakima_schools
+contact_before_releasing_result: true
+contacted_field: contacted
+participant_first_name_field: core_participant_first_name
+participant_last_name_field: core_participant_last_name
+participant_birthdate_field: core_birthdate
+enrollment_event_names:
+  - enrollment_arm_1
+  - enrollment_arm_2
+encounter_event_names:
+  - week_1_arm_1
+  - week_2_arm_1
+  - week_3_arm_1
+  - week_4_arm_1
+  - week_5_arm_1
+  - week_6_arm_1
+  - week_7_arm_1
+  - week_8_arm_1
+  - week_9_arm_1
+  - week_10_arm_1
+  - week_2_arm_2
+prioritized_barcode_fields:
+  - collect_barcode_kiosk
+  - return_utm_barcode
