@@ -120,8 +120,8 @@ GEOCODING_CACHE=/home/ubuntu/sfs-cache.pickle
 
 # Run the idle database session disconnector routine every minute
 * * * * * ubuntu fatigue --quiet promjob "terminate-idle-sessions" terminate-idle-sessions
-# Run the old metabase session disconnector routine every minute
-* * * * * ubuntu fatigue --quiet promjob "terminate-old-metabase-sessions" terminate-old-metabase-sessions
+# Run the slow metabase query disconnector routine every minute
+* * * * * ubuntu fatigue --quiet promjob "terminate-slow-metabase-queries" terminate-slow-metabase-queries
 
 # Refresh materialized shipping views every 30 minutes to include
 # latest data, including latest ingested FHIR documents
