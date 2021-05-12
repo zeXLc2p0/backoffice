@@ -18,7 +18,7 @@ psql --quiet --no-align --tuples-only --set ON_ERROR_STOP= <<<"
     slow_queries as (
         select *, pg_cancel_backend(pid) as cancelled
         from active_metabase_connections
-        where active_duration > interval '10 min'
+        where active_duration > interval '1 hour'
     )
 
     select * from slow_queries where not cancelled
