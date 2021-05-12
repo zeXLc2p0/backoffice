@@ -9,7 +9,7 @@ psql --quiet --no-align --tuples-only --set ON_ERROR_STOP= <<<"
             pg_stat_activity_nonsuperuser
         where
             pid != pg_backend_pid()
-            and usename = 'metabase'
+            and usename in ('metabase', 'metabase-privileged')
             and state = 'active'
         order by
             active_duration desc
