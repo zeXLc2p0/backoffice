@@ -244,6 +244,6 @@ if __name__ == "__main__":
     mega_linelist = mega_linelist[universal_config['column_names']]
 
     mega_linelist.sort_values(by=['record_id']) \
-        .to_csv(args.output_dir / f"linelist_{date.replace('/', '')}.csv",
+        .to_csv(f"{args.output_dir}/linelist_{date.replace('/', '')}.csv",
             index=False,
             line_terminator='\r\n')
