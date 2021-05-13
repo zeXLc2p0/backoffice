@@ -1,5 +1,5 @@
 #!/bin/bash
-# usage: ./bin/wa-doh-linelists/generate DATE
+# usage: ./bin/wa-doh-linelists/generate --date DATE
 #
 # Generates linelists for submission to WA DoH as a CSV.
 # Requires environment variables for the target REDCap projects specified in the
@@ -28,7 +28,7 @@ trap "rm -rf '$tmpdir'" EXIT
 echo "Exporting linelist data from ID3C"
 ./bin/wa-doh-linelists/export-id3c-hcov19-results "$date" > "$tmpdir"/id3c.csv
 
-echo "Combining ID3C data with REDCap report data"
+echo "Combining ID3C data with REDCap report data with args" "$@"
 pipenv run ./bin/wa-doh-linelists/transform \
     --id3c-data "$tmpdir"/id3c.csv \
-    --date "$date"
+    "$@"
