@@ -11,6 +11,7 @@ psql --quiet --no-align --tuples-only --set ON_ERROR_STOP= <<<"
             pid != pg_backend_pid()
             and usename in ('metabase', 'metabase-privileged')
             and state = 'active'
+            and metabase->'user_id' is not null
         order by
             active_duration desc
     ),
