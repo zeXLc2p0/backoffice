@@ -20,7 +20,7 @@ if [ -z ${1+x} ]; then
     exit 1
 fi
 
-date="$1"
+date="$2"
 
 tmpdir="$(mktemp -d -t generate-XXXXXX)"
 trap "rm -rf '$tmpdir'" EXIT
