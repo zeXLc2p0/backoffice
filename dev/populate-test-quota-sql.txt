@@ -9,6 +9,7 @@
 -- ***** num_days: The number of days to insert for, including the starting date.
 -- ***** start_hour: The starting hour (lower boundary of the timerange) to insert for. 8 = 08:00 (8 AM)
 -- ***** end_hour: The ending hour (upper boundary of the timerange) to insert for. 20 = 20:00 (8 PM)
+-- ***** hour_interval: The hour intervals for quotas, with 1 = every hour and 2 = every other hour.
 
 DO
 $$
@@ -17,6 +18,7 @@ start_date date = '2021-01-10';
 num_days int = 1;
 start_hour int = 8;
 end_hour int = 20;
+hour_interval int = 1;
 
 hourly_quota int;
 cur_day int = 0;
@@ -27,7 +29,7 @@ start_ts timestamp;
 end_ts timestamp;
 sql_text text;
 BEGIN
-	hourly_quota = daily_quota / (end_hour - start_hour);
+	hourly_quota = daily_quota / round((end_hour - start_hour) / hour_interval::decimal);
 
 	WHILE cur_day < num_days LOOP
 		cur_date = start_date::date + cur_day;
@@ -39,7 +41,7 @@ BEGIN
 			sql_text = 'insert into operations.test_quota (name, timespan, max) values (''uw'', tstzrange(''' || start_ts || ''', ''' || end_ts || ''' , ''(]''),' || hourly_quota || ');' ;
 			raise notice '%', sql_text;
 			EXECUTE sql_text;
-			cur_hour = cur_hour + 1;
+			cur_hour = cur_hour + hour_interval;
 		END LOOP;
 		cur_day = cur_day + 1;
 	END LOOP;
