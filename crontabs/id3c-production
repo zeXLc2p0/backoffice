@@ -132,4 +132,4 @@ GEOCODING_CACHE=/home/ubuntu/sfs-cache.pickle
 25,55  * * * * ubuntu fatigue --quiet promjob "id3c offer-uw-testing" envdir $ENVD/redcap pipenv run id3c offer-uw-testing --commit
 
 # Generate and upload the previous day's linelist data once a day at 6 A.M.
-0 6 * * * ubuntu promjob "wa-doh-linelists" pipenv run envdir $ENVD/hutch envdir $ENVD/redcap /opt/backoffice/bin/wa-doh-linelists/generate --date $(date --date=yesterday --iso-8601=date) --output-dir "s3://fh-pi-bedford-t/seattleflu/public-health-reporting"
+0 6 * * * ubuntu promjob "wa-doh-linelists" chronic pipenv run envdir $ENVD/hutch envdir $ENVD/redcap /opt/backoffice/bin/wa-doh-linelists/generate --date $(date --date=yesterday --iso-8601=date) --output-dir "s3://fh-pi-bedford-t/seattleflu/public-health-reporting"
