@@ -19,6 +19,16 @@ service.  You may want to make a backup of the Metabase database first so that
 you can restore and rollback to the previous Metabase version if the upgrade
 corrupts the configuration.
 
+Before an upgrade, please review the [Metabase release
+notes](https://github.com/metabase/metabase/releases) for any backwards
+incompatible changes or other changes which might break the study team's usage
+of Metabase.
+
+In particular, it's worth checking if the format of Metabase's query
+remark/comment has changed.  Our `pg_stat_get_activity_nonsuperuser()` function
+parses the remark to provide additional metadata to our database connection
+watchdogs ([for example](https://github.com/seattleflu/id3c-customizations/commit/6f5db9ad)).
+
 ### Testing
 
 It's nice to test upgrades locally, particularly if there are significant
