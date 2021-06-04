@@ -240,6 +240,13 @@ if __name__ == "__main__":
         log.info(f"Created linelist with {str(len(linelist))} rows.")
         mega_linelist = pd.concat([mega_linelist, linelist])
 
+    # Check if collection date, sample barcode, date tested, or test result
+    # columns are missing a value
+    if mega_linelist[['collection_date','sample_barcode','date_tested','test_result']].isnull().values.any():
+        log.warning('Value missing from required column in row: %s', \
+        mega_linelist[mega_linelist[['collection_date','sample_barcode','date_tested','test_result']] \
+        .isnull().any(axis=1)].index[0])
+
     # Reorder columns
     mega_linelist = mega_linelist[universal_config['column_names']]
 
