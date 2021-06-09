@@ -1,9 +1,14 @@
 #!/bin/bash
-# usage: ./bin/sch-retrospective-data-pulls
+# usage: ./bin/upload-sch-retrospective-data-pulls
 #
 # Parses and uploads SCH retrospective data from AWS to ID3C.
 #
-
+# For testing, alternative S3 bucket and path may be specified using
+# FH_SFS_SCH_S3_PATH environment variable.
+#
+# If the --upload flag is given, the parsed records will be uploaded
+# to ID3C and S3.
+#
 set -euo pipefail
 shopt -s extglob
 
@@ -40,21 +45,48 @@ main() {
         exit 1
     fi
 
-    datadir="$(mktemp -d -t sch-retrospective-data-pulls-XXXXXX)"
+    local s3path="${FH_SFS_SCH_S3_PATH:-s3://fh-pi-bedford-t/seattleflu/sch/}"
+    local datadir="$(mktemp -d -t sch-retrospective-data-pulls-XXXXXX)"
 
     # Always leave and delete this temporary directory regardless of exit code
     trap "rm -rf '$datadir'" EXIT
 
-    echo "Downloading the most recent Year2 and Year3 SCH data from AWS S3"
+    echo "Validating filenames on S3"
+    # Check for filenames that don't match expected pattern, excluding files from previous years 
+    local -a patterns=(
+        'README\.txt$'
+        '(SCH|SFS)_Year_?1_.*\.(csv|ndjson)$'
+        'SFS_Year2_Main_Data_2019.*\.(csv|xls|xlsx|ndjson)$'
+        'SFS_Year[2-9]_Main_Data_202[0-9].*\.(csv|xls|xlsx|ndjson)$'
+    )
+
+    local all_patterns="$(join '|' "${patterns[@]}")"
+    local all_filenames="$(aws s3 ls --recursive "$s3path")"
+
+    local invalid_filenames_found=0
+    while IFS= read -r line
+    do
+        if ! [[ $line =~ $all_patterns ]]; then
+            echo "Invalid filename: $line"
+            exit 1
+            invalid_filenames_found=1
+        fi
+    done <<< "$all_filenames"
+
+    if [[ $invalid_filenames_found -eq 0 ]]; then
+        echo "All filenames OK"
+    fi
+
+    echo "Downloading the most recent Year>=2 SCH data from AWS S3"
     # Do not include SFS Year2 Main Data files prior to 2020. After the last
     # SCH data upload of 2019, the column naming scheme changed. The CLI command
     # was then changed, now causing earlier data pulls to fail on parsing.
-    glob_pattern="SFS_Year[23]_Main_Data_202[01]*"
+    local glob_pattern="SFS_Year[2-9]_Main_Data_202[0-9]*"
 
     # Since the 2020-02-10 dataset, Amanda has only sent us Excel workbooks,
     # but preserve support for CSV too.
     aws s3 cp --recursive \
-        s3://fh-pi-bedford-t/seattleflu/sch/ \
+        "$s3path" \
         "$datadir" \
         --exclude "*" \
         --include "$glob_pattern.csv" \
@@ -88,7 +120,7 @@ main() {
             echo
 
             echo "Uploading the parsed records to S3"
-            aws s3 cp "$retrospective_ndjson_file" s3://fh-pi-bedford-t/seattleflu/sch/
+            aws s3 cp "$retrospective_ndjson_file" "$s3path"
             echo
 
             echo "Finished uploading new SCH retrospective data"
@@ -97,6 +129,12 @@ main() {
     done
 
 
+}
+
+join() {
+    IFS="$1"
+    shift
+    echo "$*"
 }
 
 print-help() {
