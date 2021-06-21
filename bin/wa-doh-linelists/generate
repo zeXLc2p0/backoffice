@@ -11,7 +11,7 @@ set -euo pipefail
 # Change to the top-level of the backoffice checkout
 cd "$(dirname "$0")/../.."
 
-: "${ID3C:=id3c-production}"
+: ${ID3C:=wa-doh-linelists}
 
 export PIPENV_PIPFILE="$ID3C/Pipfile"
 
