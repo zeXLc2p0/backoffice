@@ -1,0 +1,54 @@
+#!/bin/bash
+set -euo pipefail
+psql --no-psqlrc --quiet --set ON_ERROR_STOP= <<'SQL'
+    copy (
+        select
+            week,
+            organism,
+            present,
+            tested
+        from (
+            select
+                to_char(coalesce(collected, encountered)::date, 'IYYY-"W"IW') as week,
+
+                case
+                    when organism.lineage <@ 'Human_coronavirus.2019'
+                    then organism.lineage
+                    when organism.lineage <@ '{Human_parainfluenza, Human_coronavirus}'::ltree[]
+                    then subpath(organism.lineage, 0, 1)
+                    else organism.lineage
+                end as organism,
+
+                count(distinct sample_id) filter (where present) as present,
+                count(distinct sample_id) as tested
+
+            from warehouse.sample
+            left join warehouse.encounter using (encounter_id)
+            join warehouse.presence_absence using (sample_id)
+            join warehouse.target using (target_id)
+            join warehouse.organism using (organism_id)
+
+            where
+                (organism.lineage in
+                    ('Influenza.A.H1N1'
+                    ,'Influenza.A.H3N2'
+                    ,'Influenza.B'
+                    ,'RSV.A'
+                    ,'RSV.B'
+                    ,'Rhinovirus'
+                    ,'Adenovirus'
+                    ,'Human_metapneumovirus'
+                    ,'Human_coronavirus'
+                    ,'Human_parainfluenza'
+                    ) or organism.lineage <@ '{Human_parainfluenza, Human_coronavirus}'::ltree[])
+
+            group by week, organism
+            order by week asc, organism asc)
+        as
+            counts
+        where
+            week between '2018-W47' and to_char(current_date, 'IYYY-"W"IW')
+    )
+    to stdout
+    with (format csv, header);
+SQL

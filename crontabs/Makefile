@@ -3,6 +3,7 @@ CROND ?= /etc/cron.d
 
 crontabs := \
 	id3c-production \
+	public-datasets \
 	return-of-results \
 	scan-switchboard \
 	uw-ehs-report
