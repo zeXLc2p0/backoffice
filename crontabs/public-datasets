@@ -13,3 +13,4 @@ ENVD=/opt/backoffice/id3c-production/env.d
 
 
 0 4 * * * ubuntu promjob "upload-prevalence" envdir $ENVD/aws/ upload-prevalence
+1 4 * * * ubuntu promjob "upload-specimens" envdir $ENVD/aws/ upload-specimens

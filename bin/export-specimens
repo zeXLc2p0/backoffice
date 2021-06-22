@@ -1,33 +1,25 @@
 #!/bin/bash
 #
 # The samples included in this query (via joins and the where clause) should be
-# kept in sync with export-specimens.
+# kept in sync with export-prevalence.
 #
 set -euo pipefail
 psql --no-psqlrc --quiet --set ON_ERROR_STOP= <<'SQL'
     copy (
         select
             week,
-            organism,
-            present,
-            tested
+            site_type,
+            specimens
         from (
             select
                 to_char(coalesce(collected, encountered)::date, 'IYYY-"W"IW') as week,
+                coalesce(site.details->>'type', 'unknown') as site_type,
 
-                case
-                    when organism.lineage <@ 'Human_coronavirus.2019'
-                    then organism.lineage
-                    when organism.lineage <@ '{Human_parainfluenza, Human_coronavirus, Enterovirus}'::ltree[]
-                    then subpath(organism.lineage, 0, 1)
-                    else organism.lineage
-                end as organism,
-
-                count(distinct sample_id) filter (where present) as present,
-                count(distinct sample_id) as tested
+                count(distinct sample_id) as specimens
 
             from warehouse.sample
             left join warehouse.encounter using (encounter_id)
+            left join warehouse.site using (site_id)
             join warehouse.presence_absence using (sample_id)
             join warehouse.target using (target_id)
             join warehouse.organism using (organism_id)
@@ -46,8 +38,8 @@ psql --no-psqlrc --quiet --set ON_ERROR_STOP= <<'SQL'
                     ,'Human_parainfluenza'
                     ) or organism.lineage <@ '{Human_parainfluenza, Human_coronavirus, Enterovirus}'::ltree[])
 
-            group by week, organism
-            order by week asc, organism asc)
+            group by week, site_type
+            order by week, site_type)
         as
             counts
         where
