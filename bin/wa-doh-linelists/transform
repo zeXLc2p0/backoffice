@@ -12,7 +12,7 @@ import logging
 import argparse
 import pandas as pd
 import fsspec
-from sys import stderr
+from sys import exit, stderr
 from pathlib import Path
 from typing import Any, Dict
 from datetime import datetime
@@ -272,6 +272,7 @@ if __name__ == "__main__":
     # Reorder columns
     mega_linelist = mega_linelist[universal_config['column_names']]
 
+    error_status = 0
     for dir in args.output_dir:
         # This should be split out into different cases for each exception,
         # but we don't want to bail out completely if one attempt to
@@ -281,3 +282,5 @@ if __name__ == "__main__":
             put_file(mega_linelist, filename)
         except Exception as e:
             log.error(e)
+            error_status = 1
+    exit(error_status)
