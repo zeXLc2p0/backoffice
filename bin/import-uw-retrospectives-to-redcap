@@ -97,7 +97,7 @@ main() {
 
 parse-manifest() {
     id3c manifest parse-using-config "$CONFIG" \
-        | jq --compact-output 'select(.sample_origin | test("^(uwmc|hmc|nwh)_retro$"; "i"))'
+        | jq --compact-output 'select(.sample_origin | test("^(uwmc|hmc|nwh|phskc)_retro$"; "i"))'
 }
 
 diff-manifests() {
