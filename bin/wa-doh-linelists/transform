@@ -185,6 +185,12 @@ if __name__ == "__main__":
         default=base_dir / f"etc/wa-doh-linelists.yaml",
         help="The source file for the individual REDCap projects' configuration. "
             "Defaults to `./etc/wa-doh-linelists.yaml` at the top level of this repo.")
+    parser.add_argument("--upload-if-empty",
+        metavar="<always-upload>",
+        default=[],
+        aciton='append',
+        help="Always upload to these destinations, even if the linelist is empty. "
+            "May be specified multiple times, as a URL or protocol.")
 
     args = parser.parse_args()
 
@@ -278,9 +284,17 @@ if __name__ == "__main__":
         # but we don't want to bail out completely if one attempt to
         # write the file fails, since it could do so for any number of reasons.
         filename = f"{dir}/linelist_{date.replace('/', '')}.csv"
-        try:
-            put_file(mega_linelist, filename)
-        except Exception as e:
-            log.error(e)
-            error_status = 1
+        always_upload = False
+        for dest in args.upload_if_empty:
+            if (dir.find(dest) != -1):
+                always_upload = True
+        if (not mega_linelist.empty or always_upload):
+            try:
+                put_file(mega_linelist, filename)
+            except Exception as e:
+                log.error(e)
+                error_status = 1
+        else:
+            log.info(f"Not uploading to {dir} because linelist is empty or "
+                "--upload-if-empty not specified for this site")
     exit(error_status)
