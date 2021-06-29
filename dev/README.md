@@ -1,5 +1,12 @@
 # Dev tools
 
+## shellcheck
+
+Runs [Shellcheck](https://github.com/koalaman/shellcheck) on all
+version-controlled shell programs, to help identify and avoid some shell
+pitfalls.  This can be run by hand to check your work locally, but it will also
+be run automatically on every push as part of our CI.
+
 ## refresh-database
 
 As a quick start, you can refresh your local dev database with:
