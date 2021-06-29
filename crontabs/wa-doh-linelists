@@ -1,0 +1,21 @@
+SHELL=/bin/bash
+PATH=/opt/backoffice/bin:/usr/local/bin:/usr/bin:/bin
+
+# Point Pipenv at the production environment
+PIPENV_PIPFILE=/opt/backoffice/wa-doh-linelists/Pipfile
+
+LOG_CONFIG=/opt/backoffice/wa-doh-linelists/logging.yaml
+LOG_LEVEL=warning
+PGSERVICE=production-etl
+
+# Base of our env.d directories
+ENVD=/opt/backoffice/wa-doh-linelists/env.d
+
+# Configure a private runtime directory for "fatigue".
+XDG_RUNTIME_DIR=/home/ubuntu/run
+
+# Directory to hold flock files
+FLOCK_DIR=/var/run/lock
+
+# Generate and upload the previous day's linelist data once a day at 6 A.M.
+0 6 * * * ubuntu promjob "wa-doh-linelists" chronic pipenv run envdir $ENVD/hutch envdir $ENVD/redcap /opt/backoffice/bin/wa-doh-linelists/generate --date $(date --date=yesterday --iso-8601=date) --output-dir "s3://fh-pi-bedford-t/seattleflu/public-health-reporting" --output-dir "ssh://sft.wa.gov" --upload-if-empty "s3://fh-pi-bedford-t/seattleflu/public-health-reporting"
