@@ -130,7 +130,7 @@ main() {
 
 # Print just the digest, skipping the filename.
 md5() {
-    md5sum "$@" | awk '{print $1}'
+    md5sum | awk '{print $1}'
 }
 
 # Print the MD5 digest of a state file, after masking.

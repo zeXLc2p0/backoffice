@@ -38,7 +38,7 @@ base="$(cd "$(dirname "$0")/.."; pwd)"
 
 redcap_api_token_name=REDCAP_API_TOKEN_redcap.iths.org_19915
 
-: ${CONFIG:="$base/etc/uw-retrospectives-manifest.yaml"}
+: "${CONFIG:="$base/etc/uw-retrospectives-manifest.yaml"}"
 
 main() {
     # Parse arguments.
@@ -48,7 +48,7 @@ main() {
     for arg; do
         case "$arg" in
             --import)
-                import=import-to-redcap
+                import="import-to-redcap"
                 shift;;
             --debug)
                 debug=1
@@ -72,7 +72,11 @@ main() {
     fi
 
     local previous_records="${1:-s3://fh-pi-bedford-t/seattleflu/uw-retrospectives-manifest.ndjson}"
-    local latest_records="$(mktemp -t "$(basename "$previous_records" .ndjson)"-XXXXXX.ndjson)"
+
+    # Declare separately from initializing to avoid masking failed exit
+    # statuses in $(…).
+    local latest_records; latest_records="$(mktemp -t "$(basename "$previous_records" .ndjson)"-XXXXXX.ndjson)"
+
     local new_records="${latest_records%.ndjson}-new.ndjson"
 
     if [[ $debug == 0 ]]; then

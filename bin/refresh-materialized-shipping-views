@@ -33,7 +33,7 @@ main() {
 refresh-materialized-views() {
 
     for view in "${shipping_views[@]}"; do
-        id3c refresh-materialized-view 'shipping' ${view} --commit
+        id3c refresh-materialized-view 'shipping' "$view" --commit
     done
 
 }

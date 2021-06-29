@@ -12,9 +12,6 @@ set -euo pipefail
 
 bin="$(dirname "$0")"
 
-# Relative path to our containing repo
-base="$(dirname "$0")/../.."
-
 main() {
     for arg; do
         case "$arg" in
