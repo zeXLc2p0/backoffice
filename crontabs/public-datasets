@@ -12,4 +12,4 @@ PGSERVICE=production-etl
 ENVD=/opt/backoffice/id3c-production/env.d
 
 
-0 4 * * * ubuntu export-prevalence | envdir $ENVD/aws/ aws s3 cp - s3://seattle-flu-study/prevalence.csv --content-type text/csv
+0 4 * * * ubuntu promjob "upload-prevalence" envdir $ENVD/aws/ upload-prevalence

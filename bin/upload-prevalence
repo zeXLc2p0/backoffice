@@ -1,0 +1,8 @@
+#!/bin/bash
+set -euo pipefail
+
+: ${S3_DST:=s3://seattle-flu-study/prevalence.csv}
+
+bin="$(dirname "$0")"
+
+"$bin"/export-prevalence | aws s3 cp - "$S3_DST" --content-type text/csv
