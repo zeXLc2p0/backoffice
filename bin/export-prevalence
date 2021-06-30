@@ -14,7 +14,7 @@ psql --no-psqlrc --quiet --set ON_ERROR_STOP= <<'SQL'
                 case
                     when organism.lineage <@ 'Human_coronavirus.2019'
                     then organism.lineage
-                    when organism.lineage <@ '{Human_parainfluenza, Human_coronavirus}'::ltree[]
+                    when organism.lineage <@ '{Human_parainfluenza, Human_coronavirus, Enterovirus}'::ltree[]
                     then subpath(organism.lineage, 0, 1)
                     else organism.lineage
                 end as organism,
@@ -40,7 +40,7 @@ psql --no-psqlrc --quiet --set ON_ERROR_STOP= <<'SQL'
                     ,'Human_metapneumovirus'
                     ,'Human_coronavirus'
                     ,'Human_parainfluenza'
-                    ) or organism.lineage <@ '{Human_parainfluenza, Human_coronavirus}'::ltree[])
+                    ) or organism.lineage <@ '{Human_parainfluenza, Human_coronavirus, Enterovirus}'::ltree[])
 
             group by week, organism
             order by week asc, organism asc)
