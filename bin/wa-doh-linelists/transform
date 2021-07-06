@@ -263,6 +263,6 @@ if __name__ == "__main__":
     # as the mega_linelist
     phskc_linelist = mega_linelist[mega_linelist['home_zipcode_2'].isin(king_zips)]
     phskc_linelist.sort_values(by=['record_id']) \
-        .to_csv(f"{args.output_dir}/PHSKC_SCAN_linelist_{date.replace('/', '')}.csv",
+        .to_csv(f"{args.output_dir}/PHSKC_linelist_{date.replace('/', '')}.csv",
             index=False,
             line_terminator='\r\n')
