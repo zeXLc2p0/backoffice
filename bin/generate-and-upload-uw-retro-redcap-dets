@@ -8,9 +8,6 @@
 
 set -euo pipefail
 
-# Absolute path to our containing repo
-base="$(cd "$(dirname "$0")/.."; pwd)"
-
 main() {
     for arg; do
         case "$arg" in
@@ -24,7 +21,7 @@ main() {
 }
 
 generate-redcap-dets() {
-    id3c redcap-det generate --api-url https://redcap.iths.org/api/ --project-id 19915 --since-date "`date +"%F %T" -d "25 hours ago"`" --include-incomplete
+    id3c redcap-det generate --api-url https://redcap.iths.org/api/ --project-id 19915 --since-date "$(date +"%F %T" -d "25 hours ago")" --include-incomplete
 }
 
 upload-to-id3c() {

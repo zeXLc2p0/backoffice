@@ -9,11 +9,11 @@
 #
 set -euo pipefail
 
-if [ -z ${1+x} ]; then
+if [[ -z "${1:-}" ]]; then
     echo "A positional DATE argument (YYYY-MM-DD) is required."
     exit 1
 fi
 
-psql --quiet --no-align --tuples-only --set ON_ERROR_STOP= <<<"
-    \copy (select * from shipping.linelist_data_for_wa_doh_v1 where date_tested = '"$1"'::date) to pstdout with (format csv, header);
+psql --quiet --no-align --tuples-only --set ON_ERROR_STOP= --set date="$1" <<<"
+    copy (select * from shipping.linelist_data_for_wa_doh_v1 where date_tested = :'date') to stdout with (format csv, header);
 "

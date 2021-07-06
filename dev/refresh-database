@@ -23,10 +23,10 @@ PRODUCTION_PGDATABASE=production
 PRODUCTION_PGUSER=postgres
 
 # Default target database is our dev database
-: ${PGDATABASE:=seattleflu}
+: "${PGDATABASE:=seattleflu}"
 
 main() {
-    local workdir= pv=
+    local workdir="" pv=""
 
     for arg; do
         case "$arg" in
@@ -50,7 +50,7 @@ main() {
     if hash pv 2>/dev/null; then
         pv="pv --timer --rate --average-rate --bytes"
     else
-        pv=cat
+        pv="cat"
     fi
 
     log "Refreshing target database from production"
@@ -165,7 +165,7 @@ cd-to-workdir() {
 
 confirm-to-continue() {
     echo
-    read -e -p 'Press Y to continue, or any other key to abort: ' -n 1
+    read -r -e -p 'Press Y to continue, or any other key to abort: ' -n 1
 
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         echo "Proceeding"
@@ -244,8 +244,8 @@ suppress-ignorable-errors() {
 
 elapsed-time() {
     local delta=$SECONDS
-    local minutes=$(($delta / 60))  # integer division
-    local seconds=$(($delta % 60))
+    local minutes=$((delta / 60))  # integer division
+    local seconds=$((delta % 60))
     printf "%dm%ds\n" $minutes $seconds
 }
 

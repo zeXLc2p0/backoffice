@@ -10,8 +10,8 @@ shopt -s extglob
 # Change to the top-level of the backoffice checkout
 cd "$(dirname "$0")/.."
 
-: ${ID3C:=id3c-production}
-: ${id3c:=pipenv run id3c}
+: "${ID3C:=id3c-production}"
+: "${id3c:=pipenv run id3c}"
 
 export PIPENV_PIPFILE="$ID3C/Pipfile"
 
