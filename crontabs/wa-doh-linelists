@@ -4,7 +4,7 @@ PATH=/opt/backoffice/bin:/usr/local/bin:/usr/bin:/bin
 # Point Pipenv at the production environment
 PIPENV_PIPFILE=/opt/backoffice/wa-doh-linelists/Pipfile
 
-LOG_CONFIG=/opt/backoffice/wa-doh-linelists/logging.yaml
+LOG_CONFIG=/opt/backoffice/id3c-production/logging.yaml
 LOG_LEVEL=warning
 PGSERVICE=production-etl
 
