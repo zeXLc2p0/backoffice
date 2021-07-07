@@ -247,3 +247,22 @@ if __name__ == "__main__":
         .to_csv(f"{args.output_dir}/linelist_{date.replace('/', '')}.csv",
             index=False,
             line_terminator='\r\n')
+
+    # zipcodes in King County
+    king_zips = ['98101','98102','98103','98104','98105','98106','98107','98108',
+                '98109','98112','98115','98116','98117','98118','98119','98121',
+                '98122','98125','98126','98133','98134','98136','98144','98146',
+                '98154','98155','98164','98177','98178','98195','98199','98004',
+                '98005','98006','98007','98008','98033','98034','98039','98040',
+                '98056','98059','98011','98028','98001','98002','98003','98023',
+                '98030','98031','98032','98042','98047','98055','98057','98058',
+                '98148','98166','98168','98188','98198','98010','98022','98038',
+                '98045','98051','98065','98027','98029','98052','98074','98075',
+                '98092','98070','98014','98077','98053','98024','98072','98019']
+    # Linelist generated for PHSKC (only king county zipcodes) in same directory
+    # as the mega_linelist
+    phskc_linelist = mega_linelist[mega_linelist['home_zipcode_2'].isin(king_zips)]
+    phskc_linelist.sort_values(by=['record_id']) \
+        .to_csv(f"{args.output_dir}/PHSKC_linelist_{date.replace('/', '')}.csv",
+            index=False,
+            line_terminator='\r\n')
