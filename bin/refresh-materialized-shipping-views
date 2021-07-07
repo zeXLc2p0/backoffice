@@ -12,7 +12,7 @@ set -euo pipefail
 # They will get refreshed in the order listed.
 shipping_views=(
     "fhir_questionnaire_responses_v1"
-    " __uw_encounters"
+    "__uw_encounters"
     "scan_encounters_v1"
     )
 
