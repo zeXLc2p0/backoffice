@@ -9,7 +9,7 @@ LOG_LEVEL=warning
 PGSERVICE=production-etl
 
 # Base of our env.d directories
-ENVD=/opt/backoffice/wa-doh-linelists/env.d
+ENVD=/opt/backoffice/id3c-production/env.d
 
 # Configure a private runtime directory for "fatigue".
 XDG_RUNTIME_DIR=/home/ubuntu/run
