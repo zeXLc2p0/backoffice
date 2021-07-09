@@ -114,7 +114,7 @@ def fetch_records(project) -> List[Dict[str, dict]]:
     if project.contacted_field:
         fields.add(project.contacted_field)
 
-    for record in project.records(fields = fields, raw = True):
+    for record in project.records(fields = fields, raw = True, page_size = 5000):
         if len(required_fields) > 0 and not all(len(record[field]) for field in required_fields):
             continue
 

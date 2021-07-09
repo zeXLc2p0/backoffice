@@ -130,7 +130,7 @@ def fetch_enrollment_records(project) -> Dict[str, dict]:
     fields = [project.record_id_field, project.participant_first_name_field,
         project.participant_last_name_field, project.participant_birthdate_field]
 
-    for record in project.records(events = project.enrollment_event_names, fields = fields, raw = True):
+    for record in project.records(events = project.enrollment_event_names, fields = fields, raw = True, page_size = 5000):
         if not all(len(record[field]) for field in fields):
             continue
 
@@ -168,7 +168,7 @@ def fetch_encounter_records(project):
     if project.contacted_field:
         fields.add(project.contacted_field)
 
-    for record in project.records(events = project.encounter_event_names, fields = fields, raw = True):
+    for record in project.records(events = project.encounter_event_names, fields = fields, raw = True, page_size = 5000):
         if len(required_fields) > 0 and not any(len(record[field]) for field in required_fields):
             continue
 

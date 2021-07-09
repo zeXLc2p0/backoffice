@@ -58,7 +58,7 @@ def main():
 
 
 def fetch_records(project):
-    for record in project.records(fields = FIELDS, raw = True):
+    for record in project.records(fields = FIELDS, raw = True, page_size = 5000):
         if not all(len(record[field]) for field in REQUIRED_FIELDS):
             continue
 
