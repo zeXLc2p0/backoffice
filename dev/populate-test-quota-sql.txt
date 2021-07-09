@@ -21,6 +21,8 @@ end_hour int = 20;
 hour_interval int = 1;
 
 hourly_quota int;
+current_hourly_quota int;
+plan_vs_actual_diff int;
 cur_day int = 0;
 cur_date date;
 
@@ -30,6 +32,7 @@ end_ts timestamp;
 sql_text text;
 BEGIN
 	hourly_quota = daily_quota / round((end_hour - start_hour) / hour_interval::decimal);
+	plan_vs_actual_diff = (hourly_quota * (end_hour - start_hour)) - daily_quota;
 
 	WHILE cur_day < num_days LOOP
 		cur_date = start_date::date + cur_day;
@@ -38,7 +41,8 @@ BEGIN
 			start_ts = cur_date::text || ' '|| case when length(cur_hour::text) < 2 then ('0' || cur_hour::text) else cur_hour::text end || ':00:00';
 			end_ts = start_ts + interval '1h';
 
-			sql_text = 'insert into operations.test_quota (name, timespan, max) values (''uw'', tstzrange(''' || start_ts || ''', ''' || end_ts || ''' , ''(]''),' || hourly_quota || ');' ;
+			current_hourly_quota = case when cur_hour = (end_hour - 1) then (hourly_quota - plan_vs_actual_diff) else hourly_quota end;
+			sql_text = 'insert into operations.test_quota (name, timespan, max) values (''uw'', tstzrange(''' || start_ts || ''', ''' || end_ts || ''' , ''(]''),' || current_hourly_quota || ');' ;
 			raise notice '%', sql_text;
 			EXECUTE sql_text;
 			cur_hour = cur_hour + hour_interval;
