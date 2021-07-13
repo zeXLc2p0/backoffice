@@ -188,7 +188,7 @@ if __name__ == "__main__":
     parser.add_argument("--upload-if-empty",
         metavar="<always-upload>",
         default=[],
-        aciton='append',
+        action='append',
         help="Always upload to these destinations, even if the linelist is empty. "
             "May be specified multiple times, as a URL or protocol.")
 
