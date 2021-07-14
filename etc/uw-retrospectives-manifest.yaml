@@ -1,5 +1,30 @@
 ---
-workbook: s3://fh-pi-bedford-t/seattleflu/bbi/2019_2020_sfs_aliquoting.xlsx
+workbooks:
+  - s3://fh-pi-bedford-t/seattleflu/bbi/2019_2020_sfs_aliquoting.xlsx
+  - s3://fh-pi-bedford-t/seattleflu/bbi/2019_2020_sfs_aliquoting_2.xlsx
+  - s3://fh-pi-bedford-t/seattleflu/bbi/2019_2020_sfs_aliquoting_3.xlsx
+  - s3://fh-pi-bedford-t/seattleflu/bbi/2019_2020_sfs_aliquoting_4.xlsx
+  - s3://fh-pi-bedford-t/seattleflu/bbi/2019_2020_sfs_aliquoting_5.xlsx
+  - s3://fh-pi-bedford-t/seattleflu/bbi/2019_2020_sfs_aliquoting_6.xlsx
+  - s3://fh-pi-bedford-t/seattleflu/bbi/2019_2020_sfs_aliquoting_7.xlsx
+  - s3://fh-pi-bedford-t/seattleflu/bbi/2019_2020_sfs_aliquoting_8.xlsx
+  - s3://fh-pi-bedford-t/seattleflu/bbi/2019_2020_sfs_aliquoting_9.xlsx
+  - s3://fh-pi-bedford-t/seattleflu/bbi/2019_2020_sfs_aliquoting_10.xlsx
+  - s3://fh-pi-bedford-t/seattleflu/bbi/2020_2021_sfs_aliquoting_01.xlsx
+  - s3://fh-pi-bedford-t/seattleflu/bbi/2020_2021_sfs_aliquoting_02.xlsx
+  - s3://fh-pi-bedford-t/seattleflu/bbi/2020_2021_sfs_aliquoting_03.xlsx
+  - s3://fh-pi-bedford-t/seattleflu/bbi/2020_2021_sfs_aliquoting_04.xlsx
+  - s3://fh-pi-bedford-t/seattleflu/bbi/2020_2021_sfs_aliquoting_05.xlsx
+  - s3://fh-pi-bedford-t/seattleflu/bbi/2020_2021_sfs_aliquoting_06.xlsx
+  - s3://fh-pi-bedford-t/seattleflu/bbi/2020_2021_sfs_aliquoting_07.xlsx
+  - s3://fh-pi-bedford-t/seattleflu/bbi/2020_2021_sfs_aliquoting_08.xlsx
+  - s3://fh-pi-bedford-t/seattleflu/bbi/2020_2021_sfs_aliquoting_09.xlsx
+  - s3://fh-pi-bedford-t/seattleflu/bbi/2020_2021_sfs_aliquoting_10.xlsx
+  - s3://fh-pi-bedford-t/seattleflu/bbi/2020_2021_sfs_aliquoting_11.xlsx
+  - s3://fh-pi-bedford-t/seattleflu/bbi/2020_2021_sfs_aliquoting_12.xlsx
+  - s3://fh-pi-bedford-t/seattleflu/bbi/2020_2021_sfs_aliquoting_13.xlsx
+  - s3://fh-pi-bedford-t/seattleflu/bbi/2020_2021_sfs_aliquoting_14.xlsx
+  - s3://fh-pi-bedford-t/seattleflu/bbi/2020_2021_sfs_aliquoting_15.xlsx
 sheet: aliquoting
 sample_column: sample_id
 extra_columns:
@@ -8,233 +33,4 @@ extra_columns:
   mrn: mrn
   accession_no: accession
   sample_origin: sample_origin
----
-workbook: s3://fh-pi-bedford-t/seattleflu/bbi/2019_2020_sfs_aliquoting_2.xlsx
-sheet: aliquoting
-sample_column: sample_id
-extra_columns:
-  barcode: sample_id
-  collection_date: collection_date
-  mrn: mrn
-  accession_no: accession
-  sample_origin: sample_origin
----
-workbook: s3://fh-pi-bedford-t/seattleflu/bbi/2019_2020_sfs_aliquoting_3.xlsx
-sheet: aliquoting
-sample_column: sample_id
-extra_columns:
-  barcode: sample_id
-  collection_date: collection_date
-  mrn: mrn
-  accession_no: accession
-  sample_origin: sample_origin
----
-workbook: s3://fh-pi-bedford-t/seattleflu/bbi/2019_2020_sfs_aliquoting_4.xlsx
-sheet: aliquoting
-sample_column: sample_id
-extra_columns:
-  barcode: sample_id
-  collection_date: collection_date
-  mrn: mrn
-  accession_no: accession
-  sample_origin: sample_origin
----
-workbook: s3://fh-pi-bedford-t/seattleflu/bbi/2019_2020_sfs_aliquoting_5.xlsx
-sheet: aliquoting
-sample_column: sample_id
-extra_columns:
-  barcode: sample_id
-  collection_date: collection_date
-  mrn: mrn
-  accession_no: accession
-  sample_origin: sample_origin
----
-workbook: s3://fh-pi-bedford-t/seattleflu/bbi/2019_2020_sfs_aliquoting_6.xlsx
-sheet: aliquoting
-sample_column: sample_id
-extra_columns:
-  barcode: sample_id
-  collection_date: collection_date
-  mrn: mrn
-  accession_no: accession
-  sample_origin: sample_origin
----
-workbook: s3://fh-pi-bedford-t/seattleflu/bbi/2019_2020_sfs_aliquoting_7.xlsx
-sheet: aliquoting
-sample_column: sample_id
-extra_columns:
-  barcode: sample_id
-  collection_date: collection_date
-  mrn: mrn
-  accession_no: accession
-  sample_origin: sample_origin
----
-workbook: s3://fh-pi-bedford-t/seattleflu/bbi/2019_2020_sfs_aliquoting_8.xlsx
-sheet: aliquoting
-sample_column: sample_id
-extra_columns:
-  barcode: sample_id
-  collection_date: collection_date
-  mrn: mrn
-  accession_no: accession
-  sample_origin: sample_origin
----
-workbook: s3://fh-pi-bedford-t/seattleflu/bbi/2019_2020_sfs_aliquoting_9.xlsx
-sheet: aliquoting
-sample_column: sample_id
-extra_columns:
-  barcode: sample_id
-  collection_date: collection_date
-  mrn: mrn
-  accession_no: accession
-  sample_origin: sample_origin
----
-workbook: s3://fh-pi-bedford-t/seattleflu/bbi/2019_2020_sfs_aliquoting_10.xlsx
-sheet: aliquoting
-sample_column: sample_id
-extra_columns:
-  barcode: sample_id
-  collection_date: collection_date
-  mrn: mrn
-  accession_no: accession
-  sample_origin: sample_origin
----
-workbook: s3://fh-pi-bedford-t/seattleflu/bbi/2020_2021_sfs_aliquoting_01.xlsx
-sheet: aliquoting
-sample_column: sample_id
-extra_columns:
-  barcode: sample_id
-  collection_date: collection_date
-  mrn: mrn
-  accession_no: accession
-  sample_origin: sample_origin
----
-workbook: s3://fh-pi-bedford-t/seattleflu/bbi/2020_2021_sfs_aliquoting_02.xlsx
-sheet: aliquoting
-sample_column: sample_id
-extra_columns:
-  barcode: sample_id
-  collection_date: collection_date
-  mrn: mrn
-  accession_no: accession
-  sample_origin: sample_origin
----
-workbook: s3://fh-pi-bedford-t/seattleflu/bbi/2020_2021_sfs_aliquoting_03.xlsx
-sheet: aliquoting
-sample_column: sample_id
-extra_columns:
-  barcode: sample_id
-  collection_date: collection_date
-  mrn: mrn
-  accession_no: accession
-  sample_origin: sample_origin
----
-workbook: s3://fh-pi-bedford-t/seattleflu/bbi/2020_2021_sfs_aliquoting_04.xlsx
-sheet: aliquoting
-sample_column: sample_id
-extra_columns:
-  barcode: sample_id
-  collection_date: collection_date
-  mrn: mrn
-  accession_no: accession
-  sample_origin: sample_origin
----
-workbook: s3://fh-pi-bedford-t/seattleflu/bbi/2020_2021_sfs_aliquoting_05.xlsx
-sheet: aliquoting
-sample_column: sample_id
-extra_columns:
-  barcode: sample_id
-  collection_date: collection_date
-  mrn: mrn
-  accession_no: accession
-  sample_origin: sample_origin
----
-workbook: s3://fh-pi-bedford-t/seattleflu/bbi/2020_2021_sfs_aliquoting_06.xlsx
-sheet: aliquoting
-sample_column: sample_id
-extra_columns:
-  barcode: sample_id
-  collection_date: collection_date
-  mrn: mrn
-  accession_no: accession
-  sample_origin: sample_origin
----
-workbook: s3://fh-pi-bedford-t/seattleflu/bbi/2020_2021_sfs_aliquoting_07.xlsx
-sheet: aliquoting
-sample_column: sample_id
-extra_columns:
-  barcode: sample_id
-  collection_date: collection_date
-  mrn: mrn
-  accession_no: accession
-  sample_origin: sample_origin
----
-workbook: s3://fh-pi-bedford-t/seattleflu/bbi/2020_2021_sfs_aliquoting_08.xlsx
-sheet: aliquoting
-sample_column: sample_id
-extra_columns:
-  barcode: sample_id
-  collection_date: collection_date
-  mrn: mrn
-  accession_no: accession
-  sample_origin: sample_origin
----
-workbook: s3://fh-pi-bedford-t/seattleflu/bbi/2020_2021_sfs_aliquoting_09.xlsx
-sheet: aliquoting
-sample_column: sample_id
-extra_columns:
-  barcode: sample_id
-  collection_date: collection_date
-  mrn: mrn
-  accession_no: accession
-  sample_origin: sample_origin
----
-workbook: s3://fh-pi-bedford-t/seattleflu/bbi/2020_2021_sfs_aliquoting_10.xlsx
-sheet: aliquoting
-sample_column: sample_id
-extra_columns:
-  barcode: sample_id
-  collection_date: collection_date
-  mrn: mrn
-  accession_no: accession
-  sample_origin: sample_origin
----
-workbook: s3://fh-pi-bedford-t/seattleflu/bbi/2020_2021_sfs_aliquoting_11.xlsx
-sheet: aliquoting
-sample_column: sample_id
-extra_columns:
-  barcode: sample_id
-  collection_date: collection_date
-  mrn: mrn
-  accession_no: accession
-  sample_origin: sample_origin
----
-workbook: s3://fh-pi-bedford-t/seattleflu/bbi/2020_2021_sfs_aliquoting_12.xlsx
-sheet: aliquoting
-sample_column: sample_id
-extra_columns:
-  barcode: sample_id
-  collection_date: collection_date
-  mrn: mrn
-  accession_no: accession
-  sample_origin: sample_origin
----
-workbook: s3://fh-pi-bedford-t/seattleflu/bbi/2020_2021_sfs_aliquoting_13.xlsx
-sheet: aliquoting
-sample_column: sample_id
-extra_columns:
-  barcode: sample_id
-  collection_date: collection_date
-  mrn: mrn
-  accession_no: accession
-  sample_origin: sample_origin
----
-workbook: s3://fh-pi-bedford-t/seattleflu/bbi/2020_2021_sfs_aliquoting_14.xlsx
-sheet: aliquoting
-sample_column: sample_id
-extra_columns:
-  barcode: sample_id
-  collection_date: collection_date
-  mrn: mrn
-  accession_no: accession
-  sample_origin: sample_origin
+...
