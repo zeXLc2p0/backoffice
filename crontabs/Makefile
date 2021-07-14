@@ -6,7 +6,8 @@ crontabs := \
 	public-datasets \
 	return-of-results \
 	scan-switchboard \
-	uw-ehs-report
+	uw-ehs-report \
+        wa-doh-linelists
 
 old_crontabs := \
 	scan-amazon-addresses

@@ -11,7 +11,8 @@ import yaml
 import logging
 import argparse
 import pandas as pd
-from sys import stderr
+import fsspec
+from sys import exit, stderr
 from pathlib import Path
 from typing import Any, Dict
 from datetime import datetime
@@ -36,6 +37,31 @@ log.setLevel(LOG_LEVEL)
 
 base_dir = Path(__file__).resolve().parent.parent.parent.resolve()
 
+def put_file(linelist: pd.DataFrame, filename: str):
+    """
+    Write the given linelist to the given filename,
+    which may be local or remote.
+    """
+    filespec = None
+    proto = fsspec.utils.get_protocol(filename)
+
+    # This needs testing: different fsspec backends
+    # may require different 'mode' flags
+    if (proto == 'ssh' or proto == 'sftp'):
+        filespec = fsspec.open(filename, mode='w',
+            username=os.environ.get("DOH_USERNAME"),
+            pkey=os.environ.get("DOH_PRIVKEY_PATH"))
+    elif (proto == 's3fs'):
+        filespec = fsspec.open(filename, mode='w')
+    elif (proto == 'file'):
+        filespec = fsspec.open(filename, mode='w')
+    else:
+        raise NotImplementedError(f"WA DoH file upload doesn't support {proto} protocol (yet?)")
+        return
+
+    with filespec as fh:
+        linelist.sort_values(by=['record_id']) \
+            .to_csv(fh, index=False, line_terminator='\r\n')
 
 def test_results(date: str, config: Dict[str, Any]) -> pd.DataFrame:
     """
@@ -148,14 +174,23 @@ if __name__ == "__main__":
         help="The path to the id3c test results export.")
     parser.add_argument("--output-dir",
         metavar="<output-directory>",
-        default=base_dir / f"bin/wa-doh-linelists/data",
-        help="The destination directory for the output linelist CSV. Defaults to "
-            "`./bin/wa-doh-linelists/data/`.")
+        default=[],
+        action='append',
+        required=True,
+        help="Destination directory path for the exported CSV. "
+             "May be specified multiple times, and can be any "
+             "local or remote path supported by the Python fsspec module.")
     parser.add_argument("--config-file",
         metavar="<config.yaml>",
         default=base_dir / f"etc/wa-doh-linelists.yaml",
         help="The source file for the individual REDCap projects' configuration. "
             "Defaults to `./etc/wa-doh-linelists.yaml` at the top level of this repo.")
+    parser.add_argument("--upload-if-empty",
+        metavar="<always-upload>",
+        default=[],
+        action='append',
+        help="Always upload to these destinations, even if the linelist is empty. "
+            "May be specified multiple times, as a URL or protocol.")
 
     args = parser.parse_args()
 
@@ -243,7 +278,23 @@ if __name__ == "__main__":
     # Reorder columns
     mega_linelist = mega_linelist[universal_config['column_names']]
 
-    mega_linelist.sort_values(by=['record_id']) \
-        .to_csv(f"{args.output_dir}/linelist_{date.replace('/', '')}.csv",
-            index=False,
-            line_terminator='\r\n')
+    error_status = 0
+    for dir in args.output_dir:
+        # This should be split out into different cases for each exception,
+        # but we don't want to bail out completely if one attempt to
+        # write the file fails, since it could do so for any number of reasons.
+        filename = f"{dir}/linelist_{date.replace('/', '')}.csv"
+        always_upload = False
+        for dest in args.upload_if_empty:
+            if (dir.find(dest) != -1):
+                always_upload = True
+        if (not mega_linelist.empty or always_upload):
+            try:
+                put_file(mega_linelist, filename)
+            except Exception as e:
+                log.error(e)
+                error_status = 1
+        else:
+            log.info(f"Not uploading to {dir} because linelist is empty or "
+                "--upload-if-empty not specified for this site")
+    exit(error_status)
