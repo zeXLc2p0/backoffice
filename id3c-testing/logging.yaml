@@ -39,7 +39,7 @@ filters:
     name: id3c.cli.command.etl.presence_absence
     levelname: WARNING
     msg:
-      pattern: Skipping results for sample without a known identifier «(.+?_(Plasmid|PBS|Xeno|Water|HAP1|exp)|exp|Hap1_Gblock|HAP1_Testing|NWGC_CONTROL|Water_Control|PTC_.+?)»
+      pattern: Skipping results for sample without a known identifier «(.+?_(Plasmid|PBS|Xeno|Water|HAP1(_\d)?|exp)|exp|Hap1_Gblock|HAP1_Testing|NWGC_CONTROL|Water_Control|PTC_.+?)»
 
   unknown sample warnings for controls and experimental samples from id3c.db.find_identifier:
     (): id3c.logging.filters.suppress_records_matching
@@ -47,14 +47,14 @@ filters:
     funcName: find_identifier
     levelname: WARNING
     msg:
-      pattern: No identifier found for barcode «(.+?_(Plasmid|PBS|Xeno|Water|HAP1|exp)|exp|Hap1_Gblock|HAP1_Testing|NWGC_CONTROL|Water_Control|PTC_.+?)»
+      pattern: No identifier found for barcode «(.+?_(Plasmid|PBS|Xeno|Water|HAP1(_\d)?|exp)|exp|Hap1_Gblock|HAP1_Testing|NWGC_CONTROL|Water_Control|PTC_.+?)»
 
   unknown sample warnings for experimental samples from id3c etl manifest:
     (): id3c.logging.filters.suppress_records_matching
     name: id3c.cli.command.etl.manifest
     levelname: WARNING
     msg:
-      pattern: Skipping sample with unknown sample barcode «(.+?_exp)»
+      pattern: Skipping record «(\d+)» with unknown sample barcode «(.+?_exp)»
 
 handlers:
   console:
