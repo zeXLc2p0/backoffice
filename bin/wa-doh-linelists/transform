@@ -51,7 +51,7 @@ def put_file(linelist: pd.DataFrame, filename: str):
         filespec = fsspec.open(filename, mode='w',
             username=os.environ.get("DOH_USERNAME"),
             pkey=os.environ.get("DOH_PRIVKEY_PATH"))
-    elif (proto == 's3fs'):
+    elif (proto == 's3'):
         filespec = fsspec.open(filename, mode='w')
     elif (proto == 'file'):
         filespec = fsspec.open(filename, mode='w')
