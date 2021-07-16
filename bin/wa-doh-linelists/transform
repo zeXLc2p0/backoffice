@@ -50,7 +50,7 @@ def put_file(linelist: pd.DataFrame, filename: str):
     if (proto == 'ssh' or proto == 'sftp'):
         filespec = fsspec.open(filename, mode='w',
             username=os.environ.get("DOH_USERNAME"),
-            pkey=os.environ.get("DOH_PRIVKEY_PATH"))
+            key_filename=os.environ.get("DOH_PRIVKEY_PATH"))
     elif (proto == 's3'):
         filespec = fsspec.open(filename, mode='w')
     elif (proto == 'file'):
