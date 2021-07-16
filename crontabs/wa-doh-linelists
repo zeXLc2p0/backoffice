@@ -17,5 +17,9 @@ XDG_RUNTIME_DIR=/home/ubuntu/run
 # Directory to hold flock files
 FLOCK_DIR=/var/run/lock
 
+# SSH credentials for uploading to sft.wa.gov 
+DOH_USERNAME="doh-elff-NorthwestGenomicsCenterSCAN"
+DOH_PRIVKEY_PATH="/home/ubuntu/.ssh/sft_id_rsa"
+
 # Generate and upload the previous day's linelist data once a day at 6 A.M.
 0 6 * * * ubuntu promjob "wa-doh-linelists" chronic pipenv run envdir $ENVD/hutch envdir $ENVD/redcap /opt/backoffice/bin/wa-doh-linelists/generate --date $(date --date=yesterday --iso-8601=date) --output-dir "s3://fh-pi-bedford-t/seattleflu/public-health-reporting" --output-dir "ssh://sft.wa.gov" --upload-if-empty "s3://fh-pi-bedford-t/seattleflu/public-health-reporting"
